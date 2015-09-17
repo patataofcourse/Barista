@@ -1,0 +1,6 @@
+[dependencies.panic_abort]
+[dependencies.panic_unwind]
+
+[dependencies.std]
+path = "../rust-3ds-fork/library/std"
+stage = 1

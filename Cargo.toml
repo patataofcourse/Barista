@@ -1,0 +1,14 @@
+[package]
+description = "Nintendo 3DS project template"
+name = "rust3ds-template"
+version = "0.1.0"
+
+[dependencies]
+ctru-rs = { path = "../ctru-rs/ctru-rs" }
+ctru-sys = { path = "../ctru-rs/ctru-sys" }
+
+[profile.dev]
+lto = true
+
+[profile.release]
+lto = true

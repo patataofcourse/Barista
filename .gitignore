@@ -1,0 +1,10 @@
+target/
+dist/
+
+*.rlib
+
+*.o
+*.ll
+*.elf
+*.3dsx
+*.smdh
