@@ -8,4 +8,8 @@ fn main() {
         "debug" => "ctrud",
         _       => "ctru",
     });
+    println!("cargo:rustc-link-lib=static={}", match env::var("PROFILE").unwrap().as_str() {
+        "debug" => "citro2dd",
+        _       => "citro2d",
+    });
 }

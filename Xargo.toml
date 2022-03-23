@@ -2,5 +2,5 @@
 [dependencies.panic_unwind]
 
 [dependencies.std]
-path = "../rust-3ds-fork/library/std"
+path = "../3ds-rust-env/rust-3ds-fork/library/std"
 stage = 1

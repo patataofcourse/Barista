@@ -4,8 +4,8 @@ description = "A launcher for Rhythm Heaven Megamix mods"
 version = "0.1.0"
 
 [dependencies]
-ctru-rs = { path = "../ctru-rs/ctru-rs" }
-ctru-sys = { path = "../ctru-rs/ctru-sys" }
+ctru-rs = { path = "../3ds-rust-env/ctru-rs/ctru-rs" }
+ctru-sys = { path = "../3ds-rust-env/ctru-rs/ctru-sys" }
 
 [profile.dev]
 lto = true

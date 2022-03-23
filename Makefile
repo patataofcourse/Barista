@@ -15,14 +15,14 @@ export CC_3ds := $(DEVKITARM)/bin/arm-none-eabi-gcc
 export TARGET_CFLAGS := -specs=3dsx.specs -mfloat-abi=hard -march=armv6k -mtune=mpcore \
 						-mfpu=vfp -mtp=soft
 
-export XARGO_RUST_SRC=../rust-3ds-fork/library
+export XARGO_RUST_SRC=../3ds-rust-env/rust-3ds-fork/library
 
 .PHONY: all clean $(CRATE_NAME) dist doc test send target/3ds/release/$(CRATE_NAME).elf
 
 all: $(CRATE_NAME) 
 
 target/3ds/release/$(CRATE_NAME).elf:
-	RUST_TARGET_PATH=$(shell pwd) xargo build --release -v
+	RUST_TARGET_PATH=$(shell pwd) xargo build --release
 
 target/3ds/release/$(CRATE_NAME).smdh:
 	$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/release/$(CRATE_NAME).smdh
