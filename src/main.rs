@@ -1,7 +1,7 @@
 extern crate ctru;
 extern crate ctru_sys as libctru;
 
-use ctru::gfx::Gfx;
+use ctru::gfx::{Gfx, Screen};
 use ctru::console::Console;
 use ctru::services::apt::Apt;
 use ctru::services::hid::{Hid, KeyPad};
@@ -10,12 +10,13 @@ fn main() {
     let apt = Apt::init().unwrap();
     let hid = Hid::init().unwrap();
     let gfx = Gfx::default();
-    let _console = Console::default();
+    let console = Console::init(Screen::Bottom);
+    console.select();
 
-    println!("Hello, world!");
-
+    println!("Welcome to Barista!");
+    println!("\x1b[4;8H:)");
     println!("\x1b[29;16HPress Start to exit");
-
+    
     while apt.main_loop() {
         gfx.flush_buffers();
         gfx.swap_buffers();

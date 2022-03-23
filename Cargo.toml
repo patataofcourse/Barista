@@ -1,6 +1,6 @@
 [package]
-description = "Nintendo 3DS project template"
-name = "rust3ds-template"
+name = "barista"
+description = "A launcher for Rhythm Heaven Megamix mods"
 version = "0.1.0"
 
 [dependencies]

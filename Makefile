@@ -1,8 +1,8 @@
 # Project info
-CRATE_NAME := rust3ds-template
-PROG_NAME := Rust 3DS Template
-PROG_DESC := Rust, a modern, safe systems language.
-PROG_AUTHOR := You
+CRATE_NAME := barista
+PROG_NAME := Barista
+PROG_DESC := A launcher for Rhythm Heaven Megamix mods
+PROG_AUTHOR := patataofcourse, RHModding
 PROG_ICON := $(DEVKITPRO)/libctru/default_icon.png
 
 3DSXTOOL := $(DEVKITPRO)/tools/bin/3dsxtool
@@ -17,7 +17,7 @@ export TARGET_CFLAGS := -specs=3dsx.specs -mfloat-abi=hard -march=armv6k -mtune=
 
 export XARGO_RUST_SRC=../rust-3ds-fork/library
 
-.PHONY: all clean $(CRATE_NAME) dist test send target/3ds/release/$(CRATE_NAME).elf
+.PHONY: all clean $(CRATE_NAME) dist doc test send target/3ds/release/$(CRATE_NAME).elf
 
 all: $(CRATE_NAME) 
 
@@ -37,6 +37,9 @@ dist: $(CRATE_NAME)
 	cp target/3ds/release/$(CRATE_NAME).elf dist/$(CRATE_NAME)
 	cp target/3ds/release/$(CRATE_NAME).3dsx dist/$(CRATE_NAME)
 	cp $(PROG_ICON) dist/$(CRATE_NAME)/$(CRATE_NAME).png
+
+doc:
+	RUST_TARGET_PATH=$(shell pwd) xargo doc
 
 test: $(CRATE_NAME)
 	citra target/3ds/release/$(CRATE_NAME).elf
