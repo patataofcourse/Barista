@@ -8,6 +8,8 @@ PROG_ICON := $(DEVKITPRO)/libctru/default_icon.png
 3DSXTOOL := $(DEVKITPRO)/tools/bin/3dsxtool
 SMDHTOOL := $(DEVKITPRO)/tools/bin/smdhtool
 
+ROMFS := romfs
+
 # Prepend devkitarm bin to PATH, in case there is another arm-none-eabi-gcc installed
 export PATH := $(DEVKITARM)/bin:$(PATH)
 
@@ -28,7 +30,7 @@ target/3ds/release/$(CRATE_NAME).smdh:
 	$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/release/$(CRATE_NAME).smdh
 
 target/3ds/release/$(CRATE_NAME).3dsx: target/3ds/release/$(CRATE_NAME).elf target/3ds/release/$(CRATE_NAME).smdh
-	$(3DSXTOOL) target/3ds/release/$(CRATE_NAME).elf target/3ds/release/$(CRATE_NAME).3dsx --smdh=target/3ds/release/$(CRATE_NAME).smdh
+	$(3DSXTOOL) target/3ds/release/$(CRATE_NAME).elf target/3ds/release/$(CRATE_NAME).3dsx --smdh=target/3ds/release/$(CRATE_NAME).smdh --romfs=$(ROMFS)
 
 $(CRATE_NAME): target/3ds/release/$(CRATE_NAME).3dsx
 
