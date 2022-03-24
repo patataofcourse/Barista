@@ -1,19 +1,19 @@
-extern crate ctru;
-extern crate ctru_sys as libctru;
-
-use ctru::gfx::{Gfx, Screen};
-use ctru::console::Console;
-use ctru::services::apt::Apt;
-use ctru::services::hid::{Hid, KeyPad};
-
-use libctru::{
+use ctru::{
+    gfx::{Gfx, Screen},
+    console::Console,
+    services::apt::Apt,
+    services::hid::{Hid, KeyPad},
+};
+use ctru_sys::{
     C2D_Sprite as Sprite,
+    C2D_SpriteSheet as SpriteSheet,
     C2D_DEFAULT_MAX_OBJECTS,
     C3D_RenderTarget,
     C3D_DEFAULT_CMDBUF_SIZE,
     GFX_TOP,
     GFX_LEFT,
 };
+use libc::size_t;
 
 fn main() {
     let apt = Apt::init().unwrap();
@@ -22,11 +22,18 @@ fn main() {
     let console = Console::init(Screen::Bottom);
     console.select();
     let screen: *mut C3D_RenderTarget;
+    let sprite_sheet: SpriteSheet;
+    let mut sprite: Sprite;
     unsafe {
-        libctru::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
-        libctru::C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
-        libctru::C2D_Prepare();
-        screen = libctru::C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+        ctru_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+        ctru_sys::C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
+        ctru_sys::C2D_Prepare();
+        screen = ctru_sys::C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+        sprite_sheet = ctru_sys::C2D_SpriteSheetLoad("romfs:/barista.t3x\0".as_ptr());
+        if sprite_sheet.is_null() {
+            panic!("Sprite sheet barista.t3x not found");
+        }
+        sprite = citro2d::sprite_from_sheet(sprite_sheet, 0);
     }
 
     println!("Welcome to Barista!");
