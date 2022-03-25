@@ -23,19 +23,22 @@ fn main() {
     }
     let screen: *mut C3D_RenderTarget;
     let sprite_sheet: SpriteSheet;
-    let mut sprite: Sprite;
+    let mut bg: Sprite;
+    let mut fg: Sprite;
     citro2d::init(None, None);
     unsafe {
         screen = ctru_sys::C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
-        sprite_sheet = ctru_sys::C2D_SpriteSheetLoad("romfs:/barista.t3x\0".as_ptr());
+        sprite_sheet = ctru_sys::C2D_SpriteSheetLoad("romfs:/bg.t3x\0".as_ptr());
         if sprite_sheet.is_null() {
-            panic!("Sprite sheet barista.t3x not found");
+            panic!("Sprite sheet bg.t3x not found");
         }
-        sprite = citro2d::sprite_from_sheet(sprite_sheet, 0);
+        bg = citro2d::sprite_from_sheet(sprite_sheet, 0);
+        fg = citro2d::sprite_from_sheet(sprite_sheet, 1);
     }
-    sprite.params.pos.x = 120.0;
-    sprite.params.pos.y = 220.0;
-    sprite.params.angle = std::f64::consts::PI as f32 / 2.0;
+    bg.params.pos.x = 240.0;
+    bg.params.angle = std::f64::consts::PI as f32 / 2.0;
+    fg.params.pos.x = 240.0 - 188.0;
+    fg.params.angle = std::f64::consts::PI as f32 / 2.0;
 
     println!("Welcome to Barista!");
     println!("\x1b[29;12HPress Start to exit");
@@ -54,7 +57,8 @@ fn main() {
             C3D_FrameBegin(C3D_FRAME_SYNCDRAW as u8);
             C2D_TargetClear(screen, citro2d::WHITE);
             citro2d::scene_begin(screen);
-            C2D_DrawImage(sprite.image, &mut sprite.params, std::ptr::null());
+            C2D_DrawImage(bg.image, &mut bg.params, std::ptr::null());
+            C2D_DrawImage(fg.image, &mut fg.params, std::ptr::null());
             C3D_FrameEnd(0);
         }
     }
