@@ -7,8 +7,8 @@ edition = "2018"
 [dependencies]
 ctru-rs = { path = "../3ds-rust-env/ctru-rs/ctru-rs" }
 ctru-sys = { path = "../3ds-rust-env/ctru-rs/ctru-sys" }
-libc = "0.2"
 citro2d = {path = "citro2d"}
+ui = {path = "ui"}
 
 [profile.dev]
 lto = true
