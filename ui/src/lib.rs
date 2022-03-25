@@ -52,7 +52,7 @@ impl SpriteSheet {
     pub fn from_file(filename: &'static str) -> Option<Self> {
         let val: C2D_SpriteSheet;
         unsafe {
-            val = ctru_sys::C2D_SpriteSheetLoad(filename.as_ptr());
+            val = ctru_sys::C2D_SpriteSheetLoad((filename.to_string() + "\0").as_ptr());
         }
         if val.is_null() {
             None
