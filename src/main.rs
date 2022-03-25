@@ -40,7 +40,8 @@ fn main() {
     let sign_text = sign_sheet.get_sprite(1).unwrap();
 
     println!("Welcome to Barista!");
-    println!("\x1b[29;12HPress Start to exit");
+    //println!(" - Press A to boot Saltwater");
+    println!(" - Press Start to exit");
     
     while apt.main_loop() {
         gfx.wait_for_vblank();
