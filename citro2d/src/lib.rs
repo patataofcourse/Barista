@@ -15,10 +15,10 @@ pub unsafe fn sprite_from_sheet(sheet: C2D_SpriteSheet, index: u32) -> C2D_Sprit
                 h: (*image.subtex).height as f32,
             },
             center: C2D_DrawParams_center {
-                x: 0.0,
-                y: 0.0,
+                x: (*image.subtex).width as f32 / 2.0,
+                y: (*image.subtex).height as f32 / 2.0,
             },
-            angle: 0.25,
+            angle: 0.0,
             depth: 0.0,
         }
     }

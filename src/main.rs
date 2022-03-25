@@ -33,6 +33,9 @@ fn main() {
         }
         sprite = citro2d::sprite_from_sheet(sprite_sheet, 0);
     }
+    sprite.params.pos.x = 120.0;
+    sprite.params.pos.y = 220.0;
+    sprite.params.angle = std::f64::consts::PI as f32 / 2.0;
 
     println!("Welcome to Barista!");
     println!("\x1b[29;12HPress Start to exit");
