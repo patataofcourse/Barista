@@ -38,13 +38,21 @@ fn main() {
     println!("\x1b[29;12HPress Start to exit");
     
     while apt.main_loop() {
-        gfx.flush_buffers();
-        gfx.swap_buffers();
         gfx.wait_for_vblank();
 
         hid.scan_input();
         if hid.keys_down().contains(KeyPad::KEY_START) {
             break;
+        }
+
+        // Render the scene
+        unsafe {
+            use ctru_sys::*;
+            C3D_FrameBegin(C3D_FRAME_SYNCDRAW as u8);
+            C2D_TargetClear(screen, citro2d::WHITE);
+            citro2d::scene_begin(screen);
+            C2D_DrawImage(sprite.image, &mut sprite.params, std::ptr::null());
+            C3D_FrameEnd(0);
         }
     }
 }
