@@ -27,7 +27,7 @@ fn main() {
     unsafe {
         screen = ctru_sys::C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     }
-    let bg_sheet = SpriteSheet::from_file("romfs:/bg.t3x").expect("No spritesheet bg.3tx!");
+    let bg_sheet = SpriteSheet::from_file("romfs:/bg.t3x\0").expect("No spritesheet bg.t3x!");
     let bg = bg_sheet.get_sprite(0).unwrap();
     let fg = bg_sheet.get_sprite(1).unwrap();
 
@@ -50,7 +50,7 @@ fn main() {
             citro2d::scene_begin(screen);
         }
         bg.draw(0, 0, 1.0, 1.0, 0.0, 0.0);
-        fg.draw(0, 0, 1.0, 1.0, 0.0, 0.0);
+        fg.draw(0, 188, 1.0, 1.0, 0.0, 0.0);
         unsafe {
             ctru_sys::C3D_FrameEnd(0);
         }

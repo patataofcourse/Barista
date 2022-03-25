@@ -24,24 +24,21 @@ impl Image {
         depth: f32
     ) -> bool {
         unsafe {
-            let mut sprite = C2D_Sprite {
-                image: self.0,
-                params: C2D_DrawParams {
-                    pos: C2D_DrawParams_pos {
-                        x: 240.0 - y as f32,
-                        y: x as f32,
-                        w: (*self.0.subtex).width as f32 * scale_y,
-                        h: (*self.0.subtex).height as f32 * scale_x,
-                    },
-                    center: C2D_DrawParams_center {
-                        x: 0.0,
-                        y: 0.0,
-                    },
-                    angle: (rotation + 90.0) / 360.0 * PI,
-                    depth: depth,
-                }
+            let mut params = C2D_DrawParams {
+                pos: C2D_DrawParams_pos {
+                    x: 240.0 - y as f32,
+                    y: x as f32,
+                    w: (*self.0.subtex).width as f32 * scale_y,
+                    h: (*self.0.subtex).height as f32 * scale_x,
+                },
+                center: C2D_DrawParams_center {
+                    x: 0.0,
+                    y: 0.0,
+                },
+                angle: (rotation + 90.0) / 360.0 * 2.0 * PI,
+                depth: depth,
             };
-            C2D_DrawImage(sprite.image, &mut sprite.params, std::ptr::null())
+            C2D_DrawImage(self.0, &mut params, std::ptr::null())
         }
     }
 }
@@ -72,7 +69,7 @@ impl SpriteSheet {
         unsafe {
             image = C2D_SpriteSheetGetImage(self.val, index);
         }
-        if image.tex.is_null() {
+        if image.subtex.is_null() {
             None
         } else {
             Some(Image(image))
