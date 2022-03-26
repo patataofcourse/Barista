@@ -19,9 +19,11 @@ export TARGET_CFLAGS := -specs=3dsx.specs -mfloat-abi=hard -march=armv6k -mtune=
 
 export XARGO_RUST_SRC=../3ds-rust-env/rust-3ds-fork/library
 
-.PHONY: all clean $(CRATE_NAME) dist doc test send target/3ds/release/$(CRATE_NAME).elf
+.PHONY: all clean $(CRATE_NAME) dist release debug doc test send target/3ds/release/$(CRATE_NAME).elf
 
-all: $(CRATE_NAME) 
+all: debug 
+
+dist: release
 
 target/3ds/release/$(CRATE_NAME).elf:
 	RUST_TARGET_PATH=$(shell pwd) xargo build --release
@@ -34,11 +36,21 @@ target/3ds/release/$(CRATE_NAME).3dsx: target/3ds/release/$(CRATE_NAME).elf targ
 
 $(CRATE_NAME): target/3ds/release/$(CRATE_NAME).3dsx
 
-dist: $(CRATE_NAME)
+release: $(CRATE_NAME)
 	mkdir -p dist/$(CRATE_NAME)
 	cp target/3ds/release/$(CRATE_NAME).elf dist/$(CRATE_NAME)
 	cp target/3ds/release/$(CRATE_NAME).3dsx dist/$(CRATE_NAME)
 	cp $(PROG_ICON) dist/$(CRATE_NAME)/$(CRATE_NAME).png
+
+debug:
+	RUST_TARGET_PATH=$(shell pwd) xargo build 
+	$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/debug/$(CRATE_NAME).smdh
+	$(3DSXTOOL) target/3ds/debug/$(CRATE_NAME).elf target/3ds/debug/$(CRATE_NAME).3dsx --smdh=target/3ds/debug/$(CRATE_NAME).smdh --romfs=$(ROMFS)
+	mkdir -p dist/$(CRATE_NAME)_debug
+	cp target/3ds/debug/$(CRATE_NAME).elf dist/$(CRATE_NAME)_debug
+	cp target/3ds/debug/$(CRATE_NAME).3dsx dist/$(CRATE_NAME)_debug
+	cp $(PROG_ICON) dist/$(CRATE_NAME)_debug/$(CRATE_NAME).png
+
 
 doc:
 	RUST_TARGET_PATH=$(shell pwd) xargo doc
