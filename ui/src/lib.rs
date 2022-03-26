@@ -2,13 +2,48 @@ const PI: f32 = std::f64::consts::PI as f32;
 
 use ctru_sys::{C2D_Sprite, C2D_SpriteSheet, C2D_SpriteSheetGetImage, C2D_DrawParams, C2D_DrawParams__bindgen_ty_1 as C2D_DrawParams_pos, C2D_DrawParams__bindgen_ty_2 as C2D_DrawParams_center};
 use ctru_sys::{C3D_DEFAULT_CMDBUF_SIZE, C2D_DEFAULT_MAX_OBJECTS, C3D_RenderTarget, C2D_Image, C2D_DrawImage};
+use std::collections::HashMap;
+
+pub fn init() {
+    unsafe {
+        ctru_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+        ctru_sys::C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
+        ctru_sys::C2D_Prepare();
+    }
+}
+
 
 pub struct Scene {
+    target: C3D_RenderTarget,
+    pub background: Image,
+    pub objects: Vec<Box<dyn Object>>,
+}
 
+impl Scene {
+    pub fn draw(&self) {
+        
+    }
 }
 
 pub trait Object {
+    fn draw(&self);
+}
 
+pub struct StdObject {
+    pub x: u16,
+    pub y: u16,
+    pub scale_x: f32,
+    pub scale_y: f32,
+    pub rotation: f32,
+    pub depth: f32,
+    pub images: HashMap<String, Image>,
+    pub cur_image: String,
+}
+
+impl Object for StdObject {
+    fn draw(&self) {
+        self.images[&self.cur_image].draw(self.x, self.y, self.scale_x, self.scale_y, self.rotation, self.depth);
+    }
 }
 
 pub struct Image(C2D_Image);

@@ -80,7 +80,7 @@ fn main() {
         ctru_sys::romfsMountSelf("romfs\0".as_ptr());
     }
     let screen: *mut C3D_RenderTarget;
-    citro2d::init(None, None);
+    ui::init();
     unsafe {
         screen = ctru_sys::C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     }
@@ -117,8 +117,8 @@ fn main() {
             citro2d::scene_begin(screen);
         }
         bg.draw(0, 0, 1.0, 1.0, 0.0, 0.0);
-        //barista.draw(255, 70, 1.0, 1.0, 0.0, 0.0);
-        nicole.draw(174, 17, 1.0, 1.0, 0.0, 0.0);
+        barista.draw(255, 70, 1.0, 1.0, 0.0, 0.0);
+        //nicole.draw(174, 17, 1.0, 1.0, 0.0, 0.0);
         fg.draw(0, 188, 1.0, 1.0, 0.0, 0.0);
         sign.draw(30, 150, 1.0, 1.0, 0.0, 0.0);
         sign_text.draw(30, 150, 1.0, 1.0, 0.0, 0.0);
