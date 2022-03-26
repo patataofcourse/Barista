@@ -10,27 +10,31 @@ use ctru_sys::{
     C3D_RenderTarget,
     GFX_TOP,
     GFX_LEFT,
+    amInit,
+    AM_GetTitleCount,
+    AM_GetTitleList,
+    amExit
 };
 use ui::{SpriteSheet, Image};
+use std::slice;
 
 const TITLE_JP: u64 = 0x0004000000155A00;
 const TITLE_US: u64 = 0x000400000018a400;
 const TITLE_EU: u64 = 0x000400000018a500;
 const TITLE_KR: u64 = 0x000400000018a600;
 
-//TODO: needs refactoring
 fn list_available_games() {
     unsafe {
         println!("Available versions of the game:");
-        ctru_sys::amInit();
+        amInit();
         let mut non_megamix = 0;
         let h: *mut u32 = &mut 0;
 
         let sd_count: *mut u32 = &mut 0;
-        ctru_sys::AM_GetTitleCount(ctru_sys::MEDIATYPE_SD, sd_count);
+        AM_GetTitleCount(ctru_sys::MEDIATYPE_SD, sd_count);
         let sd_titles: *mut u64 = libc::malloc(std::mem::size_of::<u64>() * *sd_count as usize) as *mut u64;
-        ctru_sys::AM_GetTitleList(h, ctru_sys::MEDIATYPE_SD, *sd_count, sd_titles);
-        let sd_slice = std::slice::from_raw_parts::<u64>(sd_titles, *sd_count as usize);
+        AM_GetTitleList(h, ctru_sys::MEDIATYPE_SD, *sd_count, sd_titles);
+        let sd_slice = slice::from_raw_parts::<u64>(sd_titles, *sd_count as usize);
         for title in sd_slice {
             match title {
                 &TITLE_JP => println!("  - RTTB+ (JP) (Digital)"),
@@ -44,10 +48,10 @@ fn list_available_games() {
         drop(sd_titles);
 
         let cart_count: *mut u32 = &mut 0;
-        ctru_sys::AM_GetTitleCount(ctru_sys::MEDIATYPE_GAME_CARD, cart_count);
+        AM_GetTitleCount(ctru_sys::MEDIATYPE_GAME_CARD, cart_count);
         let cart_titles: *mut u64 = libc::malloc(std::mem::size_of::<u64>() * *cart_count as usize) as *mut u64;
-        ctru_sys::AM_GetTitleList(h, ctru_sys::MEDIATYPE_GAME_CARD, *cart_count, cart_titles);
-        let cart_slice = std::slice::from_raw_parts::<u64>(cart_titles, *cart_count as usize);
+        AM_GetTitleList(h, ctru_sys::MEDIATYPE_GAME_CARD, *cart_count, cart_titles);
+        let cart_slice = slice::from_raw_parts::<u64>(cart_titles, *cart_count as usize);
         for title in cart_slice {
             match title {
                 &TITLE_JP => println!("  - RTTB+ (JP) (Physical)"),
@@ -60,7 +64,7 @@ fn list_available_games() {
         libc::free(cart_titles as *mut libc::c_void);
         drop(cart_titles);
 
-        ctru_sys::amExit();
+        amExit();
         if *sd_count + *cart_count == non_megamix {println!("  none!")}
         println!();
     }
