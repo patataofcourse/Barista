@@ -13,6 +13,58 @@ use ctru_sys::{
 };
 use ui::{SpriteSheet, Image};
 
+const TITLE_JP: u64 = 0x0004000000155A00;
+const TITLE_US: u64 = 0x000400000018a400;
+const TITLE_EU: u64 = 0x000400000018a500;
+const TITLE_KR: u64 = 0x000400000018a600;
+
+//TODO: needs refactoring
+fn list_available_games() {
+    unsafe {
+        println!("Available versions of the game:");
+        ctru_sys::amInit();
+        let mut non_megamix = 0;
+
+        let sd_count: *mut u32 = &mut 0;
+        ctru_sys::AM_GetTitleCount(ctru_sys::MEDIATYPE_SD, sd_count);
+        let sd_titles: *mut u64 = libc::malloc(std::mem::size_of::<u32>() * *sd_count as usize) as *mut u64;
+        ctru_sys::AM_GetTitleList(std::ptr::null_mut(), ctru_sys::MEDIATYPE_SD, *sd_count, sd_titles);
+        let sd_slice = std::slice::from_raw_parts::<u64>(sd_titles, *sd_count as usize);
+        for title in sd_slice {
+            match title {
+                &TITLE_JP => println!("  - RTTB+ (JP) (Digital)"),
+                &TITLE_US => println!("  - RHM (US) (Digital)"),
+                &TITLE_EU => println!("  - RPM (EU) (Digital)"),
+                &TITLE_KR => println!("  - RSTB+ (KR) (Digital)"),
+                _ => non_megamix += 1,
+            }
+        }
+        libc::free(sd_titles as *mut libc::c_void);
+        drop(sd_titles);
+
+        let cart_count: *mut u32 = &mut 0;
+        ctru_sys::AM_GetTitleCount(ctru_sys::MEDIATYPE_GAME_CARD, cart_count);
+        let cart_titles: *mut u64 = libc::malloc(std::mem::size_of::<u32>() * *cart_count as usize) as *mut u64;
+        ctru_sys::AM_GetTitleList(std::ptr::null_mut(), ctru_sys::MEDIATYPE_GAME_CARD, *cart_count, cart_titles);
+        let cart_slice = std::slice::from_raw_parts::<u64>(cart_titles, *cart_count as usize);
+        for title in cart_slice {
+            match title {
+                &TITLE_JP => println!("  - RTTB+ (JP) (Physical)"),
+                &TITLE_US => println!("  - RHM (US) (Physical)"),   // Nice joke
+                &TITLE_EU => println!("  - RPM (EU) (Physical)"),
+                &TITLE_KR => println!("  - RSTB+ (KR) (Physical)"),
+                _ => non_megamix += 1,
+            }
+        }
+        libc::free(cart_titles as *mut libc::c_void);
+        drop(cart_titles);
+
+        ctru_sys::amExit();
+        if *sd_count + *cart_count == non_megamix {println!("  none!")}
+        println!();
+    }
+}
+
 fn main() {
     let apt = Apt::init().unwrap();
     let hid = Hid::init().unwrap();
@@ -40,6 +92,7 @@ fn main() {
     let sign_text = sign_sheet.get_sprite(1).unwrap();
 
     println!("Welcome to Barista!");
+    list_available_games();
     //println!(" - Press A to boot Saltwater");
     println!(" - Press Start to exit");
     

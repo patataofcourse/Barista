@@ -9,6 +9,7 @@ dependencies = [
  "citro2d",
  "ctru-rs",
  "ctru-sys",
+ "libc",
  "ui",
 ]
 
