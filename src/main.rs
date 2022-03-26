@@ -28,7 +28,7 @@ fn list_available_games() {
 
         let sd_count: *mut u32 = &mut 0;
         ctru_sys::AM_GetTitleCount(ctru_sys::MEDIATYPE_SD, sd_count);
-        let sd_titles: *mut u64 = libc::malloc(std::mem::size_of::<u32>() * *sd_count as usize) as *mut u64;
+        let sd_titles: *mut u64 = libc::malloc(std::mem::size_of::<u64>() * *sd_count as usize) as *mut u64;
         ctru_sys::AM_GetTitleList(h, ctru_sys::MEDIATYPE_SD, *sd_count, sd_titles);
         let sd_slice = std::slice::from_raw_parts::<u64>(sd_titles, *sd_count as usize);
         for title in sd_slice {
@@ -45,7 +45,7 @@ fn list_available_games() {
 
         let cart_count: *mut u32 = &mut 0;
         ctru_sys::AM_GetTitleCount(ctru_sys::MEDIATYPE_GAME_CARD, cart_count);
-        let cart_titles: *mut u64 = libc::malloc(std::mem::size_of::<u32>() * *cart_count as usize) as *mut u64;
+        let cart_titles: *mut u64 = libc::malloc(std::mem::size_of::<u64>() * *cart_count as usize) as *mut u64;
         ctru_sys::AM_GetTitleList(h, ctru_sys::MEDIATYPE_GAME_CARD, *cart_count, cart_titles);
         let cart_slice = std::slice::from_raw_parts::<u64>(cart_titles, *cart_count as usize);
         for title in cart_slice {
