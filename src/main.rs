@@ -1,3 +1,5 @@
+extern crate barista_ui as ui_lib;
+
 use ctru::{
     gfx::{Gfx, Screen},
     console::Console,
@@ -9,7 +11,7 @@ use ctru_sys::{
     GFX_TOP,
     GFX_LEFT,
 };
-use ui::SpriteSheet;
+use ui_lib::{SpriteSheet, BaristaUI};
 
 mod launcher;
 
@@ -18,14 +20,13 @@ fn main() {
     let hid = Hid::init().unwrap();
     let gfx = Gfx::default();
     let console = Console::init(Screen::Bottom);
-    console.select();
     unsafe {
         ctru_sys::romfsMountSelf("romfs\0".as_ptr());
     }
     let screen: *mut C3D_RenderTarget;
-    ui::init();
+    let ui = BaristaUI::init();
     unsafe {
-        screen = ctru_sys::C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+        screen = ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT);
     }
     let bg_sheet = SpriteSheet::from_file("romfs:/bg.t3x").expect("No spritesheet bg.t3x!");
     let bg = bg_sheet.get_sprite(0).unwrap();

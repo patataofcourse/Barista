@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 ctru-rs = { path = "../3ds-rust-env/ctru-rs/ctru-rs" }
 ctru-sys = { path = "../3ds-rust-env/ctru-rs/ctru-sys" }
-ui = {path = "ui"}
+barista-ui = { path = "ui" }
 libc = "0.2"
 
 [profile.dev]

@@ -46,12 +46,12 @@ pub fn get_available_games() -> Vec<GameVer> {
     unsafe {
         println!("Available versions of the game:");
         amInit();
-        let h: *mut u32 = &mut 0;
+        let null: *mut u32 = &mut 0;
 
         let sd_count: *mut u32 = &mut 0;
         AM_GetTitleCount(ctru_sys::MEDIATYPE_SD, sd_count);
         let sd_titles: *mut u64 = libc::malloc(std::mem::size_of::<u64>() * *sd_count as usize) as *mut u64;
-        AM_GetTitleList(h, ctru_sys::MEDIATYPE_SD, *sd_count, sd_titles);
+        AM_GetTitleList(null, ctru_sys::MEDIATYPE_SD, *sd_count, sd_titles);
         let sd_slice = slice::from_raw_parts::<u64>(sd_titles, *sd_count as usize);
         for title in sd_slice {
             match title {
@@ -72,7 +72,7 @@ pub fn get_available_games() -> Vec<GameVer> {
         let cart_count: *mut u32 = &mut 0;
         AM_GetTitleCount(ctru_sys::MEDIATYPE_GAME_CARD, cart_count);
         let cart_titles: *mut u64 = libc::malloc(std::mem::size_of::<u64>() * *cart_count as usize) as *mut u64;
-        AM_GetTitleList(h, ctru_sys::MEDIATYPE_GAME_CARD, *cart_count, cart_titles);
+        AM_GetTitleList(null, ctru_sys::MEDIATYPE_GAME_CARD, *cart_count, cart_titles);
         let cart_slice = slice::from_raw_parts::<u64>(cart_titles, *cart_count as usize);
         for title in cart_slice {
             match title {
