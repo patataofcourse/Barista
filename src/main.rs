@@ -5,8 +5,6 @@ use ctru::{
     services::hid::{Hid, KeyPad},
 };
 use ctru_sys::{
-    C2D_Sprite,
-    C2D_SpriteSheet,
     C3D_RenderTarget,
     GFX_TOP,
     GFX_LEFT,
@@ -15,19 +13,48 @@ use ctru_sys::{
     AM_GetTitleList,
     amExit
 };
-use ui::{SpriteSheet, Image};
-use std::slice;
+use ui::SpriteSheet;
+use std::{slice, fmt::{self, Display}};
 
 const TITLE_JP: u64 = 0x0004000000155A00;
 const TITLE_US: u64 = 0x000400000018a400;
 const TITLE_EU: u64 = 0x000400000018a500;
 const TITLE_KR: u64 = 0x000400000018a600;
 
-fn list_available_games() {
+struct GameVer {
+    pub region: GameRegion,
+    pub is_digital: bool,
+}
+
+impl Display for GameVer {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "{} ({})", self.region, if self.is_digital {"Digital"} else {"Physical"})
+    }
+}
+
+enum GameRegion {
+    JP,
+    US,
+    EU,
+    KR,
+}
+
+impl Display for GameRegion {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "{}", match self {
+            Self::JP => "RTTB+ (JP)".to_string(),
+            Self::US => "RHM (US)".to_string(),
+            Self::EU => "RPM (EU)".to_string(),
+            Self::KR => "RSTB+ (KR)".to_string(),
+        })
+    }
+}
+
+fn get_available_games() -> Vec<GameVer> {
+    let mut available_games = vec![];
     unsafe {
         println!("Available versions of the game:");
         amInit();
-        let mut non_megamix = 0;
         let h: *mut u32 = &mut 0;
 
         let sd_count: *mut u32 = &mut 0;
@@ -37,11 +64,15 @@ fn list_available_games() {
         let sd_slice = slice::from_raw_parts::<u64>(sd_titles, *sd_count as usize);
         for title in sd_slice {
             match title {
-                &TITLE_JP => println!("  - RTTB+ (JP) (Digital)"),
-                &TITLE_US => println!("  - RHM (US) (Digital)"),
-                &TITLE_EU => println!("  - RPM (EU) (Digital)"),
-                &TITLE_KR => println!("  - RSTB+ (KR) (Digital)"),
-                _ => non_megamix += 1,
+                &TITLE_JP =>
+                    available_games.push(GameVer{region: GameRegion::JP, is_digital: true}),
+                &TITLE_US =>
+                    available_games.push(GameVer{region: GameRegion::US, is_digital: true}),
+                &TITLE_EU =>
+                    available_games.push(GameVer{region: GameRegion::EU, is_digital: true}),
+                &TITLE_KR =>
+                    available_games.push(GameVer{region: GameRegion::KR, is_digital: true}),
+                _ => (),
             }
         }
         libc::free(sd_titles as *mut libc::c_void);
@@ -54,20 +85,23 @@ fn list_available_games() {
         let cart_slice = slice::from_raw_parts::<u64>(cart_titles, *cart_count as usize);
         for title in cart_slice {
             match title {
-                &TITLE_JP => println!("  - RTTB+ (JP) (Physical)"),
-                &TITLE_US => println!("  - RHM (US) (Physical)"),   // Nice joke
-                &TITLE_EU => println!("  - RPM (EU) (Physical)"),
-                &TITLE_KR => println!("  - RSTB+ (KR) (Physical)"),
-                _ => non_megamix += 1,
+                &TITLE_JP =>
+                    available_games.push(GameVer{region: GameRegion::JP, is_digital: false}),
+                &TITLE_US =>
+                    available_games.push(GameVer{region: GameRegion::US, is_digital: false}),
+                &TITLE_EU => 
+                    available_games.push(GameVer{region: GameRegion::EU, is_digital: false}),
+                &TITLE_KR =>
+                    available_games.push(GameVer{region: GameRegion::KR, is_digital: false}),
+                _ => (),
             }
         }
         libc::free(cart_titles as *mut libc::c_void);
         drop(cart_titles);
 
         amExit();
-        if *sd_count + *cart_count == non_megamix {println!("  none!")}
-        println!();
     }
+    available_games
 }
 
 fn main() {
@@ -96,8 +130,9 @@ fn main() {
     let sign = sign_sheet.get_sprite(0).unwrap();
     let sign_text = sign_sheet.get_sprite(1).unwrap();
 
+    let versions = get_available_games();
+
     println!("Welcome to Barista!");
-    list_available_games();
     //println!(" - Press A to boot Saltwater");
     println!(" - Press Start to exit");
     
