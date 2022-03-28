@@ -33,7 +33,7 @@ pub struct BaristaUI {
 impl BaristaUI {
     pub fn init<'a>() -> &'a Option<Self> {
         unsafe {
-            if let None = UI {return &None}
+            if let Some(_) = UI {panic!("Initialized BaristaUI twice!")}
             ctru_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
             ctru_sys::C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
             ctru_sys::C2D_Prepare();
