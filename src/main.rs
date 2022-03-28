@@ -57,8 +57,14 @@ fn main() {
         unsafe {
             use ctru_sys::*;
             C3D_FrameBegin(C3D_FRAME_SYNCDRAW as u8);
-            C2D_TargetClear(screen, citro2d::WHITE);
-            citro2d::scene_begin(screen);
+            C2D_TargetClear(screen, 0xFFFFFFFF);
+            ctru_sys::C2D_Flush();
+            ctru_sys::C3D_FrameDrawOn(screen);
+            ctru_sys::C2D_SceneSize(
+                (*screen).frameBuf.width.into(),
+                (*screen).frameBuf.height.into(),
+                (*screen).linked,
+            );
         }
         bg.draw(0, 0, 1.0, 1.0, 0.0, 0.0);
         barista.draw(255, 70, 1.0, 1.0, 0.0, 0.0);
