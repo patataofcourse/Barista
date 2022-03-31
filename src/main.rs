@@ -14,6 +14,8 @@ use ctru_sys::{
 use ui_lib::{SpriteSheet, BaristaUI};
 
 mod launcher;
+#[allow(warnings)]
+pub(crate) mod plgldr;
 
 fn main() {
     let apt = Apt::init().unwrap();

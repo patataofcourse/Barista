@@ -1,6 +1,9 @@
 target/
 dist/
 
+c/build/
+c/lib/
+
 .vscode
 
 *.rlib
