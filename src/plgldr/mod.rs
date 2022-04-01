@@ -39,6 +39,13 @@ pub fn set_state(enabled: bool) -> Result<(), i32> {
     }
 }
 
+static mut PARAMS: bindings::PluginLoadParameters = bindings::PluginLoadParameters {
+    noFlash: true,
+    lowTitleId: 0,
+    path: [0; 256],
+    config: [0; 32],
+};
+
 pub fn set_params(no_flash: bool, low_title_id: u32, path: CString, config: [u32; 32]) -> Result<(), i32> {
     let path = path.as_bytes();
     if path.len() > 256 {
@@ -51,14 +58,14 @@ pub fn set_params(no_flash: bool, low_title_id: u32, path: CString, config: [u32
         c += 1;
     }
 
-    let mut params = bindings::PluginLoadParameters {
-        noFlash: no_flash,
-        lowTitleId: low_title_id,
-        path: path_bytes,
-        config,
-    };
     let result = unsafe {
-        bindings::PLGLDR__SetPluginLoadParameters(&mut params)
+        PARAMS = bindings::PluginLoadParameters {
+            noFlash: no_flash,
+            lowTitleId: low_title_id,
+            path: path_bytes,
+            config,
+        };
+        bindings::PLGLDR__SetPluginLoadParameters(&mut PARAMS)
     };
     match result {
         0 => Ok(()),
