@@ -44,7 +44,6 @@ impl Display for GameRegion {
 pub fn get_available_games() -> Vec<GameVer> {
     let mut available_games = vec![];
     unsafe {
-        println!("Available versions of the game:");
         amInit();
         let null: *mut u32 = &mut 0;
 
