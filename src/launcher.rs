@@ -1,4 +1,5 @@
-use std::{slice, fmt::{self, Display}};
+use std::{slice, fmt::{self, Display}, ffi::CString};
+use crate::plgldr;
 
 use ctru_sys::{
     amInit,
@@ -38,6 +39,25 @@ impl Display for GameRegion {
             Self::EU => "RPM (EU)".to_string(),
             Self::KR => "RSTB+ (KR)".to_string(),
         })
+    }
+}
+
+impl GameRegion {
+    pub fn id(&self) -> u32 {
+        match self {
+            Self::JP => TITLE_JP as u32,
+            Self::US => TITLE_US as u32,
+            Self::EU => TITLE_EU as u32,
+            Self::KR => TITLE_KR as u32,
+        }
+    }
+    pub fn id_long(&self) -> u64 {
+        match self {
+            Self::JP => TITLE_JP,
+            Self::US => TITLE_US,
+            Self::EU => TITLE_EU,
+            Self::KR => TITLE_KR,
+        }
     }
 }
 
@@ -92,4 +112,30 @@ pub fn get_available_games() -> Vec<GameVer> {
         amExit();
     }
     available_games
+}
+
+pub fn check_for_plgldr() {
+    let result = plgldr::init();
+    plgldr::exit();
+    match result {
+        Ok(_) => (),
+        Err(c) => panic!("Luma3DS plugin loader is not installed"), //TODO: proper error screen, install it..?
+    }
+}
+
+pub fn launch(ver: GameVer) {
+    plgldr::init().unwrap();
+    plgldr::set_params(
+        true,
+        ver.region.id(),
+        CString::new("/spicerack/bin/Saltwater.3gx").unwrap(),
+        [0;32],
+    ).unwrap();
+    plgldr::exit();
+    unsafe {
+        ctru_sys::aptSetChainloader(
+            ver.region.id_long(),
+            if ver.is_digital { ctru_sys::MEDIATYPE_SD } else {ctru_sys::MEDIATYPE_GAME_CARD} as u8,
+        );
+    }
 }

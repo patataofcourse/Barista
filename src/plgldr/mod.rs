@@ -40,7 +40,7 @@ pub fn set_state(enabled: bool) -> Result<(), i32> {
 }
 
 static mut PARAMS: bindings::PluginLoadParameters = bindings::PluginLoadParameters {
-    noFlash: true,
+    noFlash: false,
     lowTitleId: 0,
     path: [0; 256],
     config: [0; 32],

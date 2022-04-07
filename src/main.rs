@@ -17,6 +17,8 @@ mod launcher;
 #[allow(warnings)]
 pub(crate) mod plgldr;
 
+use launcher::GameVer;
+
 fn main() {
     let apt = Apt::init().unwrap();
     let hid = Hid::init().unwrap();
@@ -44,6 +46,9 @@ fn main() {
 
     let versions = launcher::get_available_games();
 
+    let game_to_load: Option<GameVer> = None;
+    launcher::check_for_plgldr();
+    
     println!("Welcome to Barista!");
     //println!(" - Press A to boot Saltwater");
     println!(" - Press Start to exit");
@@ -79,4 +84,16 @@ fn main() {
             ctru_sys::C3D_FrameEnd(0);
         }
     }
+
+    unsafe {
+        ctru_sys::romfsUnmount("romfs\0".as_ptr());
+    }
+    drop(gfx);
+    drop(hid);
+    drop(console);
+
+    if let Some(c) = game_to_load {
+        launcher::launch(c)
+    }
+
 }
