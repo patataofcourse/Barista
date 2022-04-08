@@ -4,14 +4,18 @@ use crate::plgldr;
 use ctru_sys::{
     amInit,
     AM_GetTitleCount,
-    AM_GetTitleList,
-    amExit
+    AM_GetTitleInfo,
+    AM_TitleEntry,
+    amExit,
+    MEDIATYPE_GAME_CARD,
+    MEDIATYPE_SD
 };
 
 const TITLE_JP: u64 = 0x0004000000155A00;
 const TITLE_US: u64 = 0x000400000018a400;
 const TITLE_EU: u64 = 0x000400000018a500;
 const TITLE_KR: u64 = 0x000400000018a600;
+const TITLES: [GameRegion; 4] = [GameRegion::JP, GameRegion::US, GameRegion::EU, GameRegion::KR];
 
 #[derive(Debug, Clone)]
 pub struct GameVer {
@@ -67,50 +71,44 @@ pub fn get_available_games() -> Vec<GameVer> {
     let mut available_games = vec![];
     unsafe {
         amInit();
-        let null: *mut u32 = &mut 0;
+        let null: *mut AM_TitleEntry = &mut AM_TitleEntry {
+            titleID: 0,
+            size: 0,
+            version: 0,
+            unk: [0;6],
+        };
 
-        let sd_count: *mut u32 = &mut 0;
-        AM_GetTitleCount(ctru_sys::MEDIATYPE_SD, sd_count);
-        let sd_titles: *mut u64 = libc::malloc(std::mem::size_of::<u64>() * *sd_count as usize) as *mut u64;
-        AM_GetTitleList(null, ctru_sys::MEDIATYPE_SD, *sd_count, sd_titles);
-        let sd_slice = slice::from_raw_parts::<u64>(sd_titles, *sd_count as usize);
-        for title in sd_slice {
-            match title {
-                &TITLE_JP =>
-                    available_games.push(GameVer{region: GameRegion::JP, is_digital: true}),
-                &TITLE_US =>
-                    available_games.push(GameVer{region: GameRegion::US, is_digital: true}),
-                &TITLE_EU =>
-                    available_games.push(GameVer{region: GameRegion::EU, is_digital: true}),
-                &TITLE_KR =>
-                    available_games.push(GameVer{region: GameRegion::KR, is_digital: true}),
-                _ => (),
+        for title in &TITLES {
+            let id: *mut u64 = &mut title.id_long();
+            if AM_GetTitleInfo(MEDIATYPE_SD, 1, id, null) == 0 {
+                match title {
+                    GameRegion::JP =>
+                        available_games.push(GameVer{region: GameRegion::JP, is_digital: true}),
+                    GameRegion::US =>
+                        available_games.push(GameVer{region: GameRegion::US, is_digital: true}),
+                    GameRegion::EU =>
+                        available_games.push(GameVer{region: GameRegion::EU, is_digital: true}),
+                    GameRegion::KR =>
+                        available_games.push(GameVer{region: GameRegion::KR, is_digital: true}),
+                }
             }
         }
-        libc::free(sd_titles as *mut libc::c_void);
-        drop(sd_titles);
 
-        let cart_count: *mut u32 = &mut 0;
-        AM_GetTitleCount(ctru_sys::MEDIATYPE_GAME_CARD, cart_count);
-        let cart_titles: *mut u64 = libc::malloc(std::mem::size_of::<u64>() * *cart_count as usize) as *mut u64;
-        AM_GetTitleList(null, ctru_sys::MEDIATYPE_GAME_CARD, *cart_count, cart_titles);
-        let cart_slice = slice::from_raw_parts::<u64>(cart_titles, *cart_count as usize);
-        for title in cart_slice {
-            match title {
-                &TITLE_JP =>
-                    available_games.push(GameVer{region: GameRegion::JP, is_digital: false}),
-                &TITLE_US =>
-                    available_games.push(GameVer{region: GameRegion::US, is_digital: false}),
-                &TITLE_EU => 
-                    available_games.push(GameVer{region: GameRegion::EU, is_digital: false}),
-                &TITLE_KR =>
-                    available_games.push(GameVer{region: GameRegion::KR, is_digital: false}),
-                _ => (),
+        for title in &TITLES {
+            let id: *mut u64 = &mut title.id_long();
+            if AM_GetTitleInfo(MEDIATYPE_GAME_CARD, 1, id, null) == 0 {
+                match title {
+                    GameRegion::JP =>
+                        available_games.push(GameVer{region: GameRegion::JP, is_digital: false}),
+                    GameRegion::US =>
+                        available_games.push(GameVer{region: GameRegion::US, is_digital: false}),
+                    GameRegion::EU =>
+                        available_games.push(GameVer{region: GameRegion::EU, is_digital: false}),
+                    GameRegion::KR =>
+                        available_games.push(GameVer{region: GameRegion::KR, is_digital: false}),
+                }
             }
         }
-        libc::free(cart_titles as *mut libc::c_void);
-        drop(cart_titles);
-
         amExit();
     }
     available_games

@@ -50,7 +50,7 @@ fn main() {
     println!("Welcome to Barista!");
     if versions.len() > 0 {
         println!(" - Press A to boot Saltwater");
-        println!(" - Press D-Pad up/down to select a game version");
+        println!(" - Press D-Pad up/down to choose ver.");
     } else {
         println!("No compatible versions of the game found");
     }
@@ -59,7 +59,7 @@ fn main() {
     for version in &versions {
         println!(" - [ ] {}", version);
     }
-    print!("\x1b[5;4Hx");
+    println!("\x1b[6;5Hx");
 
     let mut chosen_version = 0;
 
@@ -76,7 +76,7 @@ fn main() {
                 if chosen_version > 0 {
                     chosen_version -= 1;
                     for i in 0..versions.len() {
-                        print!("\x1b[{};4H{}", 5 + i, if chosen_version == i { "x" } else {" "})
+                        println!("\x1b[{};5H{}", 6 + i, if chosen_version == i { "x" } else {" "})
                     }
                 }
             }
@@ -85,7 +85,7 @@ fn main() {
                 if chosen_version < versions.len() - 1 {
                     chosen_version += 1;
                     for i in 0..versions.len() {
-                        print!("\x1b[{};4H{}", 5 + i, if chosen_version == i { "x" } else {" "})
+                        println!("\x1b[{};5H{}", 6 + i, if chosen_version == i { "x" } else {" "})
                     }
                 }
             }
