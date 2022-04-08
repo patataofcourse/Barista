@@ -1,15 +1,13 @@
 extern crate barista_ui as ui_lib;
 
 use ctru::{
-    gfx::{Gfx, Screen},
+    gfx::{Gfx, Screen, Side},
     console::Console,
     services::apt::Apt,
     services::hid::{Hid, KeyPad},
 };
 use ctru_sys::{
     C3D_RenderTarget,
-    GFX_TOP,
-    GFX_LEFT,
 };
 use ui_lib::{SpriteSheet, BaristaUI};
 
@@ -30,7 +28,7 @@ fn main() {
     let screen: *mut C3D_RenderTarget;
     let ui = BaristaUI::init();
     unsafe {
-        screen = ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT);
+        screen = ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, Side::Left as u32);
     }
     let bg_sheet = SpriteSheet::from_file("romfs:/gfx/bg.t3x").expect("No spritesheet bg.t3x!");
     let bg = bg_sheet.get_sprite(0).unwrap();
@@ -46,19 +44,56 @@ fn main() {
 
     let versions = launcher::get_available_games();
 
-    let game_to_load: Option<GameVer> = None;
+    let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
     
     println!("Welcome to Barista!");
-    //println!(" - Press A to boot Saltwater");
+    if versions.len() > 0 {
+        println!(" - Press A to boot Saltwater");
+        println!(" - Press D-Pad up/down to select a game version");
+    } else {
+        println!("No compatible versions of the game found");
+    }
     println!(" - Press Start to exit");
-    
+    println!();
+    for version in &versions {
+        println!(" - [ ] {}", version);
+    }
+    print!("\x1b[5;4Hx");
+
+    let mut chosen_version = 0;
+
     while apt.main_loop() {
         gfx.wait_for_vblank();
 
         hid.scan_input();
         if hid.keys_down().contains(KeyPad::KEY_START) {
             break;
+        }
+
+        if versions.len() != 0 {
+            if hid.keys_down().contains(KeyPad::KEY_DUP) {
+                if chosen_version > 0 {
+                    chosen_version -= 1;
+                    for i in 0..versions.len() {
+                        print!("\x1b[{};4H{}", 5 + i, if chosen_version == i { "x" } else {" "})
+                    }
+                }
+            }
+
+            if hid.keys_down().contains(KeyPad::KEY_DDOWN) {
+                if chosen_version < versions.len() - 1 {
+                    chosen_version += 1;
+                    for i in 0..versions.len() {
+                        print!("\x1b[{};4H{}", 5 + i, if chosen_version == i { "x" } else {" "})
+                    }
+                }
+            }
+
+            if hid.keys_down().contains(KeyPad::KEY_A) {
+                game_to_load = Some(versions[chosen_version].clone());
+                break;
+            }
         }
 
         // Render the scene

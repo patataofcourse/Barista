@@ -13,6 +13,7 @@ const TITLE_US: u64 = 0x000400000018a400;
 const TITLE_EU: u64 = 0x000400000018a500;
 const TITLE_KR: u64 = 0x000400000018a600;
 
+#[derive(Debug, Clone)]
 pub struct GameVer {
     pub region: GameRegion,
     pub is_digital: bool,
@@ -24,6 +25,7 @@ impl Display for GameVer {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum GameRegion {
     JP,
     US,
@@ -119,7 +121,7 @@ pub fn check_for_plgldr() {
     plgldr::exit();
     match result {
         Ok(_) => (),
-        Err(c) => panic!("Luma3DS plugin loader is not installed"), //TODO: proper error screen, install it..?
+        Err(_) => panic!("Luma3DS plugin loader is not installed"), //TODO: proper error screen, install it..?
     }
 }
 
