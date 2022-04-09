@@ -23,73 +23,64 @@ use std::collections::HashMap;
 
 static mut UI: Option<BaristaUI> = None;
 
-pub struct BaristaUI {
-    pub top_scene: Option<Scene>,
-    pub bottom_scene: Option<Scene>,
+struct BaristaUI<'a> {
+    pub top_scene: Option<Scene<'a>>,
+    pub bottom_scene: Option<Scene<'a>>,
     top_screen_target: *mut C3D_RenderTarget,
     bottom_screen_target: *mut C3D_RenderTarget,
 }
 
-impl BaristaUI {
-    pub fn init<'a>() -> &'a Option<Self> {
-        unsafe {
-            if let Some(_) = UI {panic!("Initialized BaristaUI twice!")}
-            ctru_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
-            ctru_sys::C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
-            ctru_sys::C2D_Prepare();
-            UI = Some(Self {
-                bottom_scene: None,
-                top_scene: None,
-                top_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
-                bottom_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
-            });
-            return &UI;
-        }
-    }
-
-    pub fn get<'a>() -> &'a Option<Self> {
-        unsafe {
-            &UI
-        }
-    }
-
+impl BaristaUI <'_> {
     pub(crate) fn get_target(&self, screen: Screen) -> *mut C3D_RenderTarget {
         match screen {
             Screen::Top => self.top_screen_target.clone(),
             Screen::Bottom => self.bottom_screen_target.clone(),
         }
     }
+}
 
-    pub fn render(&self) {
-        unsafe {
-            C3D_FrameBegin(C3D_FRAME_SYNCDRAW as u8);
-        }
-        match &self.top_scene {
-            Some(c) => {
-                c.draw()
-            },
-            None => (),
-        }
-        match &self.bottom_scene {
-            Some(c) => {
-                c.draw()
-            },
-            None => (),
-        }
-        unsafe {
-            ctru_sys::C3D_FrameEnd(0);
-        }
+pub fn init() {
+    unsafe {
+        if let Some(_) = UI {panic!("Initialized UI twice")}
+        ctru_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+        ctru_sys::C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
+        ctru_sys::C2D_Prepare();
+        UI = Some(BaristaUI {
+            bottom_scene: None,
+            top_scene: None,
+            top_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
+            bottom_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
+        });
     }
 }
 
-pub struct Scene {
+pub fn render() {
+    unsafe {
+        C3D_FrameBegin(C3D_FRAME_SYNCDRAW as u8);
+        match &UI.as_ref().expect("UI not initialized").top_scene {
+            Some(c) => {
+                c.draw()
+            },
+            None => (),
+        }
+        match &UI.as_ref().expect("UI not initialized").bottom_scene {
+            Some(c) => {
+                c.draw()
+            },
+            None => (),
+        }
+        ctru_sys::C3D_FrameEnd(0);
+    }
+}
+
+pub struct Scene<'a> {
     target: *mut C3D_RenderTarget,
     screen: Screen,
     pub background: Option<Image>,
-    pub objects: Vec<Box<dyn Object>>,
+    pub objects: Vec<Box<dyn Object + 'a>>,
 }
 
-impl Scene {
+impl Scene<'_> {
     pub fn new(screen: Screen, background: Option<Image>) -> Self {
         unsafe {
             Self {
@@ -99,12 +90,6 @@ impl Scene {
                 objects: vec![],
             }
         }
-    }
-
-    pub fn add_object<T: 'static>(&mut self, object: T)
-        where T: Object
-    {
-        self.objects.push(Box::from(object))
     }
 
     pub fn get_screen(&self) -> Screen {
@@ -126,6 +111,14 @@ impl Scene {
         for object in &self.objects {
             object.as_ref().draw(); //TODO: use these
         }
+    }
+}
+
+impl<'a> Scene<'a> {
+    pub fn add_object<T: 'a>(&mut self, object: T)
+        where T: Object
+    {
+        self.objects.push(Box::from(object))
     }
 }
 

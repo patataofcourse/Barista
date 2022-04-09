@@ -1,9 +1,8 @@
-use std::{slice, fmt::{self, Display}, ffi::CString};
+use std::{fmt::{self, Display}, ffi::CString};
 use crate::plgldr;
 
 use ctru_sys::{
     amInit,
-    AM_GetTitleCount,
     AM_GetTitleInfo,
     AM_TitleEntry,
     amExit,

@@ -9,9 +9,11 @@ use ctru::{
 use ctru_sys::{
     C3D_RenderTarget,
 };
-use ui_lib::{SpriteSheet, BaristaUI};
+use ui_lib::{SpriteSheet};
 
 mod launcher;
+mod scene;
+
 #[allow(warnings)]
 pub(crate) mod plgldr;
 
@@ -25,11 +27,13 @@ fn main() {
     unsafe {
         ctru_sys::romfsMountSelf("romfs\0".as_ptr());
     }
+
     let screen: *mut C3D_RenderTarget;
-    let ui = BaristaUI::init();
+    ui_lib::init();
     unsafe {
         screen = ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, Side::Left as u32);
     }
+
     let bg_sheet = SpriteSheet::from_file("romfs:/gfx/bg.t3x").expect("No spritesheet bg.t3x!");
     let bg = bg_sheet.get_sprite(0).unwrap();
     let fg = bg_sheet.get_sprite(1).unwrap();
