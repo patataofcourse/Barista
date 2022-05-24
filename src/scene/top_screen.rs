@@ -18,7 +18,11 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     scene.add_object(StaticObject {
         x: 0,
         y: 188,
+        scale_x: 1.0,
+        scale_y: 1.0,
         image: bg_sheet.get_sprite(1).unwrap(),
+        depth: 0.0,
+        rotation: 0.0,
     });
 
     // Sign

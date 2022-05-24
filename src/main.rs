@@ -29,10 +29,13 @@ fn main() {
     // Initialize GFX stuff
 
     let screen: *mut C3D_RenderTarget;
-    let ui = BaristaUI::init();
+    let mut  ui = BaristaUI::init();
     unsafe {
         screen = ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, Side::Left as u32);
     }
+
+    let top_scene = scene::top_screen::top_screen_scene(&ui);
+    ui.set_scene(Screen::Top, &top_scene);
 
     let bg_sheet = SpriteSheet::from_file("romfs:/gfx/bg.t3x").expect("No spritesheet bg.t3x!");
     let bg = bg_sheet.get_sprite(0).unwrap();
@@ -110,28 +113,7 @@ fn main() {
             }
         }
 
-        // Render the scene
-        unsafe {
-            use ctru_sys::*;
-            C3D_FrameBegin(C3D_FRAME_SYNCDRAW as u8);
-            C2D_TargetClear(screen, 0xFFFFFFFF);
-            ctru_sys::C2D_Flush();
-            ctru_sys::C3D_FrameDrawOn(screen);
-            ctru_sys::C2D_SceneSize(
-                (*screen).frameBuf.width.into(),
-                (*screen).frameBuf.height.into(),
-                (*screen).linked,
-            );
-        }
-        bg.draw(0, 0, 1.0, 1.0, 0.0, 0.0);
-        barista.draw(255, 70, 1.0, 1.0, 0.0, 0.0);
-        //nicole.draw(174, 17, 1.0, 1.0, 0.0, 0.0);
-        fg.draw(0, 188, 1.0, 1.0, 0.0, 0.0);
-        sign.draw(30, 150, 1.0, 1.0, 0.0, 0.0);
-        sign_text.draw(30, 150, 1.0, 1.0, 0.0, 0.0);
-        unsafe {
-            ctru_sys::C3D_FrameEnd(0);
-        }
+        ui.render();
     }
 
     unsafe {
