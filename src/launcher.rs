@@ -1,20 +1,21 @@
-use std::{fmt::{self, Display}, ffi::CString};
 use crate::plgldr;
-
-use ctru_sys::{
-    amInit,
-    AM_GetTitleInfo,
-    AM_TitleEntry,
-    amExit,
-    MEDIATYPE_GAME_CARD,
-    MEDIATYPE_SD
+use std::{
+    ffi::CString,
+    fmt::{self, Display},
 };
+
+use ctru_sys::{amExit, amInit, AM_GetTitleInfo, AM_TitleEntry, MEDIATYPE_GAME_CARD, MEDIATYPE_SD};
 
 const TITLE_JP: u64 = 0x0004000000155A00;
 const TITLE_US: u64 = 0x000400000018a400;
 const TITLE_EU: u64 = 0x000400000018a500;
 const TITLE_KR: u64 = 0x000400000018a600;
-const TITLES: [GameRegion; 4] = [GameRegion::JP, GameRegion::US, GameRegion::EU, GameRegion::KR];
+const TITLES: [GameRegion; 4] = [
+    GameRegion::JP,
+    GameRegion::US,
+    GameRegion::EU,
+    GameRegion::KR,
+];
 
 #[derive(Debug, Clone)]
 pub struct GameVer {
@@ -24,7 +25,16 @@ pub struct GameVer {
 
 impl Display for GameVer {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{} ({})", self.region, if self.is_digital {"Digital"} else {"Physical"})
+        write!(
+            formatter,
+            "{} ({})",
+            self.region,
+            if self.is_digital {
+                "Digital"
+            } else {
+                "Physical"
+            }
+        )
     }
 }
 
@@ -38,12 +48,16 @@ pub enum GameRegion {
 
 impl Display for GameRegion {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}", match self {
-            Self::JP => "RTTB+ (JP)".to_string(),
-            Self::US => "RHM (US)".to_string(),
-            Self::EU => "RPM (EU)".to_string(),
-            Self::KR => "RSTB+ (KR)".to_string(),
-        })
+        write!(
+            formatter,
+            "{}",
+            match self {
+                Self::JP => "RTTB+ (JP)".to_string(),
+                Self::US => "RHM (US)".to_string(),
+                Self::EU => "RPM (EU)".to_string(),
+                Self::KR => "RSTB+ (KR)".to_string(),
+            }
+        )
     }
 }
 
@@ -74,21 +88,29 @@ pub fn get_available_games() -> Vec<GameVer> {
             titleID: 0,
             size: 0,
             version: 0,
-            unk: [0;6],
+            unk: [0; 6],
         };
 
         for title in &TITLES {
             let id: *mut u64 = &mut title.id_long();
             if AM_GetTitleInfo(MEDIATYPE_SD, 1, id, null) == 0 {
                 match title {
-                    GameRegion::JP =>
-                        available_games.push(GameVer{region: GameRegion::JP, is_digital: true}),
-                    GameRegion::US =>
-                        available_games.push(GameVer{region: GameRegion::US, is_digital: true}),
-                    GameRegion::EU =>
-                        available_games.push(GameVer{region: GameRegion::EU, is_digital: true}),
-                    GameRegion::KR =>
-                        available_games.push(GameVer{region: GameRegion::KR, is_digital: true}),
+                    GameRegion::JP => available_games.push(GameVer {
+                        region: GameRegion::JP,
+                        is_digital: true,
+                    }),
+                    GameRegion::US => available_games.push(GameVer {
+                        region: GameRegion::US,
+                        is_digital: true,
+                    }),
+                    GameRegion::EU => available_games.push(GameVer {
+                        region: GameRegion::EU,
+                        is_digital: true,
+                    }),
+                    GameRegion::KR => available_games.push(GameVer {
+                        region: GameRegion::KR,
+                        is_digital: true,
+                    }),
                 }
             }
         }
@@ -97,14 +119,22 @@ pub fn get_available_games() -> Vec<GameVer> {
             let id: *mut u64 = &mut title.id_long();
             if AM_GetTitleInfo(MEDIATYPE_GAME_CARD, 1, id, null) == 0 {
                 match title {
-                    GameRegion::JP =>
-                        available_games.push(GameVer{region: GameRegion::JP, is_digital: false}),
-                    GameRegion::US =>
-                        available_games.push(GameVer{region: GameRegion::US, is_digital: false}),
-                    GameRegion::EU =>
-                        available_games.push(GameVer{region: GameRegion::EU, is_digital: false}),
-                    GameRegion::KR =>
-                        available_games.push(GameVer{region: GameRegion::KR, is_digital: false}),
+                    GameRegion::JP => available_games.push(GameVer {
+                        region: GameRegion::JP,
+                        is_digital: false,
+                    }),
+                    GameRegion::US => available_games.push(GameVer {
+                        region: GameRegion::US,
+                        is_digital: false,
+                    }),
+                    GameRegion::EU => available_games.push(GameVer {
+                        region: GameRegion::EU,
+                        is_digital: false,
+                    }),
+                    GameRegion::KR => available_games.push(GameVer {
+                        region: GameRegion::KR,
+                        is_digital: false,
+                    }),
                 }
             }
         }
@@ -128,13 +158,18 @@ pub fn launch(ver: GameVer) {
         true,
         ver.region.id(),
         CString::new("/spicerack/bin/Saltwater.3gx").unwrap(),
-        [0;32],
-    ).unwrap();
+        [0; 32],
+    )
+    .unwrap();
     plgldr::exit();
     unsafe {
         ctru_sys::aptSetChainloader(
             ver.region.id_long(),
-            if ver.is_digital { ctru_sys::MEDIATYPE_SD } else {ctru_sys::MEDIATYPE_GAME_CARD} as u8,
+            if ver.is_digital {
+                ctru_sys::MEDIATYPE_SD
+            } else {
+                ctru_sys::MEDIATYPE_GAME_CARD
+            } as u8,
         );
     }
 }

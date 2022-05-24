@@ -1,15 +1,13 @@
 extern crate barista_ui as ui_lib;
 
 use ctru::{
-    gfx::{Gfx, Screen, Side},
     console::Console,
+    gfx::{Gfx, Screen, Side},
     services::apt::Apt,
     services::hid::{Hid, KeyPad},
 };
-use ctru_sys::{
-    C3D_RenderTarget,
-};
-use ui_lib::{SpriteSheet};
+use ctru_sys::C3D_RenderTarget;
+use ui_lib::{BaristaUI, Scene, SpriteSheet};
 
 mod launcher;
 mod scene;
@@ -28,8 +26,10 @@ fn main() {
         ctru_sys::romfsMountSelf("romfs\0".as_ptr());
     }
 
+    // Initialize GFX stuff
+
     let screen: *mut C3D_RenderTarget;
-    ui_lib::init();
+    let ui = BaristaUI::init();
     unsafe {
         screen = ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, Side::Left as u32);
     }
@@ -38,11 +38,13 @@ fn main() {
     let bg = bg_sheet.get_sprite(0).unwrap();
     let fg = bg_sheet.get_sprite(1).unwrap();
 
-    let barista_sheet = SpriteSheet::from_file("romfs:/gfx/barista.t3x").expect("No spritesheet barista.t3x!");
+    let barista_sheet =
+        SpriteSheet::from_file("romfs:/gfx/barista.t3x").expect("No spritesheet barista.t3x!");
     let barista = barista_sheet.get_sprite(0).unwrap();
     let nicole = barista_sheet.get_sprite(1).unwrap();
 
-    let sign_sheet = SpriteSheet::from_file("romfs:/gfx/sign.t3x").expect("No spritesheet barista.t3x!");
+    let sign_sheet =
+        SpriteSheet::from_file("romfs:/gfx/sign.t3x").expect("No spritesheet barista.t3x!");
     let sign = sign_sheet.get_sprite(0).unwrap();
     let sign_text = sign_sheet.get_sprite(1).unwrap();
 
@@ -50,7 +52,7 @@ fn main() {
 
     let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
-    
+
     println!("Welcome to Barista!");
     if versions.len() > 0 {
         println!(" - Press A to boot Saltwater");
@@ -80,7 +82,11 @@ fn main() {
                 if chosen_version > 0 {
                     chosen_version -= 1;
                     for i in 0..versions.len() {
-                        println!("\x1b[{};5H{}", 6 + i, if chosen_version == i { "x" } else {" "})
+                        println!(
+                            "\x1b[{};5H{}",
+                            6 + i,
+                            if chosen_version == i { "x" } else { " " }
+                        )
                     }
                 }
             }
@@ -89,7 +95,11 @@ fn main() {
                 if chosen_version < versions.len() - 1 {
                     chosen_version += 1;
                     for i in 0..versions.len() {
-                        println!("\x1b[{};5H{}", 6 + i, if chosen_version == i { "x" } else {" "})
+                        println!(
+                            "\x1b[{};5H{}",
+                            6 + i,
+                            if chosen_version == i { "x" } else { " " }
+                        )
                     }
                 }
             }
@@ -134,5 +144,4 @@ fn main() {
     if let Some(c) = game_to_load {
         launcher::launch(c)
     }
-
 }
