@@ -10,6 +10,7 @@ use ctru_sys::C3D_RenderTarget;
 use ui_lib::{BaristaUI, Scene, SpriteSheet};
 
 mod launcher;
+mod saltwater_cfg;
 mod scene;
 
 #[allow(warnings)]
@@ -29,7 +30,7 @@ fn main() {
     // Initialize GFX stuff
     let mut ui = BaristaUI::init();
 
-    let top_scene = scene::top_screen::top_screen_scene(&ui);
+    let top_scene = scene::top_screen_scene(&ui);
     ui.set_scene(Screen::Top, &top_scene);
 
     // Init loader
