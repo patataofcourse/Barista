@@ -17,9 +17,7 @@ use ctru_sys::{
     C3D_FRAME_SYNCDRAW,
     C3D_FrameBegin,
     GFX_LEFT,
-    C2D_CreateScreenTarget,
 };
-use std::collections::HashMap;
 
 
 pub struct BaristaUI<'a> {
@@ -46,27 +44,28 @@ impl<'a> BaristaUI <'a> {
                 bottom_scene: None,
                 top_scene: None,
                 top_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
-                bottom_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
+                bottom_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Bottom as u32, GFX_LEFT),
             }
         }
     }
 
-    pub fn render(&self) {
+    pub fn render(&self) -> [(bool, Vec<bool>); 2] {
         unsafe {
             C3D_FrameBegin(C3D_FRAME_SYNCDRAW as u8);
-            match &self.top_scene {
+            let out_top = match &self.top_scene {
                 Some(c) => {
                     c.draw()
                 },
-                None => (),
-            }
-            match &self.bottom_scene {
+                None => (false, vec![]),
+            };
+            let out_bottom = match &self.bottom_scene {
                 Some(c) => {
                     c.draw()
                 },
-                None => (),
-            }
+                None => (false, vec![]),
+            };
             ctru_sys::C3D_FrameEnd(0);
+            [out_top, out_bottom]
         }
     }
 
@@ -87,14 +86,12 @@ pub struct Scene<'a> {
 
 impl Scene<'_> {
     pub fn new(ui: &BaristaUI, screen: Screen, background: Option<Image>) -> Self {
-        unsafe {
             Self {
                 screen: screen.clone(),
                 target: ui.get_target(screen),
                 background,
                 objects: vec![],
             }
-        }
     }
 
     pub fn get_screen(&self) -> Screen {
@@ -103,7 +100,7 @@ impl Scene<'_> {
 
     //TODO: set_screen? doubt it'll be useful though
 
-    pub fn draw(&self) {
+    pub fn draw(&self) -> (bool, Vec<bool>) {
         unsafe {
             C2D_TargetClear(self.target, 0xFFFFFFFF);
             C2D_Flush();
@@ -114,13 +111,15 @@ impl Scene<'_> {
                 (*self.target).linked,
             );
         }
-        match &self.background{
-            Some(c) => c.draw(0, 0, 1.0, 1.0, 0.0, 0.0), //TODO: use this
-            None => true,
+        let out1 = match &self.background{
+            Some(c) => c.draw(0, 0, 1.0, 1.0, 0.0, 0.0),
+            None => false,
         };
+        let mut out2 = vec![];
         for object in &self.objects {
-            object.as_ref().draw(); //TODO: use these
+            out2.push(object.as_ref().draw());
         }
+        (out1, out2)
     }
 }
 

@@ -27,30 +27,12 @@ fn main() {
     }
 
     // Initialize GFX stuff
-
-    let screen: *mut C3D_RenderTarget;
     let mut ui = BaristaUI::init();
-    unsafe {
-        screen = ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, Side::Left as u32);
-    }
 
     let top_scene = scene::top_screen::top_screen_scene(&ui);
     ui.set_scene(Screen::Top, &top_scene);
 
-    let bg_sheet = SpriteSheet::from_file("romfs:/gfx/bg.t3x").expect("No spritesheet bg.t3x!");
-    let bg = bg_sheet.get_sprite(0).unwrap();
-    let fg = bg_sheet.get_sprite(1).unwrap();
-
-    let barista_sheet =
-        SpriteSheet::from_file("romfs:/gfx/barista.t3x").expect("No spritesheet barista.t3x!");
-    let barista = barista_sheet.get_sprite(0).unwrap();
-    let nicole = barista_sheet.get_sprite(1).unwrap();
-
-    let sign_sheet =
-        SpriteSheet::from_file("romfs:/gfx/sign.t3x").expect("No spritesheet barista.t3x!");
-    let sign = sign_sheet.get_sprite(0).unwrap();
-    let sign_text = sign_sheet.get_sprite(1).unwrap();
-
+    // Init loader
     let versions = launcher::get_available_games();
 
     let mut game_to_load: Option<GameVer> = None;

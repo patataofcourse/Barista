@@ -18,6 +18,12 @@ impl Object for BaristaSprites {
     }
 }
 
+impl BaristaSprites {
+    fn switch(&mut self, img: &'static str) {
+        self.cur_image = img;
+    }
+}
+
 pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     let bg_sheet = SpriteSheet::from_file("romfs:/gfx/bg.t3x").expect("No spritesheet bg.t3x!");
     let barista_sheet =
