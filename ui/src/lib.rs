@@ -108,6 +108,11 @@ impl Scene<'_> {
             C2D_TargetClear(self.target, 0xFFFFFFFF);
             C2D_Flush();
             ctru_sys::C3D_FrameDrawOn(self.target);
+            ctru_sys::C2D_SceneSize(
+                (*self.target).frameBuf.width.into(),
+                (*self.target).frameBuf.height.into(),
+                (*self.target).linked,
+            );
         }
         match &self.background{
             Some(c) => c.draw(0, 0, 1.0, 1.0, 0.0, 0.0), //TODO: use this

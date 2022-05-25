@@ -1,5 +1,22 @@
 use ctru::gfx::Screen;
-use ui_lib::{BaristaUI, Object, Scene, SpriteSheet, StaticObject};
+use std::collections::HashMap;
+use ui_lib::{BaristaUI, Image, Object, Scene, SpriteSheet, StaticObject};
+
+pub struct BaristaSprites {
+    pub depth: f32,
+    pub images: HashMap<String, (u16, u16, Image)>,
+    pub cur_image: &'static str,
+}
+
+impl Object for BaristaSprites {
+    fn draw(&self) -> bool {
+        let img = match self.images.get(self.cur_image) {
+            Some(c) => c,
+            None => return true,
+        };
+        img.2.draw(img.0, img.1, 1.0, 1.0, 0.0, self.depth)
+    }
+}
 
 pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     let bg_sheet = SpriteSheet::from_file("romfs:/gfx/bg.t3x").expect("No spritesheet bg.t3x!");
@@ -29,5 +46,5 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     let sign = sign_sheet.get_sprite(0).unwrap();
     let sign_text = sign_sheet.get_sprite(1).unwrap();
 
-    todo!();
+    scene
 }

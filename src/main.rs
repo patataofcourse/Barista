@@ -29,7 +29,7 @@ fn main() {
     // Initialize GFX stuff
 
     let screen: *mut C3D_RenderTarget;
-    let mut  ui = BaristaUI::init();
+    let mut ui = BaristaUI::init();
     unsafe {
         screen = ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, Side::Left as u32);
     }
