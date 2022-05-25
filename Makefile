@@ -3,7 +3,7 @@ CRATE_NAME := barista
 PROG_NAME := Barista
 PROG_DESC := A launcher for Rhythm Heaven Megamix mods
 PROG_AUTHOR := patataofcourse, RHModding
-PROG_ICON := $(DEVKITPRO)/libctru/default_icon.png
+PROG_ICON := icon.png
 
 3DSXTOOL := $(DEVKITPRO)/tools/bin/3dsxtool
 SMDHTOOL := $(DEVKITPRO)/tools/bin/smdhtool
