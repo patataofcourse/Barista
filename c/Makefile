@@ -93,10 +93,6 @@ all: lib/libplgldr.a
 
 build: lib/libplgldr.a
 
-install: dist-bin
-	mkdir -p $(DESTDIR)$(DEVKITPRO)/libctru
-	bzip2 -cd $(TARGET)-$(VERSION).tar.bz2 | tar -xf - -C $(DESTDIR)$(DEVKITPRO)/libctru
-
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...

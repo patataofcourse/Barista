@@ -57,7 +57,7 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     let barista_sheet =
         SpriteSheet::from_file("romfs:/gfx/barista.t3x").expect("No spritesheet barista.t3x!");
     let sign_sheet =
-        SpriteSheet::from_file("romfs:/gfx/sign.t3x").expect("No spritesheet barista.t3x!");
+        SpriteSheet::from_file("romfs:/gfx/sign.t3x").expect("No spritesheet sign.t3x!");
 
     let mut scene = Scene::new(ui, Screen::Top, Some(bg_sheet.get_sprite(0).unwrap()));
 

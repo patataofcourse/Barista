@@ -19,7 +19,7 @@ export TARGET_CFLAGS := -specs=3dsx.specs -mfloat-abi=hard -march=armv6k -mtune=
 
 export XARGO_RUST_SRC=../3ds-rust-env/rust-3ds-fork/library
 
-.PHONY: all c clean $(CRATE_NAME) dist release debug doc fmt test send target/3ds/release/$(CRATE_NAME).elf
+.PHONY: all c check clean $(CRATE_NAME) dist release debug doc fmt test send target/3ds/release/$(CRATE_NAME).elf
 
 all: debug 
 
@@ -65,6 +65,9 @@ test: $(CRATE_NAME)
 
 send: $(CRATE_NAME)
 	3dslink target/3ds/release/$(CRATE_NAME).3dsx
+
+check:
+	RUST_TARGET_PATH=$(shell pwd) xargo check
 
 clean:
 	rm -rf target
