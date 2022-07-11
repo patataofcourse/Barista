@@ -1,4 +1,5 @@
 use crate::plgldr;
+use ctru::services::fs::Fs;
 use std::{
     ffi::CString,
     fmt::{self, Display},
@@ -95,10 +96,14 @@ pub fn get_available_games() -> Vec<GameVer> {
             let id: *mut u64 = &mut title.id_long();
             if AM_GetTitleInfo(MEDIATYPE_SD, 1, id, null) == 0 {
                 match title {
-                    GameRegion::JP => available_games.push(GameVer {
-                        region: GameRegion::JP,
-                        is_digital: true,
-                    }),
+                    GameRegion::JP => {
+                        if cfg!(feature = "jp") {
+                            available_games.push(GameVer {
+                                region: GameRegion::JP,
+                                is_digital: true,
+                            })
+                        }
+                    }
                     GameRegion::US => available_games.push(GameVer {
                         region: GameRegion::US,
                         is_digital: true,
@@ -119,13 +124,17 @@ pub fn get_available_games() -> Vec<GameVer> {
             let id: *mut u64 = &mut title.id_long();
             if AM_GetTitleInfo(MEDIATYPE_GAME_CARD, 1, id, null) == 0 {
                 match title {
-                    GameRegion::JP => available_games.push(GameVer {
-                        region: GameRegion::JP,
-                        is_digital: false,
-                    }),
+                    GameRegion::JP => {
+                        if cfg!(feature = "jp") {
+                            available_games.push(GameVer {
+                                region: GameRegion::JP,
+                                is_digital: false,
+                            })
+                        }
+                    }
                     GameRegion::US => available_games.push(GameVer {
                         region: GameRegion::US,
-                        is_digital: false,
+                        is_digital: false, //this will never happen
                     }),
                     GameRegion::EU => available_games.push(GameVer {
                         region: GameRegion::EU,
@@ -152,7 +161,11 @@ pub fn check_for_plgldr() {
     }
 }
 
-pub fn launch(ver: GameVer) {
+pub fn check_for_rhmpatch(fs: Fs) -> bool {
+    todo!();
+}
+
+pub fn launch(ver: GameVer, fs: Fs) {
     plgldr::init().unwrap();
     plgldr::set_params(
         true,

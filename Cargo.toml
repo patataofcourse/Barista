@@ -16,3 +16,7 @@ lto = true
 
 [profile.release]
 lto = true
+
+[features]
+default = []
+jp = []

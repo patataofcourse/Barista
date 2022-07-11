@@ -10,6 +10,8 @@ SMDHTOOL := $(DEVKITPRO)/tools/bin/smdhtool
 
 ROMFS := romfs
 
+FEATURES := 
+
 # Prepend devkitarm bin to PATH, in case there is another arm-none-eabi-gcc installed
 export PATH := $(DEVKITARM)/bin:$(PATH)
 
@@ -26,7 +28,7 @@ all: debug
 dist: release
 
 target/3ds/release/$(CRATE_NAME).elf:
-	RUST_TARGET_PATH=$(shell pwd) xargo build --release
+	RUST_TARGET_PATH=$(shell pwd) xargo build --release --features=$(FEATURES)
 
 target/3ds/release/$(CRATE_NAME).smdh:
 	$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/release/$(CRATE_NAME).smdh
@@ -46,7 +48,7 @@ release: c $(CRATE_NAME)
 	cp $(PROG_ICON) dist/$(CRATE_NAME)/$(CRATE_NAME).png
 
 debug: c
-	RUST_TARGET_PATH=$(shell pwd) xargo build 
+	RUST_TARGET_PATH=$(shell pwd) xargo build --features=$(FEATURES)
 	$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/debug/$(CRATE_NAME).smdh
 	$(3DSXTOOL) target/3ds/debug/$(CRATE_NAME).elf target/3ds/debug/$(CRATE_NAME).3dsx --smdh=target/3ds/debug/$(CRATE_NAME).smdh --romfs=$(ROMFS)
 	mkdir -p dist/$(CRATE_NAME)_debug
@@ -67,7 +69,7 @@ send: $(CRATE_NAME)
 	3dslink target/3ds/release/$(CRATE_NAME).3dsx
 
 check:
-	RUST_TARGET_PATH=$(shell pwd) xargo check
+	RUST_TARGET_PATH=$(shell pwd) xargo check --features=$(FEATURES)
 
 clean:
 	rm -rf target

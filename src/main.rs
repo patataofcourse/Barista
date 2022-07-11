@@ -2,12 +2,14 @@ extern crate barista_ui as ui_lib;
 
 use ctru::{
     console::Console,
-    gfx::{Gfx, Screen, Side},
-    services::apt::Apt,
-    services::hid::{Hid, KeyPad},
+    gfx::{Gfx, Screen},
+    services::{
+        apt::Apt,
+        fs::Fs,
+        hid::{Hid, KeyPad},
+    },
 };
-use ctru_sys::C3D_RenderTarget;
-use ui_lib::{BaristaUI, Scene, SpriteSheet};
+use ui_lib::BaristaUI;
 
 mod launcher;
 mod saltwater_cfg;
@@ -20,6 +22,7 @@ use launcher::GameVer;
 
 fn main() {
     let apt = Apt::init().unwrap();
+    let fs = Fs::init().unwrap();
     let hid = Hid::init().unwrap();
     let gfx = Gfx::default();
     let console = Console::init(Screen::Bottom);
@@ -107,6 +110,6 @@ fn main() {
     drop(console);
 
     if let Some(c) = game_to_load {
-        launcher::launch(c)
+        launcher::launch(c, fs)
     }
 }

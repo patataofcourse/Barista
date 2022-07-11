@@ -1,11 +1,11 @@
+use bytestream::*;
 use std::{
     collections::HashMap,
-    fs::File,
     ffi::CString,
-    io::{self, Write, Read},
+    fs::File,
+    io::{self, Read, Write},
     path::PathBuf,
 };
-use bytestream::*;
 
 pub struct Config {
     pub tickflows: HashMap<u16, Vec<u8>>,
@@ -15,7 +15,7 @@ const MAGIC: &[u8; 4] = b"SCF\x02";
 
 impl Config {
     pub fn from_file(file: impl Into<PathBuf>) -> io::Result<Self> {
-        let mut file = File::open(file.into())?;
+        let mut file = File::open(file.into())?; //todo: use ctru_rs instead ffs
         let mut magic_buffer = [0u8; 4];
         file.read(&mut magic_buffer)?;
         if &magic_buffer != MAGIC {
@@ -25,7 +25,7 @@ impl Config {
     }
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> io::Result<()> {
-        let mut file = File::create(file.into())?;
+        let mut file = File::create(file.into())?; //todo: use ctru_rs instead ffs
         file.write(MAGIC)?;
         for (index, string) in &self.tickflows {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;
