@@ -74,7 +74,7 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
                 (174, 17, barista_sheet.get_sprite(1).unwrap()),
             ),
         ]),
-        cur_image: "nicole",
+        cur_image: "barista",
     });
 
     // Foreground (counter)
