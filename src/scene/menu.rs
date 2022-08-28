@@ -101,7 +101,7 @@ impl MenuState {
             }
         } else if hid.keys_down().contains(KeyPad::KEY_A) {
             if let SubMenu::Run = self.sub_menu {
-                if self.cursor == self.actions().len() as u32 - 1 {
+                if self.cursor == self.cursor_option_len(versions) - 1 {
                     self.action = MenuAction::ChangeMenu(SubMenu::Main)
                 } else {
                     self.action = MenuAction::Run
@@ -113,7 +113,10 @@ impl MenuState {
 
         match &self.action {
             MenuAction::Exit | MenuAction::Run => return,
-            MenuAction::ChangeMenu(c) => {self.sub_menu = *c; self.cursor = 0},
+            MenuAction::ChangeMenu(c) => {
+                self.sub_menu = *c;
+                self.cursor = 0
+            }
             MenuAction::None => {}
         }
         self.render(console, versions);

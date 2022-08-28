@@ -9,6 +9,10 @@ use ctru::{
         hid::{Hid, KeyPad},
     },
 };
+use std::{
+    panic::{self, PanicInfo},
+    str::EncodeUtf16,
+};
 use ui_lib::BaristaUI;
 
 mod error;
@@ -33,6 +37,8 @@ fn main() {
     unsafe {
         ctru_sys::romfsMountSelf("romfs\0".as_ptr());
     }
+
+    panic::set_hook(Box::new(panic_hook));
 
     // Initialize GFX stuff
     let mut ui = BaristaUI::init();
@@ -62,8 +68,6 @@ fn main() {
         println!("\x1b[6;5Hx");
     */
 
-    let mut chosen_version = 0;
-
     let mut menu = MenuState::default();
 
     while apt.main_loop() {
@@ -88,11 +92,42 @@ fn main() {
     unsafe {
         ctru_sys::romfsUnmount("romfs\0".as_ptr());
     }
+
+    panic!("fuck shit fuck");
+
     drop(gfx);
     drop(hid);
     drop(console);
 
     if let Some(c) = game_to_load {
         launcher::launch(c, fs)
+    }
+}
+
+fn panic_hook(info: &PanicInfo) {
+    let location_info = if let Some(c) = info.location() {
+        format!(" at {}:{}:{}", c.file(), c.line(), c.column())
+    } else {String::new()};
+
+    let msg = if let Some(c) = info.payload().downcast_ref::<&str>() {
+        format!("panic: {:?}{}\0", c, location_info)
+    } else if let Some(c) = info.payload().downcast_ref::<String>() {
+        format!("panic: {:?}{}\0", c, location_info)
+    } else {
+        format!("panic{}\0", location_info)
+    };
+    unsafe {
+        use ctru_sys::{
+            errorConf, errorDisp, errorInit, errorText, CFG_LANGUAGE_EN, ERROR_TEXT_WORD_WRAP,
+        };
+        let mut error_conf: errorConf = errorConf::default();
+        errorInit(&mut error_conf, ERROR_TEXT_WORD_WRAP, CFG_LANGUAGE_EN);
+        errorText(
+            &mut error_conf,
+            msg.as_ptr() as *const ::libc::c_char,
+        );
+
+        // Display the error
+        errorDisp(&mut error_conf);
     }
 }

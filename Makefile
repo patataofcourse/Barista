@@ -42,39 +42,40 @@ c:
 	@cd c && make --no-print-directory
 
 release: c $(CRATE_NAME)
-	mkdir -p dist/$(CRATE_NAME)
-	cp target/3ds/release/$(CRATE_NAME).elf dist/$(CRATE_NAME)
-	cp target/3ds/release/$(CRATE_NAME).3dsx dist/$(CRATE_NAME)
-	cp $(PROG_ICON) dist/$(CRATE_NAME)/$(CRATE_NAME).png
+	@mkdir -p dist/$(CRATE_NAME)
+	@cp target/3ds/release/$(CRATE_NAME).elf dist/$(CRATE_NAME)
+	@cp target/3ds/release/$(CRATE_NAME).3dsx dist/$(CRATE_NAME)
+	@cp $(PROG_ICON) dist/$(CRATE_NAME)/$(CRATE_NAME).png
 
 debug: c
-	RUST_TARGET_PATH=$(shell pwd) xargo build --features=$(FEATURES)
-	$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/debug/$(CRATE_NAME).smdh
-	$(3DSXTOOL) target/3ds/debug/$(CRATE_NAME).elf target/3ds/debug/$(CRATE_NAME).3dsx --smdh=target/3ds/debug/$(CRATE_NAME).smdh --romfs=$(ROMFS)
-	mkdir -p dist/$(CRATE_NAME)_debug
-	cp target/3ds/debug/$(CRATE_NAME).elf dist/$(CRATE_NAME)_debug
-	cp target/3ds/debug/$(CRATE_NAME).3dsx dist/$(CRATE_NAME)_debug
-	cp $(PROG_ICON) dist/$(CRATE_NAME)_debug/$(CRATE_NAME).png
+	@RUST_TARGET_PATH=$(shell pwd) xargo build --features=$(FEATURES)
+	@$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/debug/$(CRATE_NAME).smdh
+	@$(3DSXTOOL) target/3ds/debug/$(CRATE_NAME).elf target/3ds/debug/$(CRATE_NAME).3dsx --smdh=target/3ds/debug/$(CRATE_NAME).smdh --romfs=$(ROMFS)
+	@mkdir -p dist/$(CRATE_NAME)_debug
+	@cp target/3ds/debug/$(CRATE_NAME).elf dist/$(CRATE_NAME)_debug
+	@cp target/3ds/debug/$(CRATE_NAME).3dsx dist/$(CRATE_NAME)_debug
+	@cp $(PROG_ICON) dist/$(CRATE_NAME)_debug/$(CRATE_NAME).png
 
 doc:
-	RUST_TARGET_PATH=$(shell pwd) xargo doc
+	@RUST_TARGET_PATH=$(shell pwd) xargo doc
 
 fmt:
-	RUST_TARGET_PATH=$(shell pwd) xargo fmt
+	@RUST_TARGET_PATH=$(shell pwd) xargo fmt
 
 test: $(CRATE_NAME)
-	flatpak run org.citra_emu.citra target/3ds/release/$(CRATE_NAME).elf
+	@flatpak run org.citra_emu.citra target/3ds/release/$(CRATE_NAME).elf
 
 send: $(CRATE_NAME)
-	3dslink target/3ds/release/$(CRATE_NAME).3dsx
+	@3dslink target/3ds/release/$(CRATE_NAME).3dsx
 
 check:
-	RUST_TARGET_PATH=$(shell pwd) xargo check --features=$(FEATURES)
+	@RUST_TARGET_PATH=$(shell pwd) xargo check --features=$(FEATURES)
 
 clean:
-	rm -rf target
-	rm -rf dist
+	@echo "clean ..."
+	@rm -rf target
+	@rm -rf dist
 	@cd c && make clean --no-print-directory
 
 cleanenv: clean
-	rm -rf ~/.xargo
+	@rm -rf ~/.xargo
