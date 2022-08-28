@@ -63,7 +63,7 @@ fmt:
 	RUST_TARGET_PATH=$(shell pwd) xargo fmt
 
 test: $(CRATE_NAME)
-	citra target/3ds/release/$(CRATE_NAME).elf
+	flatpak run org.citra_emu.citra target/3ds/release/$(CRATE_NAME).elf
 
 send: $(CRATE_NAME)
 	3dslink target/3ds/release/$(CRATE_NAME).3dsx

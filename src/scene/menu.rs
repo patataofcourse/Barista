@@ -90,14 +90,14 @@ impl MenuState {
         if hid.keys_down().contains(KeyPad::KEY_DUP) && self.cursor > 0 {
             self.cursor -= 1;
         } else if hid.keys_down().contains(KeyPad::KEY_DDOWN)
-            && self.cursor < self.cursor_option_len(versions)
+            && self.cursor < self.cursor_option_len(versions) - 1
         {
             self.cursor += 1;
         } else if hid.keys_down().contains(KeyPad::KEY_B) {
             if let SubMenu::Main = self.sub_menu {
                 self.action = MenuAction::Exit;
             } else {
-                self.action = self.actions()[self.actions().len()].clone();
+                self.action = self.actions()[self.actions().len() - 1].clone();
             }
         } else if hid.keys_down().contains(KeyPad::KEY_A) {
             if let SubMenu::Run = self.sub_menu {
@@ -113,13 +113,14 @@ impl MenuState {
 
         match &self.action {
             MenuAction::Exit | MenuAction::Run => return,
-            MenuAction::ChangeMenu(c) => self.sub_menu = *c,
+            MenuAction::ChangeMenu(c) => {self.sub_menu = *c; self.cursor = 0},
             MenuAction::None => {}
         }
         self.render(console, versions);
     }
 
     pub fn render(&mut self, console: &Console, versions: &Vec<GameVer>) {
-        todo!();
+        console.clear();
+        println!("{:?}, {}", self.sub_menu, self.cursor)
     }
 }

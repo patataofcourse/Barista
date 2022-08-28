@@ -17,6 +17,7 @@ pub use self::error::{Error, Result};
 mod launcher;
 mod saltwater_cfg;
 mod scene;
+pub use self::scene::menu::{MenuAction, MenuState};
 
 #[allow(warnings)]
 pub(crate) mod plgldr;
@@ -45,61 +46,40 @@ fn main() {
     let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
 
-    println!("Welcome to Barista!");
-    if versions.len() > 0 {
-        println!(" - Press A to boot Saltwater");
-        println!(" - Press D-Pad up/down to choose ver.");
-    } else {
-        println!("No compatible versions of the game found");
-    }
-    println!(" - Press Start to exit");
-    println!();
-    for version in &versions {
-        println!(" - [ ] {}", version);
-    }
-    println!("\x1b[6;5Hx");
+    /*
+        println!("Welcome to Barista!");
+        if versions.len() > 0 {
+            println!(" - Press A to boot Saltwater");
+            println!(" - Press D-Pad up/down to choose ver.");
+        } else {
+            println!("No compatible versions of the game found");
+        }
+        println!(" - Press Start to exit");
+        println!();
+        for version in &versions {
+            println!(" - [ ] {}", version);
+        }
+        println!("\x1b[6;5Hx");
+    */
 
     let mut chosen_version = 0;
+
+    let mut menu = MenuState::default();
 
     while apt.main_loop() {
         gfx.wait_for_vblank();
 
         hid.scan_input();
-        if hid.keys_down().contains(KeyPad::KEY_START) {
-            break;
-        }
 
-        if versions.len() != 0 {
-            if hid.keys_down().contains(KeyPad::KEY_DUP) {
-                if chosen_version > 0 {
-                    chosen_version -= 1;
-                    for i in 0..versions.len() {
-                        println!(
-                            "\x1b[{};5H{}",
-                            6 + i,
-                            if chosen_version == i { "x" } else { " " }
-                        )
-                    }
-                }
-            }
+        menu.run(&hid, &console, &versions);
 
-            if hid.keys_down().contains(KeyPad::KEY_DDOWN) {
-                if chosen_version < versions.len() - 1 {
-                    chosen_version += 1;
-                    for i in 0..versions.len() {
-                        println!(
-                            "\x1b[{};5H{}",
-                            6 + i,
-                            if chosen_version == i { "x" } else { " " }
-                        )
-                    }
-                }
-            }
-
-            if hid.keys_down().contains(KeyPad::KEY_A) {
-                game_to_load = Some(versions[chosen_version].clone());
+        match &menu.action {
+            MenuAction::Exit => break,
+            MenuAction::Run => {
+                game_to_load = Some(versions[menu.cursor as usize].clone());
                 break;
             }
+            MenuAction::ChangeMenu(_) | MenuAction::None => {}
         }
 
         ui.render();
