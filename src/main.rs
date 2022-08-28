@@ -70,6 +70,8 @@ fn main() {
 
     let mut menu = MenuState::default();
 
+    menu.render(&console, versions);
+
     while apt.main_loop() {
         gfx.wait_for_vblank();
 

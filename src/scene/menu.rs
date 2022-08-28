@@ -34,7 +34,7 @@ impl Default for MenuState {
         Self {
             sub_menu: SubMenu::Main,
             cursor: 0,
-            action: MenuAction::ChangeMenu(SubMenu::Main),
+            action: MenuAction::None,
         }
     }
 }
