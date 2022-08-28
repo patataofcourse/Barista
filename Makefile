@@ -12,6 +12,8 @@ ROMFS := romfs
 
 FEATURES := 
 
+NM := $(DEVKITARM)/bin/arm-none-eabi-nm
+
 # Prepend devkitarm bin to PATH, in case there is another arm-none-eabi-gcc installed
 export PATH := $(DEVKITARM)/bin:$(PATH)
 
@@ -28,13 +30,14 @@ all: debug
 dist: release
 
 target/3ds/release/$(CRATE_NAME).elf:
-	RUST_TARGET_PATH=$(shell pwd) xargo build --release --features=$(FEATURES)
+	@RUST_TARGET_PATH=$(shell pwd) xargo build --release --features=$(FEATURES)
+	@$(NM) -Cn $@ > target/3ds/release/$(CRATE_NAME).map
 
 target/3ds/release/$(CRATE_NAME).smdh:
-	$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/release/$(CRATE_NAME).smdh
+	@$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/release/$(CRATE_NAME).smdh
 
 target/3ds/release/$(CRATE_NAME).3dsx: target/3ds/release/$(CRATE_NAME).elf target/3ds/release/$(CRATE_NAME).smdh
-	$(3DSXTOOL) target/3ds/release/$(CRATE_NAME).elf target/3ds/release/$(CRATE_NAME).3dsx --smdh=target/3ds/release/$(CRATE_NAME).smdh --romfs=$(ROMFS)
+	@$(3DSXTOOL) target/3ds/release/$(CRATE_NAME).elf target/3ds/release/$(CRATE_NAME).3dsx --smdh=target/3ds/release/$(CRATE_NAME).smdh --romfs=$(ROMFS)
 
 $(CRATE_NAME): target/3ds/release/$(CRATE_NAME).3dsx
 
@@ -49,6 +52,7 @@ release: c $(CRATE_NAME)
 
 debug: c
 	@RUST_TARGET_PATH=$(shell pwd) xargo build --features=$(FEATURES)
+	@$(NM) -Cn target/3ds/debug/$(CRATE_NAME).elf > target/3ds/debug/$(CRATE_NAME).map
 	@$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" target/3ds/debug/$(CRATE_NAME).smdh
 	@$(3DSXTOOL) target/3ds/debug/$(CRATE_NAME).elf target/3ds/debug/$(CRATE_NAME).3dsx --smdh=target/3ds/debug/$(CRATE_NAME).smdh --romfs=$(ROMFS)
 	@mkdir -p dist/$(CRATE_NAME)_debug

@@ -26,6 +26,7 @@ pub enum MenuAction {
     ChangeMenu(SubMenu),
     Run,
     Exit,
+    MoveCursor,
 }
 
 impl Default for MenuState {
@@ -33,7 +34,7 @@ impl Default for MenuState {
         Self {
             sub_menu: SubMenu::Main,
             cursor: 0,
-            action: MenuAction::None,
+            action: MenuAction::ChangeMenu(SubMenu::Main),
         }
     }
 }
@@ -89,10 +90,12 @@ impl MenuState {
 
         if hid.keys_down().contains(KeyPad::KEY_DUP) && self.cursor > 0 {
             self.cursor -= 1;
+            self.action = MenuAction::MoveCursor
         } else if hid.keys_down().contains(KeyPad::KEY_DDOWN)
             && self.cursor < self.cursor_option_len(versions) - 1
         {
             self.cursor += 1;
+            self.action = MenuAction::MoveCursor
         } else if hid.keys_down().contains(KeyPad::KEY_B) {
             if let SubMenu::Main = self.sub_menu {
                 self.action = MenuAction::Exit;
@@ -112,18 +115,50 @@ impl MenuState {
         }
 
         match &self.action {
-            MenuAction::Exit | MenuAction::Run => return,
+            MenuAction::Exit | MenuAction::Run | MenuAction::None => return,
             MenuAction::ChangeMenu(c) => {
                 self.sub_menu = *c;
                 self.cursor = 0
             }
-            MenuAction::None => {}
+            MenuAction::MoveCursor => {}
         }
         self.render(console, versions);
     }
 
     pub fn render(&mut self, console: &Console, versions: &Vec<GameVer>) {
         console.clear();
-        println!("{:?}, {}", self.sub_menu, self.cursor)
+        match &self.sub_menu {
+            SubMenu::Main => {
+                println!("Welcome to Barista pre1!");
+                println!("Controls: DPad up/down - move cursor;");
+                println!("A - pick; B - go back; Start - exit");
+                println!(" {} Run Saltwater", if self.cursor == 0 {"x"} else {" "});
+                println!(" {} Set up mods", if self.cursor == 1 {"x"} else {" "});
+                println!(" {} Music", if self.cursor == 2 {"x"} else {" "});
+                println!(" {} Settings", if self.cursor == 3 {"x"} else {" "});
+            }
+            SubMenu::Run => {
+                println!("Barista - Choose a version to boot");
+                for vnum in 0..versions.len() {
+                    println!(" {} {}", if self.cursor as usize == vnum {"x"} else {" "}, versions[vnum]);
+                }
+                println!(" {} Back", if self.cursor as usize == versions.len() {"x"} else {" "});
+            }
+            SubMenu::SetUp => {
+                println!("Barista - Set up mods");
+                println!("TO BE IMPLEMENTED");
+                println!(" {} Back", if self.cursor == 0 {"x"} else {" "})
+            }
+            SubMenu::Music => {
+                println!("Barista - Music picker");
+                println!("TO BE IMPLEMENTED");
+                println!(" {} Back", if self.cursor == 0 {"x"} else {" "})
+            }
+            SubMenu::Options => {
+                println!("Barista - Settings");
+                println!("TO BE IMPLEMENTED");
+                println!(" {} Back", if self.cursor == 0 {"x"} else {" "})
+            }
+        }
     }
 }

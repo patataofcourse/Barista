@@ -83,7 +83,7 @@ fn main() {
                 game_to_load = Some(versions[menu.cursor as usize].clone());
                 break;
             }
-            MenuAction::ChangeMenu(_) | MenuAction::None => {}
+            MenuAction::ChangeMenu(_) | MenuAction::None | MenuAction::MoveCursor => {}
         }
 
         ui.render();
@@ -92,8 +92,6 @@ fn main() {
     unsafe {
         ctru_sys::romfsUnmount("romfs\0".as_ptr());
     }
-
-    panic!("fuck shit fuck");
 
     drop(gfx);
     drop(hid);
