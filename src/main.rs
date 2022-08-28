@@ -6,12 +6,11 @@ use ctru::{
     services::{
         apt::Apt,
         fs::Fs,
-        hid::{Hid, KeyPad},
+        hid::Hid,
     },
 };
 use std::{
     panic::{self, PanicInfo},
-    str::EncodeUtf16,
 };
 use ui_lib::BaristaUI;
 
@@ -84,7 +83,7 @@ fn main() {
     drop(console);
 
     if let Some(c) = game_to_load {
-        launcher::launch(c, fs)
+        launcher::launch(c)
     }
 }
 

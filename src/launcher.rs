@@ -1,5 +1,5 @@
 use crate::plgldr;
-use ctru::services::fs::Fs;
+use ctru::services::fs::{File, Fs, self};
 use std::{
     ffi::CString,
     fmt::{self, Display},
@@ -78,6 +78,18 @@ impl GameRegion {
             Self::EU => TITLE_EU,
             Self::KR => TITLE_KR,
         }
+    }
+}
+
+pub struct LoaderConfig {
+    rhmpatch_disabler: bool,
+}
+
+impl Into<[u32; 32]> for LoaderConfig {
+    fn into(self) -> [u32; 32] {
+        let mut out = [0; 32];
+        out[0] = self.rhmpatch_disabler as u32;
+        out
     }
 }
 
@@ -161,11 +173,21 @@ pub fn check_for_plgldr() {
     }
 }
 
-pub fn check_for_rhmpatch(fs: Fs) -> bool {
-    todo!();
+pub fn check_for_rhmpatch() -> bool {
+    let fs = Fs::init().unwrap();
+    match File::open(&fs.sdmc().unwrap(), "/luma/titles/000400000018A400/code.ips") {
+        Ok(_) => true,
+        Err(_) => false,
+    }
 }
 
-pub fn launch(ver: GameVer, fs: Fs) {
+pub fn launch(ver: GameVer) {
+    //disable rhmpatch if it exists
+    if check_for_rhmpatch() {
+        let fs = Fs::init().unwrap();
+        fs::rename(&fs.sdmc().unwrap(), "/luma/titles/000400000018A400/code.ips", "/luma/titles/000400000018A400/_code.ips").unwrap()
+    }
+
     plgldr::init().unwrap();
     plgldr::set_params(
         true,
