@@ -141,6 +141,7 @@ impl MenuState {
                 println!(" [{}] Set up mods", if self.cursor == 1 {"*"} else {" "});
                 println!(" [{}] Music", if self.cursor == 2 {"*"} else {" "});
                 println!(" [{}] Settings", if self.cursor == 3 {"*"} else {" "});
+                println!(" [{}] Exit Barista", if self.cursor == 3 {"*"} else {" "});
             }
             SubMenu::Run => {
                 println!("Barista - Run Saltwater");
