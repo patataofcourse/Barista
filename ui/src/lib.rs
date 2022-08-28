@@ -18,7 +18,7 @@ use ctru_sys::{
     C3D_FrameBegin,
     GFX_LEFT,
 };
-
+use std::collections::HashMap;
 
 pub struct BaristaUI<'a> {
     pub top_scene: Option<&'a Scene<'a>>,
@@ -81,7 +81,7 @@ pub struct Scene<'a> {
     target: *mut C3D_RenderTarget,
     screen: Screen,
     pub background: Option<Image>,
-    pub objects: Vec<Box<dyn Object + 'a>>,
+    pub objects: HashMap<&'static str, Box<dyn Object + 'a>>,
 }
 
 impl Scene<'_> {
@@ -90,7 +90,7 @@ impl Scene<'_> {
                 screen: screen.clone(),
                 target: ui.get_target(screen),
                 background,
-                objects: vec![],
+                objects: HashMap::new(),
             }
     }
 
@@ -116,7 +116,7 @@ impl Scene<'_> {
             None => false,
         };
         let mut out2 = vec![];
-        for object in &self.objects {
+        for( _, object) in &self.objects {
             out2.push(object.as_ref().draw());
         }
         (out1, out2)
@@ -124,10 +124,10 @@ impl Scene<'_> {
 }
 
 impl<'a> Scene<'a> {
-    pub fn add_object<T: 'a>(&mut self, object: T)
+    pub fn add_object<T: 'a>(&mut self, name:&'static str, object: T)
         where T: Object
     {
-        self.objects.push(Box::from(object))
+        self.objects.insert(name, Box::from(object));
     }
 }
 

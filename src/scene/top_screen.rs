@@ -62,7 +62,7 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     let mut scene = Scene::new(ui, Screen::Top, Some(bg_sheet.get_sprite(0).unwrap()));
 
     // Barista / Nicole
-    scene.add_object(BaristaSprites {
+    scene.add_object("barista", BaristaSprites {
         depth: 0.0,
         images: HashMap::from_iter(vec![
             (
@@ -78,7 +78,7 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     });
 
     // Foreground (counter)
-    scene.add_object(StaticObject {
+    scene.add_object("foreground", StaticObject {
         x: 0,
         y: 188,
         scale_x: 1.0,
@@ -89,7 +89,7 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     });
 
     // Sign
-    scene.add_object(Sign {
+    scene.add_object("sign", Sign {
         x: 30,
         y: 150,
         sign_image: sign_sheet.get_sprite(0).unwrap(),
