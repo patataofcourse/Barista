@@ -129,35 +129,49 @@ impl MenuState {
         console.clear();
         match &self.sub_menu {
             SubMenu::Main => {
-                println!("Welcome to Barista pre1!");
-                println!("Controls: DPad up/down - move cursor;");
-                println!("A - pick; B - go back; Start - exit");
-                println!(" {} Run Saltwater", if self.cursor == 0 {"x"} else {" "});
-                println!(" {} Set up mods", if self.cursor == 1 {"x"} else {" "});
-                println!(" {} Music", if self.cursor == 2 {"x"} else {" "});
-                println!(" {} Settings", if self.cursor == 3 {"x"} else {" "});
+                println!("Barista - Main menu");
+                println!();
+                println!("Controls:");
+                println!("- DPad up/down: move cursor");
+                println!("- A: choose selected option");
+                println!("- B: go to prev menu");
+                println!("- Start - exit Barista");
+                println!();
+                println!(" [{}] Run Saltwater", if self.cursor == 0 {"*"} else {" "});
+                println!(" [{}] Set up mods", if self.cursor == 1 {"*"} else {" "});
+                println!(" [{}] Music", if self.cursor == 2 {"*"} else {" "});
+                println!(" [{}] Settings", if self.cursor == 3 {"*"} else {" "});
             }
             SubMenu::Run => {
-                println!("Barista - Choose a version to boot");
+                println!("Barista - Run Saltwater");
+                println!();
+                println!("Choose a version to run with Saltwater");
+                println!();
                 for vnum in 0..versions.len() {
-                    println!(" {} {}", if self.cursor as usize == vnum {"x"} else {" "}, versions[vnum]);
+                    println!(" [{}] {}", if self.cursor as usize == vnum {"*"} else {" "}, versions[vnum]);
                 }
-                println!(" {} Back", if self.cursor as usize == versions.len() {"x"} else {" "});
+                println!(" [{}] Back", if self.cursor as usize == versions.len() {"*"} else {" "});
             }
             SubMenu::SetUp => {
                 println!("Barista - Set up mods");
+                println!();
                 println!("TO BE IMPLEMENTED");
-                println!(" {} Back", if self.cursor == 0 {"x"} else {" "})
+                println!();
+                println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
             }
             SubMenu::Music => {
-                println!("Barista - Music picker");
+                println!("Barista - Music");
+                println!();
                 println!("TO BE IMPLEMENTED");
-                println!(" {} Back", if self.cursor == 0 {"x"} else {" "})
+                println!();
+                println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
             }
             SubMenu::Options => {
                 println!("Barista - Settings");
+                println!();
                 println!("TO BE IMPLEMENTED");
-                println!(" {} Back", if self.cursor == 0 {"x"} else {" "})
+                println!();
+                println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
             }
         }
     }
