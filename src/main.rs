@@ -52,22 +52,6 @@ fn main() {
     let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
 
-    /*
-        println!("Welcome to Barista!");
-        if versions.len() > 0 {
-            println!(" - Press A to boot Saltwater");
-            println!(" - Press D-Pad up/down to choose ver.");
-        } else {
-            println!("No compatible versions of the game found");
-        }
-        println!(" - Press Start to exit");
-        println!();
-        for version in &versions {
-            println!(" - [ ] {}", version);
-        }
-        println!("\x1b[6;5Hx");
-    */
-
     let mut menu = MenuState::default();
 
     menu.render(&console, &versions);

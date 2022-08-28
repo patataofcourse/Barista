@@ -49,7 +49,7 @@ dist: $(TARGET)/$(CRATE_NAME).3dsx $(TARGET)/$(CRATE_NAME).elf $(TARGET)/$(CRATE
 	@cp $(TARGET)/$(CRATE_NAME).3dsx $(DIST)
 	@cp $(PROG_ICON) $(DIST)/$(notdir $(PROG_ICON))
 
-%.elf: plgldr$(basename $@)
+%.elf: plgldr
 	@xargo build $(CARGOFLAGS)
 	@$(NM) -Cn $@ > $(basename $@).lst
 
