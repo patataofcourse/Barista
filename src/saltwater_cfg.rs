@@ -1,8 +1,9 @@
+use crate::Result;
 use bytestream::*;
+use ctru::services::fs::{File, Fs};
 use std::{
     collections::HashMap,
     ffi::CString,
-    fs::File,
     io::{self, Read, Write},
     path::PathBuf,
 };
@@ -14,8 +15,9 @@ pub struct Config {
 const MAGIC: &[u8; 4] = b"SCF\x02";
 
 impl Config {
-    pub fn from_file(file: impl Into<PathBuf>) -> io::Result<Self> {
-        let mut file = File::open(file.into())?; //todo: use ctru_rs instead ffs
+    pub fn from_file(file: impl Into<PathBuf>) -> Result<Self> {
+        let fs = Fs::init()?;
+        let mut file = File::open(&fs.sdmc()?, file.into())?;
         let mut magic_buffer = [0u8; 4];
         file.read(&mut magic_buffer)?;
         if &magic_buffer != MAGIC {
@@ -24,8 +26,9 @@ impl Config {
         todo!();
     }
 
-    pub fn to_file(&self, file: impl Into<PathBuf>) -> io::Result<()> {
-        let mut file = File::create(file.into())?; //todo: use ctru_rs instead ffs
+    pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
+        let fs = Fs::init()?;
+        let mut file = File::create(&fs.sdmc()?, file.into())?;
         file.write(MAGIC)?;
         for (index, string) in &self.tickflows {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;

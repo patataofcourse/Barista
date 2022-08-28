@@ -11,6 +11,9 @@ use ctru::{
 };
 use ui_lib::BaristaUI;
 
+mod error;
+pub use self::error::{Error, Result};
+
 mod launcher;
 mod saltwater_cfg;
 mod scene;
