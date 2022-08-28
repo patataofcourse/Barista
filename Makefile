@@ -8,6 +8,7 @@ FEATURES 	?=
 NM 			:= $(DEVKITARM)/bin/arm-none-eabi-nm
 3DSXTOOL 	:= $(DEVKITPRO)/tools/bin/3dsxtool
 SMDHTOOL 	:= $(DEVKITPRO)/tools/bin/smdhtool
+BANNERTOOL 	:= $(DEVKITPRO)/tools/bin/bannertool
 
 ifeq ($(DEBUG), 1)
 PROFILE 	:= debug
@@ -23,6 +24,7 @@ endif
 TARGET		:= target/3ds/$(PROFILE)
 DIST		:= dist/barista_$(PROFILE)
 ROMFS 		:= romfs
+RSF			:= app.rsf
 
 CRATE_NAME 	:= barista
 PROG_NAME 	:= Barista
@@ -42,12 +44,24 @@ all: dist
 
 ### Main executable ###
 
+ifneq ($(DEBUG), 1)
+dist: $(TARGET)/$(CRATE_NAME).cia
+endif
+
 dist: $(TARGET)/$(CRATE_NAME).3dsx $(TARGET)/$(CRATE_NAME).elf $(TARGET)/$(CRATE_NAME).smdh
 	@mkdir -p $(DIST)
 	@cp $(TARGET)/$(CRATE_NAME).elf $(DIST)
 	@cp $(TARGET)/$(CRATE_NAME).lst $(DIST)
 	@cp $(TARGET)/$(CRATE_NAME).3dsx $(DIST)
+ifneq ($(DEBUG), 1)
+	@cp $(TARGET)/$(CRATE_NAME).cia $(DIST)
+endif
 	@cp $(PROG_ICON) $(DIST)/$(notdir $(PROG_ICON))
+
+%.cia: %.elf
+	@bannertool makesmdh -s Barista -l Barista -p "patataofcourse, RHModding" -i icon.png -o $(dir $@)icon.icn -r regionfree -f nosavebackups,visible
+	@bannertool makebanner -i banner.png -a banner.wav -o $(dir $@)banner.bnr
+	@makerom -f cia -o $@ -exefslogo -elf $(basename $@).elf -rsf app.rsf -ver 0 -icon $(dir $@)icon.icn -banner $(dir $@)banner.bnr
 
 %.elf: plgldr
 	@xargo build $(CARGOFLAGS)
