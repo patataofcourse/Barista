@@ -137,11 +137,20 @@ impl MenuState {
                 println!("- B: go to prev menu");
                 println!("- Start - exit Barista");
                 println!();
-                println!(" [{}] Run Saltwater", if self.cursor == 0 {"*"} else {" "});
-                println!(" [{}] Set up mods", if self.cursor == 1 {"*"} else {" "});
-                println!(" [{}] Music", if self.cursor == 2 {"*"} else {" "});
-                println!(" [{}] Settings", if self.cursor == 3 {"*"} else {" "});
-                println!(" [{}] Exit Barista", if self.cursor == 4 {"*"} else {" "});
+                println!(
+                    " [{}] Run Saltwater",
+                    if self.cursor == 0 { "*" } else { " " }
+                );
+                println!(
+                    " [{}] Set up mods",
+                    if self.cursor == 1 { "*" } else { " " }
+                );
+                println!(" [{}] Music", if self.cursor == 2 { "*" } else { " " });
+                println!(" [{}] Settings", if self.cursor == 3 { "*" } else { " " });
+                println!(
+                    " [{}] Exit Barista",
+                    if self.cursor == 4 { "*" } else { " " }
+                );
             }
             SubMenu::Run => {
                 println!("Barista - Run Saltwater");
@@ -149,30 +158,46 @@ impl MenuState {
                 println!("Choose a version to run with Saltwater");
                 println!();
                 for vnum in 0..versions.len() {
-                    println!(" [{}] {}", if self.cursor as usize == vnum {"*"} else {" "}, versions[vnum]);
+                    println!(
+                        " [{}] {}",
+                        if self.cursor as usize == vnum {
+                            "*"
+                        } else {
+                            " "
+                        },
+                        versions[vnum]
+                    );
                 }
-                println!(" [{}] Back", if self.cursor as usize == versions.len() {"*"} else {" "});
+                println!(
+                    " [{}] Back",
+                    if self.cursor as usize == versions.len() {
+                        "*"
+                    } else {
+                        " "
+                    }
+                );
             }
             SubMenu::SetUp => {
                 println!("Barista - Set up mods");
                 println!();
                 println!("TO BE IMPLEMENTED");
                 println!();
-                println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
+                //println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
+                println!("{:?}", crate::config().tickflows);
             }
             SubMenu::Music => {
                 println!("Barista - Music");
                 println!();
                 println!("TO BE IMPLEMENTED");
                 println!();
-                println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
+                println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
             }
             SubMenu::Options => {
                 println!("Barista - Settings");
                 println!();
                 println!("TO BE IMPLEMENTED");
                 println!();
-                println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
+                println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
             }
         }
     }

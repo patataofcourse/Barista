@@ -62,44 +62,53 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
     let mut scene = Scene::new(ui, Screen::Top, Some(bg_sheet.get_sprite(0).unwrap()));
 
     // Barista / Nicole
-    scene.add_object("barista", BaristaSprites {
-        depth: 0.0,
-        images: HashMap::from_iter(vec![
-            (
-                "barista".to_string(),
-                (255, 70, barista_sheet.get_sprite(0).unwrap()),
-            ),
-            (
-                "nicole".to_string(),
-                (174, 17, barista_sheet.get_sprite(1).unwrap()),
-            ),
-        ]),
-        cur_image: "barista",
-    });
+    scene.add_object(
+        "barista",
+        BaristaSprites {
+            depth: 0.0,
+            images: HashMap::from_iter(vec![
+                (
+                    "barista".to_string(),
+                    (255, 70, barista_sheet.get_sprite(0).unwrap()),
+                ),
+                (
+                    "nicole".to_string(),
+                    (174, 17, barista_sheet.get_sprite(1).unwrap()),
+                ),
+            ]),
+            cur_image: "barista",
+        },
+    );
 
     // Foreground (counter)
-    scene.add_object("foreground", StaticObject {
-        x: 0,
-        y: 188,
-        scale_x: 1.0,
-        scale_y: 1.0,
-        image: bg_sheet.get_sprite(1).unwrap(),
-        depth: 0.0,
-        rotation: 0.0,
-    });
+    scene.add_object(
+        "foreground",
+        StaticObject {
+            x: 0,
+            y: 188,
+            scale_x: 1.0,
+            scale_y: 1.0,
+            image: bg_sheet.get_sprite(1).unwrap(),
+            depth: 0.0,
+            rotation: 0.0,
+        },
+    );
 
     // Sign
-    scene.add_object("sign", Sign {
-        x: 30,
-        y: 150,
-        sign_image: sign_sheet.get_sprite(0).unwrap(),
-        sign_text: HashMap::from_iter(vec![(
-            "opening".to_string(),
-            sign_sheet.get_sprite(1).unwrap(),
-        )]),
-        depth: 0.0,
-        cur_text: "opening",
-    });
+    scene.add_object(
+        "sign",
+        Sign {
+            x: 30,
+            y: 150,
+            sign_image: sign_sheet.get_sprite(0).unwrap(),
+            sign_text: HashMap::from_iter(vec![(
+                "opening".to_string(),
+                sign_sheet.get_sprite(1).unwrap(),
+            )]),
+            depth: 0.0,
+            cur_text: "opening",
+        },
+    );
 
     scene
 }

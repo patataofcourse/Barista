@@ -1,5 +1,5 @@
 use crate::plgldr;
-use ctru::services::fs::{File, Fs, self};
+use ctru::services::fs::{self, File, Fs};
 use std::{
     ffi::CString,
     fmt::{self, Display},
@@ -175,7 +175,10 @@ pub fn check_for_plgldr() {
 
 pub fn check_for_rhmpatch() -> bool {
     let fs = Fs::init().unwrap();
-    match File::open(&fs.sdmc().unwrap(), "/luma/titles/000400000018A400/code.ips") {
+    match File::open(
+        &fs.sdmc().unwrap(),
+        "/luma/titles/000400000018A400/code.ips",
+    ) {
         Ok(_) => true,
         Err(_) => false,
     }
@@ -185,7 +188,12 @@ pub fn launch(ver: GameVer) {
     //disable rhmpatch if it exists
     if check_for_rhmpatch() {
         let fs = Fs::init().unwrap();
-        fs::rename(&fs.sdmc().unwrap(), "/luma/titles/000400000018A400/code.ips", "/luma/titles/000400000018A400/_code.ips").unwrap()
+        fs::rename(
+            &fs.sdmc().unwrap(),
+            "/luma/titles/000400000018A400/code.ips",
+            "/luma/titles/000400000018A400/_code.ips",
+        )
+        .unwrap()
     }
 
     plgldr::init().unwrap();

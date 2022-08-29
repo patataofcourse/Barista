@@ -3,15 +3,9 @@ extern crate barista_ui as ui_lib;
 use ctru::{
     console::Console,
     gfx::{Gfx, Screen},
-    services::{
-        apt::Apt,
-        fs::Fs,
-        hid::Hid,
-    },
+    services::{apt::Apt, fs::Fs, hid::Hid},
 };
-use std::{
-    panic::{self, PanicInfo},
-};
+use std::panic::{self, PanicInfo};
 use ui_lib::BaristaUI;
 
 mod error;
@@ -26,6 +20,8 @@ pub use self::scene::menu::{MenuAction, MenuState};
 pub(crate) mod plgldr;
 
 use launcher::GameVer;
+
+static mut CONFIG: Option<saltwater_cfg::Config> = None;
 
 fn main() {
     let apt = Apt::init().unwrap();
@@ -51,9 +47,13 @@ fn main() {
     let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
 
+    // Init menu
     let mut menu = MenuState::default();
 
     menu.render(&console, &versions);
+
+    // Init config
+    *config_wrapped() = Some(saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap());
 
     while apt.main_loop() {
         gfx.wait_for_vblank();
@@ -87,10 +87,20 @@ fn main() {
     }
 }
 
+fn config() -> &'static mut saltwater_cfg::Config {
+    unsafe { CONFIG.as_mut().expect("Config not initialized") }
+}
+
+fn config_wrapped() -> &'static mut Option<saltwater_cfg::Config> {
+    unsafe { &mut CONFIG}
+}
+
 fn panic_hook(info: &PanicInfo) {
     let location_info = if let Some(c) = info.location() {
         format!(" at {}:{}:{}", c.file(), c.line(), c.column())
-    } else {String::new()};
+    } else {
+        String::new()
+    };
 
     let msg = if let Some(c) = info.payload().downcast_ref::<&str>() {
         format!("panic: {:?}{}\0", c, location_info)
@@ -105,10 +115,7 @@ fn panic_hook(info: &PanicInfo) {
         };
         let mut error_conf: errorConf = errorConf::default();
         errorInit(&mut error_conf, ERROR_TEXT_WORD_WRAP, CFG_LANGUAGE_EN);
-        errorText(
-            &mut error_conf,
-            msg.as_ptr() as *const ::libc::c_char,
-        );
+        errorText(&mut error_conf, msg.as_ptr() as *const ::libc::c_char);
 
         // Display the error
         errorDisp(&mut error_conf);

@@ -5,10 +5,11 @@ use std::{
     collections::HashMap,
     io::{self, Read, Write},
     path::PathBuf,
+    convert::TryInto,
 };
 
 pub struct Config {
-    pub tickflows: HashMap<u16, Vec<u8>>,
+    pub tickflows: HashMap<u16, String>,
 }
 
 const MAGIC: &[u8; 4] = b"SCF\x02";
@@ -22,7 +23,20 @@ impl Config {
         if &magic_buffer != MAGIC {
             Err(io::Error::new(io::ErrorKind::Other, "invalid file"))?;
         }
-        todo!();
+        let mut tickflows = HashMap::new();
+        loop {
+            let index = u16::read_from(&mut file, ByteOrder::LittleEndian)?;
+            if index == 0xC000 {
+                break;
+            }
+            let file_len = u16::read_from(&mut file, ByteOrder::LittleEndian)?;
+            let mut fname = String::new();
+            for _ in 0..file_len {
+                fname.push(u8::read_from(&mut file, ByteOrder::LittleEndian)? as char);
+            }
+            tickflows.insert(index, fname);
+        }
+        Ok(Self {tickflows})
     }
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
@@ -32,8 +46,9 @@ impl Config {
         for (index, string) in &self.tickflows {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;
             (string.len() as u16).write_to(&mut file, ByteOrder::LittleEndian)?;
-            for chr in string {
-                chr.write_to(&mut file, ByteOrder::LittleEndian)?;
+            for chr in string.chars() {
+                let chru8 = chr as u8; // should already be ASCII
+                chru8.write_to(&mut file, ByteOrder::LittleEndian)?;
             }
         }
         0xC000u16.write_to(&mut file, ByteOrder::LittleEndian)?;
