@@ -1,8 +1,8 @@
 target/
 dist/
 
-c/build/
-c/lib/
+**/build/
+**/lib/
 
 .vscode
 

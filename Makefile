@@ -21,6 +21,8 @@ ifneq ($(FEATURES),)
 CARGOFLAGS	+= --features=$(FEATURES)
 endif
 
+CARGOFLAGS  += --color=always
+
 TARGET		:= target/3ds/$(PROFILE)
 DIST		:= dist/barista_$(PROFILE)
 ROMFS 		:= romfs
@@ -35,10 +37,14 @@ PROG_ICON 	:= icon.png
 # Prepend devkitarm bin to PATH, in case there is another arm-none-eabi-gcc installed
 export PATH := $(DEVKITARM)/bin:$(PATH)
 
+# Xargo
 export XARGO_RUST_SRC	= ../3ds-rust-env/rust-3ds-fork/library
 export RUST_TARGET_PATH	= $(shell pwd)
 
-.PHONY: all clean dist plgldr check doc fmt test
+# Rust fork needs this
+export CC_3ds = $(DEVKITARM)/bin/arm-none-eabi-gcc
+
+.PHONY: all clean dist plgldr check doc fmt test update
 
 all: dist
 
@@ -108,3 +114,6 @@ test: debug
 
 check:
 	@xargo check --features=$(FEATURES)
+
+update:
+	@xargo update
