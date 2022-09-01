@@ -57,7 +57,8 @@ fn main() {
     menu.render(&console, &versions);
 
     // Init config
-    *config_wrapped() = Some(saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap());
+    *config_wrapped() =
+        Some(saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap());
 
     while apt.main_loop() {
         gfx.wait_for_vblank();
@@ -96,7 +97,7 @@ fn config() -> &'static mut saltwater_cfg::Config {
 }
 
 fn config_wrapped() -> &'static mut Option<saltwater_cfg::Config> {
-    unsafe { &mut CONFIG}
+    unsafe { &mut CONFIG }
 }
 
 fn panic_hook(info: &PanicInfo) {

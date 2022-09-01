@@ -3,9 +3,9 @@ use bytestream::*;
 use ctru::services::fs::{File, Fs};
 use std::{
     collections::HashMap,
+    convert::TryInto,
     io::{self, Read, Write},
     path::PathBuf,
-    convert::TryInto,
 };
 
 pub struct Config {
@@ -36,7 +36,7 @@ impl Config {
             }
             tickflows.insert(index, fname);
         }
-        Ok(Self {tickflows})
+        Ok(Self { tickflows })
     }
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
