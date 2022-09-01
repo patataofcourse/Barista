@@ -9,16 +9,20 @@ use std::{
     io::{self, Read, Seek, SeekFrom},
     path::PathBuf,
     ptr::NonNull,
+    slice,
 };
 
 pub struct LinearAllocator;
 
 unsafe impl Allocator for LinearAllocator {
     fn allocate(&self, layout: Layout) -> std::result::Result<NonNull<[u8]>, AllocError> {
-        unsafe {
-			let out = linearAlloc(layout.size() as u32);
-		}
-		todo!();
+        let out = unsafe { linearAlloc(layout.size() as u32) };
+        match unsafe { (out as *mut u8).as_ref() } {
+            Some(_) => unsafe {
+                Ok(slice::from_raw_parts_mut(out as *mut u8, layout.size()).into())
+            },
+            None => Err(AllocError),
+        }
     }
     unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
         linearFree(ptr.as_ptr() as *mut libc::c_void);
@@ -59,11 +63,11 @@ pub struct BCSTMFile {
 
 impl Drop for BCSTMFile {
     fn drop(&mut self) {
-		unsafe {
-			for i in 0..self.channel_count {
-				ndspChnWaveBufClear(self.channel[i] as i32);
-			}
-		}
+        unsafe {
+            for i in 0..self.channel_count {
+                ndspChnWaveBufClear(self.channel[i] as i32);
+            }
+        }
     }
 }
 
