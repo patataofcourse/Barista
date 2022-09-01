@@ -10,6 +10,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     CtruError(CtruError),
     IoError(IoError),
+    OtherError(String),
 }
 
 impl Display for self::Error {

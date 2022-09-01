@@ -1,3 +1,5 @@
+#![feature(allocator_api)]
+
 extern crate barista_ui as ui_lib;
 
 use ctru::{
@@ -7,6 +9,8 @@ use ctru::{
 };
 use std::panic::{self, PanicInfo};
 use ui_lib::BaristaUI;
+
+mod bcstm;
 
 mod error;
 pub use self::error::{Error, Result};
