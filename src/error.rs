@@ -21,6 +21,7 @@ impl Display for self::Error {
             match self {
                 Self::IoError(c) => c.to_string(),
                 Self::CtruError(c) => c.to_string(),
+                Self::OtherError(c) => c.to_string()
             }
         )
     }

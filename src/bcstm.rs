@@ -1,7 +1,9 @@
 use crate::{Error, Result};
 use bytestream::{ByteOrder, StreamReader};
 use ctru::services::fs::{File, Fs};
-use ctru_sys::{linearAlloc, linearFree, ndspAdpcmData, ndspChnSetPaused, ndspWaveBuf};
+use ctru_sys::{
+    linearAlloc, linearFree, ndspAdpcmData, ndspChnSetPaused, ndspChnWaveBufClear, ndspWaveBuf,
+};
 use std::{
     alloc::{AllocError, Allocator, Layout},
     io::{self, Read, Seek, SeekFrom},
@@ -12,11 +14,14 @@ use std::{
 pub struct LinearAllocator;
 
 unsafe impl Allocator for LinearAllocator {
-    fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
-        let out = linearAlloc(Layout);
+    fn allocate(&self, layout: Layout) -> std::result::Result<NonNull<[u8]>, AllocError> {
+        unsafe {
+			let out = linearAlloc(layout.size() as u32);
+		}
+		todo!();
     }
     unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
-        linearFree(ptr.as_mut_ptr());
+        linearFree(ptr.as_ptr() as *mut libc::c_void);
     }
 }
 
@@ -27,7 +32,6 @@ pub struct BCSTMFile {
     current_time: u32,
 
     endian: ByteOrder,
-    is_streaming: bool,
     is_paused: bool,
 
     looping: bool,
@@ -47,10 +51,6 @@ pub struct BCSTMFile {
     info_offset: u32,
     data_offset: u32,
 
-    active_ndsp_channels: u32, // default: 0
-
-    is_loaded: bool, // default: false
-
     channel: [u16; 2],
     wave_buf: [[ndspWaveBuf; BCSTMFile::BUFFER_COUNT]; 2],
     adpcm_data: [[ndspAdpcmData; 2]; 2],
@@ -59,28 +59,19 @@ pub struct BCSTMFile {
 
 impl Drop for BCSTMFile {
     fn drop(&mut self) {
-        self.stop();
+		unsafe {
+			for i in 0..self.channel_count {
+				ndspChnWaveBufClear(self.channel[i] as i32);
+			}
+		}
     }
 }
 
 impl BCSTMFile {
     pub const BUFFER_COUNT: usize = 20;
 
-    // constructors and destructors
-    pub fn new_uninit() -> Self {
-        Self {
-            active_ndsp_channels: 0,
-            is_loaded: false,
-            is_paused: false,
-            is_streaming: false,
-            channel_count: 0,
-            // ...
-        }
-    }
-
     // public functions
-    pub fn open_from_file(&mut self, filename: impl Into<PathBuf>) -> Result<()> {
-        self.stop();
+    pub fn open_from_file(filename: impl Into<PathBuf>) -> Result<Self> {
         let fs = Fs::init()?;
         let mut file = File::open(&fs.romfs()?, filename.into())?;
 
@@ -109,7 +100,7 @@ impl BCSTMFile {
         todo!();
     }
     pub fn pause(&mut self) {
-        if !self.is_streaming {
+        if self.is_paused {
             return;
         }
         self.is_paused = true;
@@ -119,26 +110,8 @@ impl BCSTMFile {
             }
         }
     }
-    pub fn stop(&mut self) {
-        todo!();
-    }
 
     // public inline functions
-    pub fn GetLoop(&self) -> &'static str {
-        if self.looping {
-            "True"
-        } else {
-            "False"
-        }
-    }
-    pub fn GetLoopStart<'a>(&self) -> &'a str {
-        let ref out = format!("{}", self.block_loop_start);
-        out
-    }
-    pub fn GetLoopEnd<'a>(&self) -> &'a str {
-        let ref out = format!("{}", self.block_loop_end);
-        out
-    }
     pub fn GetTotal(&self) -> f32 {
         self.total_time as f32
     }
