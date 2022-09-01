@@ -66,14 +66,26 @@ impl BCSTMFile {
     pub fn open_from_file(&mut self, filename: impl Into<PathBuf>) -> Result<()> {
 		self.stop();
 		let fs = Fs::init()?;
-		let file = File::open(&fs.romfs()?, filename.into())?;
-		let mut endian = ByteOrder::LittleEndian;
+		let mut file = File::open(&fs.romfs()?, filename.into())?;
 
 		let mut magic_buf = [0u8; 4];
 		file.read(&mut magic_buf)?;
 		if magic_buf != [b'C', b'S', b'T', b'M'] {
 			Err(Error::OtherError(format!("Not a BCSTM file")))?;
 		}
+
+		let endian = match u16::read_from(&mut file, ByteOrder::LittleEndian)? {
+			0xFFFE => ByteOrder::BigEndian,
+			0xFEFF => ByteOrder::LittleEndian,
+			_ => Err(Error::OtherError(format!("Invalid BOM")))?,
+		};
+
+		file.seek(SeekFrom::Start(0x10));
+		let section_block_count = u16::read_from(&mut file, endian);
+		u16::read_from(&mut file, endian);
+
+		
+
 		todo!();
 	}
     pub fn tick(&mut self) {
