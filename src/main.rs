@@ -54,7 +54,6 @@ fn main() {
 
     // Init menu
     let mut menu = MenuState::default();
-
     menu.render(&console, &versions);
 
     // Music test
@@ -72,6 +71,8 @@ fn main() {
 
         hid.scan_input();
 
+        ui.render();
+
         menu.run(&hid, &console, &versions);
 
         match &menu.action {
@@ -84,8 +85,6 @@ fn main() {
         }
 
         music_test.tick().unwrap(); //TODO: test value, stop if false
-
-        ui.render();
     }
 
     unsafe {

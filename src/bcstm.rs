@@ -4,7 +4,7 @@ use bytestream::{ByteOrder, StreamReader};
 use ctru_sys::{
     linearAlloc, linearFree, ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat,
     ndspChnSetInterp, ndspChnSetMix, ndspChnSetPaused, ndspChnWaveBufClear, ndspWaveBuf,
-     NDSP_FORMAT_ADPCM, NDSP_INTERP_LINEAR, NDSP_WBUF_DONE, ndspChnWaveBufAdd, DSP_FlushDataCache, ndspChnSetRate
+     NDSP_FORMAT_ADPCM, NDSP_INTERP_NONE, NDSP_WBUF_DONE, ndspChnWaveBufAdd, DSP_FlushDataCache, ndspChnSetRate
 };
 use std::{
     alloc::{AllocError, Allocator, Layout},
@@ -39,11 +39,11 @@ unsafe impl Allocator for LinearAllocator {
 pub struct BCSTMFile {
     file: File,
 
-    is_paused: bool,
+    pub is_paused: bool,
 
-    looping: bool,
-    channel_count: usize,
-    sample_rate: u32,
+    pub looping: bool,
+    pub channel_count: usize,
+    pub sample_rate: u32,
 
     block_loop_start: u32,
     block_loop_end: u32,
@@ -177,6 +177,7 @@ impl BCSTMFile {
                 adpcm_data[i][j].history0 = i16::read_from(&mut file, endian)?;
                 adpcm_data[i][j].history1 = i16::read_from(&mut file, endian)?;
             }
+            u16::read_from(&mut file, endian);
         }
 
         let mut buffer_data: [MaybeUninit<Vec<u8, LinearAllocator>>; Self::BUFFER_COUNT] =
@@ -239,8 +240,10 @@ impl BCSTMFile {
 
             let mut mix: [f32; 16] = [0.0; 16];
             if self.channel_count == 1 {
-                mix[0] = 1.0;
-                mix[1] = 1.0;
+                mix[0] = 0.8;
+                mix[1] = 0.8;
+                mix[2] = 0.2;
+                mix[3] = 0.2;
             } else if i == 0 {
                 mix[0] = 0.8;
                 mix[2] = 0.2;
@@ -253,7 +256,6 @@ impl BCSTMFile {
             ndspChnSetAdpcmCoefs(self.channel[i] as i32, self.adpcm_coefs[i].as_mut_ptr());
             ndspChnSetFormat(self.channel[i] as i32, NDSP_FORMAT_ADPCM as u16);
             ndspChnSetRate(self.channel[i] as i32, self.sample_rate as f32);
-            ndspChnSetInterp(self.channel[i] as i32, NDSP_INTERP_LINEAR);
 
             for j in 0..Self::BUFFER_COUNT {
                 self.wave_buf[i][j].status = NDSP_WBUF_DONE as u8;
