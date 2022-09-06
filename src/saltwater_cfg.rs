@@ -3,7 +3,6 @@ use bytestream::*;
 use ctru::services::fs::{File, Fs};
 use std::{
     collections::HashMap,
-    convert::TryInto,
     io::{self, Read, Write},
     path::PathBuf,
 };

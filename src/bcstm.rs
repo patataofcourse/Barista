@@ -24,7 +24,7 @@ unsafe impl Allocator for LinearAllocator {
             None => Err(AllocError),
         }
     }
-    unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
+    unsafe fn deallocate(&self, ptr: NonNull<u8>, _: Layout) {
         linearFree(ptr.as_ptr() as *mut libc::c_void);
     }
 }
@@ -91,9 +91,71 @@ impl BCSTMFile {
             _ => Err(Error::OtherError(format!("Invalid BOM")))?,
         };
 
-        file.seek(SeekFrom::Start(0x10));
-        let section_block_count = u16::read_from(&mut file, endian);
-        u16::read_from(&mut file, endian);
+        file.seek(SeekFrom::Start(0x10))?;
+        let section_block_count = u16::read_from(&mut file, endian)?;
+        u16::read_from(&mut file, endian)?;
+
+        let mut data_offset: Option<u32> = None;
+        let mut info_offset: Option<u32> = None;
+        for _ in 0..section_block_count {
+            let id = u16::read_from(&mut file, endian)?;
+            u16::read_from(&mut file, endian)?;
+            let offset = u32::read_from(&mut file, endian)?;
+            u32::read_from(&mut file, endian)?; // size
+            match id {
+                id if id == RefType::InfoBlock as u16 => info_offset = Some(offset),
+                id if id == RefType::DataBlock as u16 => data_offset = Some(offset),
+                _ => {}
+            }
+        }
+
+        let data_offset = if let Some(c) = data_offset {
+            c
+        } else {
+            Err(Error::OtherError(
+                "BCSTM: no data_offset section".to_string(),
+            ))?
+        };
+        let info_offset = if let Some(c) = info_offset {
+            c
+        } else {
+            Err(Error::OtherError(
+                "BCSTM: no info_offset section".to_string(),
+            ))?
+        };
+
+        file.seek(SeekFrom::Start(info_offset as u64 + 0x20))?;
+        if u8::read_from(&mut file, endian)? != 2 {
+            Err(Error::OtherError(
+                "Unknown BCSTM error - info+0x20".to_string(),
+            ))?
+        }
+
+        let looping = u8::read_from(&mut file, endian)? != 0;
+        let channel_count = u8::read_from(&mut file, endian)?;
+        if channel_count > 2 {
+            Err(Error::OtherError(
+                "Unknown BCSTM error - channel_count".to_string(),
+            ))?
+        }
+        u8::read_from(&mut file, endian)?;
+
+        let sample_rate = u32::read_from(&mut file, endian)?;
+        let loop_pos = u32::read_from(&mut file, endian)?;
+        let loop_end = u32::read_from(&mut file, endian)?;
+        let block_count = u32::read_from(&mut file, endian)?;
+        let block_size = u32::read_from(&mut file, endian)?;
+        let block_sample_count = u32::read_from(&mut file, endian)?;
+        u32::read_from(&mut file, endian)?; // last block used bytes
+        let last_block_sample_count = u32::read_from(&mut file, endian)?;
+        let last_block_size = u32::read_from(&mut file, endian)?;
+
+        let block_loop_start = loop_pos / block_sample_count;
+        let block_loop_end = if loop_end % block_sample_count != 0 {
+            block_count
+        } else {
+            loop_end / block_sample_count
+        };
 
         todo!();
     }

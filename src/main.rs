@@ -29,7 +29,6 @@ static mut CONFIG: Option<saltwater_cfg::Config> = None;
 
 fn main() {
     let apt = Apt::init().unwrap();
-    let fs = Fs::init().unwrap();
     let hid = Hid::init().unwrap();
     let gfx = Gfx::default();
     let console = Console::init(Screen::Bottom);
