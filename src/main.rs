@@ -34,6 +34,7 @@ fn main() {
     let console = Console::init(Screen::Bottom);
     unsafe {
         ctru_sys::romfsMountSelf("romfs\0".as_ptr());
+        ctru_sys::ndspInit();
     }
 
     panic::set_hook(Box::new(panic_hook));
@@ -56,7 +57,7 @@ fn main() {
     menu.render(&console, &versions);
 
     // Music test
-    //bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/Practice.dspadpcm.bcstm").unwrap();
+    bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/Practice.bcstm").unwrap();
 
     // Init config
     *config_wrapped() =
@@ -84,6 +85,7 @@ fn main() {
 
     unsafe {
         ctru_sys::romfsUnmount("romfs\0".as_ptr());
+        ctru_sys::ndspExit();
     }
 
     drop(gfx);

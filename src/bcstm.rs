@@ -8,11 +8,13 @@ use std::{
     alloc::{AllocError, Allocator, Layout},
     fs::File,
     io::{self, Read, Seek, SeekFrom},
+    mem::{self, MaybeUninit},
     path::PathBuf,
     ptr::NonNull,
     slice,
 };
 
+#[derive(Clone)]
 pub struct LinearAllocator;
 
 unsafe impl Allocator for LinearAllocator {
@@ -33,7 +35,7 @@ unsafe impl Allocator for LinearAllocator {
 pub struct BCSTMFile {
     file: File,
 
-    total_time: u32,
+    last_time: u32,
     current_time: u32,
 
     endian: ByteOrder,
@@ -133,7 +135,7 @@ impl BCSTMFile {
         }
 
         let looping = u8::read_from(&mut file, endian)? != 0;
-        let channel_count = u8::read_from(&mut file, endian)?;
+        let channel_count = u8::read_from(&mut file, endian)? as usize;
         if channel_count > 2 {
             Err(Error::OtherError(
                 "Unknown BCSTM error - channel_count".to_string(),
@@ -158,16 +160,79 @@ impl BCSTMFile {
             loop_end / block_sample_count
         };
 
-        todo!();
+        while u32::read_from(&mut file, endian)? != RefType::ChannelInfo as u32 {}
+        {
+            let offset = u32::read_from(&mut file, endian)? as i64;
+            file.seek(SeekFrom::Current(offset + channel_count as i64 * 8 - 0xC))?;
+        }
+
+        // Get ADPCM data
+        let mut adpcm_coefs = [[0; 16];2];
+        let mut adpcm_data = [[ndspAdpcmData::default(); 2]; 2];
+        for i in 0..channel_count {
+            for j in 0..16 {
+                adpcm_coefs[i][j] = u16::read_from(&mut file, endian)?;
+            }
+            for j in 0..1 {
+                adpcm_data[i][j].index = u16::read_from(&mut file, endian)?;
+                adpcm_data[i][j].history0 = i16::read_from(&mut file, endian)?;
+                adpcm_data[i][j].history1 = i16::read_from(&mut file, endian)?;
+            }
+        }
+
+        let mut buffer_data: [MaybeUninit<Vec<u8, LinearAllocator>>; BCSTMFile::BUFFER_COUNT] = unsafe {
+            MaybeUninit::uninit().assume_init()
+        };
+
+        for elmt in &mut buffer_data[..] {
+            *elmt = MaybeUninit::new(Vec::new_in(LinearAllocator));
+        }
+
+        let buffer_data = unsafe {
+            mem::transmute::<_,[Vec<u8, LinearAllocator>; BCSTMFile::BUFFER_COUNT]>(buffer_data)
+        };
+
+        file.seek(SeekFrom::Start(data_offset as u64 + 0x20))?;
+        let mut out = Self {
+            file,
+
+            last_time: 0,
+            current_time: 0,
+
+            endian,
+            is_paused: true,
+
+            looping,
+            channel_count,
+            sample_rate,
+
+            block_loop_start,
+            block_loop_end,
+            block_count,
+            block_size,
+            block_sample_count,
+            last_block_size,
+            last_block_sample_count,
+            adpcm_coefs,
+
+            current_block: 0,
+            info_offset,
+            data_offset,
+
+            channel: [0, 0],
+            wave_buf: [[ndspWaveBuf::default(); BCSTMFile::BUFFER_COUNT]; 2],
+            adpcm_data,
+            buffer_data: [buffer_data.clone(), buffer_data.clone()],
+        };
+        todo!(); // start
     }
+
     pub fn tick(&mut self) {
         self.stream_data();
     }
+
     pub fn play(&mut self) {
-        todo!();
-    }
-    pub fn pause(&mut self) {
-        if self.is_paused {
+        if !self.is_paused {
             return;
         }
         self.is_paused = true;
@@ -178,12 +243,16 @@ impl BCSTMFile {
         }
     }
 
-    // public inline functions
-    pub fn GetTotal(&self) -> f32 {
-        self.total_time as f32
-    }
-    pub fn GetCurrent(&self) -> f32 {
-        self.current_time as f32
+    pub fn pause(&mut self) {
+        if self.is_paused {
+            return;
+        }
+        self.is_paused = true;
+        for i in 0..self.channel_count {
+            unsafe {
+                ndspChnSetPaused(self.channel[i] as i32, true);
+            }
+        }
     }
 
     // protected functions
