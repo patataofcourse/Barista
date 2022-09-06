@@ -271,10 +271,10 @@ impl BCSTMFile {
         if !self.is_paused {
             return;
         }
-        self.is_paused = true;
+        self.is_paused = false;
         for i in 0..self.channel_count {
             unsafe {
-                ndspChnSetPaused(self.channel[i] as i32, true);
+                ndspChnSetPaused(self.channel[i] as i32, false);
             }
         }
     }
@@ -346,7 +346,7 @@ impl BCSTMFile {
                 }
             }
             self.current_block += 1;
-            todo!();
+            Ok(true)
         } else {
             Ok(true)
         }
