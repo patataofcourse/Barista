@@ -10,13 +10,11 @@ use ctru::{
 use std::panic::{self, PanicInfo};
 use ui_lib::BaristaUI;
 
-mod bcstm;
-
 mod error;
 pub use self::error::{Error, Result};
 
+mod format;
 mod launcher;
-mod saltwater_cfg;
 mod scene;
 pub use self::scene::menu::{MenuAction, MenuState};
 
@@ -25,7 +23,7 @@ pub(crate) mod plgldr;
 
 use launcher::GameVer;
 
-static mut CONFIG: Option<saltwater_cfg::Config> = None;
+static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 
 fn main() {
     let apt = Apt::init().unwrap();
@@ -58,12 +56,13 @@ fn main() {
 
     // Music test
     let mut music_test =
-        bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/bartender_construction.bcstm").unwrap();
-    music_test.play();
+        format::bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/bartender_construction.bcstm")
+            .unwrap();
+    //music_test.play();
 
     // Init config
     *config_wrapped() =
-        Some(saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap());
+        Some(format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap());
 
     // Main loop
     while apt.main_loop() {
@@ -101,11 +100,11 @@ fn main() {
     }
 }
 
-fn config() -> &'static mut saltwater_cfg::Config {
+fn config() -> &'static mut format::saltwater_cfg::Config {
     unsafe { CONFIG.as_mut().expect("Config not initialized") }
 }
 
-fn config_wrapped() -> &'static mut Option<saltwater_cfg::Config> {
+fn config_wrapped() -> &'static mut Option<format::saltwater_cfg::Config> {
     unsafe { &mut CONFIG }
 }
 

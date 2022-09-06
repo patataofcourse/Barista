@@ -3,8 +3,9 @@ use bytestream::{ByteOrder, StreamReader};
 //use ctru::services::fs::{File, Fs};
 use ctru_sys::{
     linearAlloc, linearFree, ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat,
-    ndspChnSetInterp, ndspChnSetMix, ndspChnSetPaused, ndspChnWaveBufClear, ndspWaveBuf,
-     NDSP_FORMAT_ADPCM, NDSP_INTERP_NONE, NDSP_WBUF_DONE, ndspChnWaveBufAdd, DSP_FlushDataCache, ndspChnSetRate
+    ndspChnSetInterp, ndspChnSetMix, ndspChnSetPaused, ndspChnSetRate, ndspChnWaveBufAdd,
+    ndspChnWaveBufClear, ndspWaveBuf, DSP_FlushDataCache, NDSP_FORMAT_ADPCM, NDSP_INTERP_NONE,
+    NDSP_WBUF_DONE,
 };
 use std::{
     alloc::{AllocError, Allocator, Layout},
@@ -177,7 +178,7 @@ impl BCSTMFile {
                 adpcm_data[i][j].history0 = i16::read_from(&mut file, endian)?;
                 adpcm_data[i][j].history1 = i16::read_from(&mut file, endian)?;
             }
-            u16::read_from(&mut file, endian);
+            u16::read_from(&mut file, endian)?;
         }
 
         let mut buffer_data: [MaybeUninit<Vec<u8, LinearAllocator>>; Self::BUFFER_COUNT] =
@@ -324,11 +325,16 @@ impl BCSTMFile {
 
                     let block_size = if self.current_block == self.block_count - 1 {
                         self.last_block_size as usize
-                    } else {self.block_size as usize};
+                    } else {
+                        self.block_size as usize
+                    };
 
                     self.buffer_data[j][i].resize(block_size, 0);
                     self.file.read(&mut self.buffer_data[j][i])?;
-                    DSP_FlushDataCache(self.buffer_data[j][i].as_ptr() as *const libc::c_void, self.block_size);
+                    DSP_FlushDataCache(
+                        self.buffer_data[j][i].as_ptr() as *const libc::c_void,
+                        self.block_size,
+                    );
 
                     if self.current_block == 0 {
                         buf.adpcm_data = &mut self.adpcm_data[j][0];
@@ -336,14 +342,14 @@ impl BCSTMFile {
                         buf.adpcm_data = &mut self.adpcm_data[j][1];
                     }
 
-                    if self.current_block == self.block_count-1 {
+                    if self.current_block == self.block_count - 1 {
                         buf.nsamples = self.last_block_sample_count
                     } else {
                         buf.nsamples = self.block_sample_count
                     }
 
                     buf.__bindgen_anon_1.data_adpcm = self.buffer_data[j][i].as_mut_ptr();
-                
+
                     ndspChnWaveBufAdd(self.channel[j] as i32, buf as *mut ndspWaveBuf);
                 }
             }
