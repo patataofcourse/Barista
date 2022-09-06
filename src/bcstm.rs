@@ -3,9 +3,8 @@ use bytestream::{ByteOrder, StreamReader};
 //use ctru::services::fs::{File, Fs};
 use ctru_sys::{
     linearAlloc, linearFree, ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat,
-    ndspChnSetInterp, ndspChnSetMix, ndspChnSetPaused, ndspChnWaveBufClear,
-    ndspWaveBuf, svcGetSystemTick, NDSP_FORMAT_ADPCM, NDSP_INTERP_LINEAR,
-    NDSP_WBUF_DONE,
+    ndspChnSetInterp, ndspChnSetMix, ndspChnSetPaused, ndspChnWaveBufClear, ndspWaveBuf,
+    svcGetSystemTick, NDSP_FORMAT_ADPCM, NDSP_INTERP_LINEAR, NDSP_WBUF_DONE,
 };
 use std::{
     alloc::{AllocError, Allocator, Layout},
@@ -40,9 +39,6 @@ unsafe impl Allocator for LinearAllocator {
 pub struct BCSTMFile {
     file: File,
 
-    last_time: u64,
-    current_time: u64,
-
     endian: ByteOrder,
     is_paused: bool,
 
@@ -64,9 +60,9 @@ pub struct BCSTMFile {
     data_offset: u32,
 
     channel: [u16; 2],
-    wave_buf: [[ndspWaveBuf; BCSTMFile::BUFFER_COUNT]; 2],
+    wave_buf: [[ndspWaveBuf; Self::BUFFER_COUNT]; 2],
     adpcm_data: [[ndspAdpcmData; 2]; 2],
-    buffer_data: [[Vec<u8, LinearAllocator>; BCSTMFile::BUFFER_COUNT]; 2],
+    buffer_data: [[Vec<u8, LinearAllocator>; Self::BUFFER_COUNT]; 2],
 }
 
 impl Drop for BCSTMFile {
@@ -185,7 +181,7 @@ impl BCSTMFile {
             }
         }
 
-        let mut buffer_data: [MaybeUninit<Vec<u8, LinearAllocator>>; BCSTMFile::BUFFER_COUNT] =
+        let mut buffer_data: [MaybeUninit<Vec<u8, LinearAllocator>>; Self::BUFFER_COUNT] =
             unsafe { MaybeUninit::uninit().assume_init() };
 
         for elmt in &mut buffer_data[..] {
@@ -193,15 +189,12 @@ impl BCSTMFile {
         }
 
         let buffer_data = unsafe {
-            mem::transmute::<_, [Vec<u8, LinearAllocator>; BCSTMFile::BUFFER_COUNT]>(buffer_data)
+            mem::transmute::<_, [Vec<u8, LinearAllocator>; Self::BUFFER_COUNT]>(buffer_data)
         };
 
         file.seek(SeekFrom::Start(data_offset as u64 + 0x20))?;
         let mut out = Self {
             file,
-
-            last_time: 0,
-            current_time: 0,
 
             endian,
             is_paused: true,
@@ -224,7 +217,7 @@ impl BCSTMFile {
             data_offset,
 
             channel: [0, 0],
-            wave_buf: [[ndspWaveBuf::default(); BCSTMFile::BUFFER_COUNT]; 2],
+            wave_buf: [[ndspWaveBuf::default(); Self::BUFFER_COUNT]; 2],
             adpcm_data,
             buffer_data: [buffer_data.clone(), buffer_data.clone()],
         };
@@ -265,7 +258,7 @@ impl BCSTMFile {
             ndspChnSetFormat(self.channel[i] as i32, NDSP_FORMAT_ADPCM as u16);
             ndspChnSetInterp(self.channel[i] as i32, NDSP_INTERP_LINEAR);
 
-            for j in 0..BCSTMFile::BUFFER_COUNT {
+            for j in 0..Self::BUFFER_COUNT {
                 self.wave_buf[i][j].status = NDSP_WBUF_DONE as u8;
                 self.buffer_data[i][j].resize(self.block_size as usize, 0);
             }
@@ -274,10 +267,8 @@ impl BCSTMFile {
         Ok(())
     }
 
-    pub fn tick(&mut self) {
-        unsafe {
-            self.stream_data();
-        }
+    pub fn tick(&mut self) -> Result<bool> {
+        unsafe { self.stream_data() }
     }
 
     pub fn play(&mut self) {
@@ -304,17 +295,40 @@ impl BCSTMFile {
         }
     }
 
-    unsafe fn stream_data(&mut self) {
-        self.current_time = svcGetSystemTick();
-        if (self.current_time - self.last_time >= 100000000) {
-            if (!self.is_paused) {
-                self.fill_buffers();
+    unsafe fn stream_data(&mut self) -> Result<bool> {
+        if (!self.is_paused) {
+            for i in 0..Self::BUFFER_COUNT {
+                if self.wave_buf[0][i].status != NDSP_WBUF_DONE as u8 {
+                    continue;
+                }
+                if self.channel_count == 2 && self.wave_buf[1][i].status != NDSP_WBUF_DONE as u8 {
+                    continue;
+                }
+
+                if self.current_block == self.block_loop_end {
+                    if self.looping {
+                        self.current_block = self.block_loop_start;
+                        self.file.seek(SeekFrom::Start(
+                            (self.data_offset
+                                + 0x20
+                                + self.block_size as u32
+                                    * self.channel_count as u32
+                                    * self.block_loop_start) as u64,
+                        ))?;
+                    } else {
+                        return Ok(false);
+                    }
+                }
+
+                for j in 0..self.channel_count {
+                    let buf = &mut self.wave_buf[j][i];
+                    *buf = ndspWaveBuf::default();
+                }
             }
-            self.last_time = self.current_time;
+            todo!();
+        } else {
+            Ok(true)
         }
-    }
-    unsafe fn fill_buffers(&mut self) {
-        todo!();
     }
 }
 

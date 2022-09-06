@@ -59,7 +59,7 @@ fn main() {
 
     // Music test
     let mut music_test =
-        bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/Practice.bcstm").unwrap();
+        bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/bartender_construction.bcstm").unwrap();
     music_test.play();
 
     // Init config
@@ -83,7 +83,7 @@ fn main() {
             MenuAction::ChangeMenu(_) | MenuAction::None | MenuAction::MoveCursor => {}
         }
 
-        music_test.tick();
+        music_test.tick().unwrap(); //TODO: test value, stop if false
 
         ui.render();
     }
