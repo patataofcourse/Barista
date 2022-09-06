@@ -2,7 +2,10 @@ use crate::{Error, Result};
 use bytestream::{ByteOrder, StreamReader};
 //use ctru::services::fs::{File, Fs};
 use ctru_sys::{
-    linearAlloc, linearFree, ndspAdpcmData, ndspChnSetPaused, ndspChnWaveBufClear, ndspWaveBuf,
+    linearAlloc, linearFree, ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat,
+    ndspChnSetInterp, ndspChnSetMix, ndspChnSetPaused, ndspChnWaveBufClear,
+    ndspWaveBuf, svcGetSystemTick, NDSP_FORMAT_ADPCM, NDSP_INTERP_LINEAR,
+    NDSP_WBUF_DONE,
 };
 use std::{
     alloc::{AllocError, Allocator, Layout},
@@ -13,6 +16,8 @@ use std::{
     ptr::NonNull,
     slice,
 };
+
+static mut ACTIVE_NDSP_CHANNELS: u32 = 0;
 
 #[derive(Clone)]
 pub struct LinearAllocator;
@@ -35,8 +40,8 @@ unsafe impl Allocator for LinearAllocator {
 pub struct BCSTMFile {
     file: File,
 
-    last_time: u32,
-    current_time: u32,
+    last_time: u64,
+    current_time: u64,
 
     endian: ByteOrder,
     is_paused: bool,
@@ -167,7 +172,7 @@ impl BCSTMFile {
         }
 
         // Get ADPCM data
-        let mut adpcm_coefs = [[0; 16];2];
+        let mut adpcm_coefs = [[0; 16]; 2];
         let mut adpcm_data = [[ndspAdpcmData::default(); 2]; 2];
         for i in 0..channel_count {
             for j in 0..16 {
@@ -180,16 +185,15 @@ impl BCSTMFile {
             }
         }
 
-        let mut buffer_data: [MaybeUninit<Vec<u8, LinearAllocator>>; BCSTMFile::BUFFER_COUNT] = unsafe {
-            MaybeUninit::uninit().assume_init()
-        };
+        let mut buffer_data: [MaybeUninit<Vec<u8, LinearAllocator>>; BCSTMFile::BUFFER_COUNT] =
+            unsafe { MaybeUninit::uninit().assume_init() };
 
         for elmt in &mut buffer_data[..] {
             *elmt = MaybeUninit::new(Vec::new_in(LinearAllocator));
         }
 
         let buffer_data = unsafe {
-            mem::transmute::<_,[Vec<u8, LinearAllocator>; BCSTMFile::BUFFER_COUNT]>(buffer_data)
+            mem::transmute::<_, [Vec<u8, LinearAllocator>; BCSTMFile::BUFFER_COUNT]>(buffer_data)
         };
 
         file.seek(SeekFrom::Start(data_offset as u64 + 0x20))?;
@@ -224,11 +228,56 @@ impl BCSTMFile {
             adpcm_data,
             buffer_data: [buffer_data.clone(), buffer_data.clone()],
         };
-        todo!(); // start
+
+        unsafe {
+            out.init()?;
+        }
+        Ok(out)
+    }
+
+    // in the original code's play function
+    unsafe fn init(&mut self) -> Result<()> {
+        for i in 0..self.channel_count {
+            while ((ACTIVE_NDSP_CHANNELS >> self.channel[i]) & 1) == 1 {
+                self.channel[i] += 1;
+
+                if self.channel[i] >= 24 {
+                    Err(Error::OtherError("No NDSP channels available".to_string()))?
+                }
+            }
+            ACTIVE_NDSP_CHANNELS |= 1 << self.channel[i];
+            ndspChnWaveBufClear(self.channel[i].into());
+
+            let mut mix: [f32; 16] = [0.0; 16];
+            if self.channel_count == 1 {
+                mix[0] = 1.0;
+                mix[1] = 1.0;
+            } else if i == 0 {
+                mix[0] = 0.8;
+                mix[2] = 0.2;
+            } else {
+                mix[1] = 0.8;
+                mix[3] = 0.2;
+            }
+
+            ndspChnSetMix(self.channel[i] as i32, mix.as_mut_ptr());
+            ndspChnSetAdpcmCoefs(self.channel[i] as i32, self.adpcm_coefs[i].as_mut_ptr());
+            ndspChnSetFormat(self.channel[i] as i32, NDSP_FORMAT_ADPCM as u16);
+            ndspChnSetInterp(self.channel[i] as i32, NDSP_INTERP_LINEAR);
+
+            for j in 0..BCSTMFile::BUFFER_COUNT {
+                self.wave_buf[i][j].status = NDSP_WBUF_DONE as u8;
+                self.buffer_data[i][j].resize(self.block_size as usize, 0);
+            }
+        }
+
+        Ok(())
     }
 
     pub fn tick(&mut self) {
-        self.stream_data();
+        unsafe {
+            self.stream_data();
+        }
     }
 
     pub fn play(&mut self) {
@@ -255,24 +304,17 @@ impl BCSTMFile {
         }
     }
 
-    // protected functions
-    fn stream_data(&mut self) {
+    unsafe fn stream_data(&mut self) {
+        self.current_time = svcGetSystemTick();
+        if (self.current_time - self.last_time >= 100000000) {
+            if (!self.is_paused) {
+                self.fill_buffers();
+            }
+            self.last_time = self.current_time;
+        }
+    }
+    unsafe fn fill_buffers(&mut self) {
         todo!();
-    }
-    fn fill_buffers(&mut self) {
-        todo!();
-    }
-}
-
-impl Read for BCSTMFile {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.file.read(buf)
-    }
-}
-
-impl Seek for BCSTMFile {
-    fn seek(&mut self, seek: SeekFrom) -> io::Result<u64> {
-        self.file.seek(seek)
     }
 }
 

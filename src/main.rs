@@ -35,6 +35,7 @@ fn main() {
     unsafe {
         ctru_sys::romfsMountSelf("romfs\0".as_ptr());
         ctru_sys::ndspInit();
+        ctru_sys::ndspSetOutputMode(ctru_sys::NDSP_OUTPUT_STEREO);
     }
 
     panic::set_hook(Box::new(panic_hook));
@@ -57,7 +58,9 @@ fn main() {
     menu.render(&console, &versions);
 
     // Music test
-    bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/Practice.bcstm").unwrap();
+    let mut music_test =
+        bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/Practice.bcstm").unwrap();
+    music_test.play();
 
     // Init config
     *config_wrapped() =
@@ -79,6 +82,8 @@ fn main() {
             }
             MenuAction::ChangeMenu(_) | MenuAction::None | MenuAction::MoveCursor => {}
         }
+
+        music_test.tick();
 
         ui.render();
     }
