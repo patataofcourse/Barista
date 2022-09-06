@@ -4,12 +4,12 @@ use bytestream::{ByteOrder, StreamReader};
 use ctru_sys::{
     linearAlloc, linearFree, ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat,
     ndspChnSetInterp, ndspChnSetMix, ndspChnSetPaused, ndspChnWaveBufClear, ndspWaveBuf,
-    svcGetSystemTick, NDSP_FORMAT_ADPCM, NDSP_INTERP_LINEAR, NDSP_WBUF_DONE,
+     NDSP_FORMAT_ADPCM, NDSP_INTERP_LINEAR, NDSP_WBUF_DONE, ndspChnWaveBufAdd, DSP_FlushDataCache, ndspChnSetRate
 };
 use std::{
     alloc::{AllocError, Allocator, Layout},
     fs::File,
-    io::{self, Read, Seek, SeekFrom},
+    io::{Read, Seek, SeekFrom},
     mem::{self, MaybeUninit},
     path::PathBuf,
     ptr::NonNull,
@@ -39,7 +39,6 @@ unsafe impl Allocator for LinearAllocator {
 pub struct BCSTMFile {
     file: File,
 
-    endian: ByteOrder,
     is_paused: bool,
 
     looping: bool,
@@ -56,7 +55,6 @@ pub struct BCSTMFile {
     adpcm_coefs: [[u16; 16]; 2],
 
     current_block: u32,
-    info_offset: u32,
     data_offset: u32,
 
     channel: [u16; 2],
@@ -106,8 +104,8 @@ impl BCSTMFile {
             let offset = u32::read_from(&mut file, endian)?;
             u32::read_from(&mut file, endian)?; // size
             match id {
-                id if id == RefType::InfoBlock as u16 => info_offset = Some(offset),
-                id if id == RefType::DataBlock as u16 => data_offset = Some(offset),
+                id if id == BlockType::InfoBlock as u16 => info_offset = Some(offset),
+                id if id == BlockType::DataBlock as u16 => data_offset = Some(offset),
                 _ => {}
             }
         }
@@ -161,7 +159,7 @@ impl BCSTMFile {
             loop_end / block_sample_count
         };
 
-        while u32::read_from(&mut file, endian)? != RefType::ChannelInfo as u32 {}
+        while u32::read_from(&mut file, endian)? != CHANNEL_INFO {}
         {
             let offset = u32::read_from(&mut file, endian)? as i64;
             file.seek(SeekFrom::Current(offset + channel_count as i64 * 8 - 0xC))?;
@@ -196,7 +194,6 @@ impl BCSTMFile {
         let mut out = Self {
             file,
 
-            endian,
             is_paused: true,
 
             looping,
@@ -213,7 +210,6 @@ impl BCSTMFile {
             adpcm_coefs,
 
             current_block: 0,
-            info_offset,
             data_offset,
 
             channel: [0, 0],
@@ -256,11 +252,11 @@ impl BCSTMFile {
             ndspChnSetMix(self.channel[i] as i32, mix.as_mut_ptr());
             ndspChnSetAdpcmCoefs(self.channel[i] as i32, self.adpcm_coefs[i].as_mut_ptr());
             ndspChnSetFormat(self.channel[i] as i32, NDSP_FORMAT_ADPCM as u16);
+            ndspChnSetRate(self.channel[i] as i32, self.sample_rate as f32);
             ndspChnSetInterp(self.channel[i] as i32, NDSP_INTERP_LINEAR);
 
             for j in 0..Self::BUFFER_COUNT {
                 self.wave_buf[i][j].status = NDSP_WBUF_DONE as u8;
-                self.buffer_data[i][j].resize(self.block_size as usize, 0);
             }
         }
 
@@ -296,7 +292,7 @@ impl BCSTMFile {
     }
 
     unsafe fn stream_data(&mut self) -> Result<bool> {
-        if (!self.is_paused) {
+        if !self.is_paused {
             for i in 0..Self::BUFFER_COUNT {
                 if self.wave_buf[0][i].status != NDSP_WBUF_DONE as u8 {
                     continue;
@@ -323,8 +319,33 @@ impl BCSTMFile {
                 for j in 0..self.channel_count {
                     let buf = &mut self.wave_buf[j][i];
                     *buf = ndspWaveBuf::default();
+
+                    let block_size = if self.current_block == self.block_count - 1 {
+                        self.last_block_size as usize
+                    } else {self.block_size as usize};
+
+                    self.buffer_data[j][i].resize(block_size, 0);
+                    self.file.read(&mut self.buffer_data[j][i])?;
+                    DSP_FlushDataCache(self.buffer_data[j][i].as_ptr() as *const libc::c_void, self.block_size);
+
+                    if self.current_block == 0 {
+                        buf.adpcm_data = &mut self.adpcm_data[j][0];
+                    } else if self.current_block == self.block_loop_start {
+                        buf.adpcm_data = &mut self.adpcm_data[j][1];
+                    }
+
+                    if self.current_block == self.block_count-1 {
+                        buf.nsamples = self.last_block_sample_count
+                    } else {
+                        buf.nsamples = self.block_sample_count
+                    }
+
+                    buf.__bindgen_anon_1.data_adpcm = self.buffer_data[j][i].as_mut_ptr();
+                
+                    ndspChnWaveBufAdd(self.channel[j] as i32, buf as *mut ndspWaveBuf);
                 }
             }
+            self.current_block += 1;
             todo!();
         } else {
             Ok(true)
@@ -332,16 +353,12 @@ impl BCSTMFile {
     }
 }
 
+const CHANNEL_INFO: u32 = 0x4102;
+
 #[repr(u16)]
-enum RefType {
-    ByteTable = 0x0100,
-    ReferenceTable = 0x0101,
-    SampleData = 0x1F00,
-    DSPADPCMInfo = 0x0300,
+#[allow(unused)]
+enum BlockType {
     InfoBlock = 0x4000,
     SeekBlock = 0x4001,
     DataBlock = 0x4002,
-    StreamInfo = 0x4100,
-    TrackInfo = 0x4101,
-    ChannelInfo = 0x4102,
 }
