@@ -1,11 +1,12 @@
 use crate::{Error, Result};
 use bytestream::{ByteOrder, StreamReader};
-use ctru::services::fs::{File, Fs};
+//use ctru::services::fs::{File, Fs};
 use ctru_sys::{
     linearAlloc, linearFree, ndspAdpcmData, ndspChnSetPaused, ndspChnWaveBufClear, ndspWaveBuf,
 };
 use std::{
     alloc::{AllocError, Allocator, Layout},
+    fs::File,
     io::{self, Read, Seek, SeekFrom},
     path::PathBuf,
     ptr::NonNull,
@@ -76,19 +77,18 @@ impl BCSTMFile {
 
     // public functions
     pub fn open_from_file(filename: impl Into<PathBuf>) -> Result<Self> {
-        let fs = Fs::init()?;
-        let mut file = File::open(&fs.romfs()?, filename.into())?;
+        let mut file = File::open(filename.into())?;
 
         let mut magic_buf = [0u8; 4];
         file.read(&mut magic_buf)?;
         if magic_buf != [b'C', b'S', b'T', b'M'] {
-            Err(Error::OtherError(format!("Not a BCSTM file")))?;
+            Err(Error::OtherError(format!("BCSTM - Not a BCSTM file")))?;
         }
 
         let endian = match u16::read_from(&mut file, ByteOrder::LittleEndian)? {
             0xFFFE => ByteOrder::BigEndian,
             0xFEFF => ByteOrder::LittleEndian,
-            _ => Err(Error::OtherError(format!("Invalid BOM")))?,
+            _ => Err(Error::OtherError(format!("BCSTM - Invalid BOM")))?,
         };
 
         file.seek(SeekFrom::Start(0x10))?;
@@ -125,9 +125,10 @@ impl BCSTMFile {
         };
 
         file.seek(SeekFrom::Start(info_offset as u64 + 0x20))?;
-        if u8::read_from(&mut file, endian)? != 2 {
+        let encoding = u8::read_from(&mut file, endian)?;
+        if encoding != 2 {
             Err(Error::OtherError(
-                "Unknown BCSTM error - info+0x20".to_string(),
+                "BCSTM - encoding not supported (only DSP ADPCM supported)".to_string(),
             ))?
         }
 

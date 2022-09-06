@@ -5,7 +5,7 @@ extern crate barista_ui as ui_lib;
 use ctru::{
     console::Console,
     gfx::{Gfx, Screen},
-    services::{apt::Apt, fs::Fs, hid::Hid},
+    services::{apt::Apt, hid::Hid},
 };
 use std::panic::{self, PanicInfo};
 use ui_lib::BaristaUI;
@@ -55,10 +55,14 @@ fn main() {
 
     menu.render(&console, &versions);
 
+    // Music test
+    //bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/Practice.dspadpcm.bcstm").unwrap();
+
     // Init config
     *config_wrapped() =
         Some(saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap());
 
+    // Main loop
     while apt.main_loop() {
         gfx.wait_for_vblank();
 
