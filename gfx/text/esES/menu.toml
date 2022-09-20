@@ -1,0 +1,22 @@
+[text_menu]
+title = "Barista - "
+main_menu = "Menú principal"
+run = "Ejecutar Saltwater"
+setup = "Preparar mods"
+music = "Música"
+settings = "Ajustes"
+back = "Atrás"
+exit = "Cerrar Barista"
+tbi = "NO IMPLEMENTADO TODAVÍA"
+controls = """\
+    Controles:
+    - DPad arriba/abajo: mover cursor
+    - A: elegir opción seleccionada
+    - B: menú anterior
+    - Start - cerrar Barista
+"""
+choose_ver = "Elige una versión para usar con Saltwater"
+
+[launcher]
+physical = "Físico"
+digital = "Digital"

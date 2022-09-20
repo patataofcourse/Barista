@@ -1,11 +1,9 @@
 use crate::{Error, Result};
 use bytestream::{ByteOrder, StreamReader};
-//use ctru::services::fs::{File, Fs};
 use ctru_sys::{
-    linearAlloc, linearFree, ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat,
-    ndspChnSetInterp, ndspChnSetMix, ndspChnSetPaused, ndspChnSetRate, ndspChnWaveBufAdd,
-    ndspChnWaveBufClear, ndspWaveBuf, DSP_FlushDataCache, NDSP_FORMAT_ADPCM, NDSP_INTERP_NONE,
-    NDSP_WBUF_DONE,
+    linearAlloc, linearFree, ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat, ndspChnSetMix,
+    ndspChnSetPaused, ndspChnSetRate, ndspChnWaveBufAdd, ndspChnWaveBufClear, ndspWaveBuf,
+    DSP_FlushDataCache, NDSP_FORMAT_ADPCM, NDSP_WBUF_DONE,
 };
 use std::{
     alloc::{AllocError, Allocator, Layout},

@@ -1,0 +1,23 @@
+[text_menu]
+title = "Barista - "
+main_menu = "Main menu"
+run = "Run Saltwater"
+setup = "Set up mods"
+music = "Music"
+settings = "Settings"
+back = "Back"
+exit = "Exit Barista"
+tbi = "TO BE IMPLEMENTED"
+controls = """\
+    Controls:
+    - DPad up/down: move cursor
+    - A: choose selected option
+    - B: go to prev menu
+    - Start - exit Barista
+"""
+choose_ver = "Choose a version to run with Saltwater"
+
+
+[launcher]
+physical = "Physical"
+digital = "Digital"

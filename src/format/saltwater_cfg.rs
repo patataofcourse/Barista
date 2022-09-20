@@ -8,7 +8,7 @@ use std::{
 };
 
 pub struct Config {
-    pub tickflows: HashMap<u16, String>,
+    pub btks: HashMap<u16, String>,
 }
 
 const MAGIC: &[u8; 4] = b"SCF\x02";
@@ -22,7 +22,7 @@ impl Config {
         if &magic_buffer != MAGIC {
             Err(io::Error::new(io::ErrorKind::Other, "invalid file"))?;
         }
-        let mut tickflows = HashMap::new();
+        let mut btks = HashMap::new();
         loop {
             let index = u16::read_from(&mut file, ByteOrder::LittleEndian)?;
             if index == 0xC000 {
@@ -33,16 +33,16 @@ impl Config {
             for _ in 0..file_len {
                 fname.push(u8::read_from(&mut file, ByteOrder::LittleEndian)? as char);
             }
-            tickflows.insert(index, fname);
+            btks.insert(index, fname);
         }
-        Ok(Self { tickflows })
+        Ok(Self { btks })
     }
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
         let fs = Fs::init()?;
         let mut file = File::create(&fs.sdmc()?, file.into())?;
         file.write(MAGIC)?;
-        for (index, string) in &self.tickflows {
+        for (index, string) in &self.btks {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;
             (string.len() as u16).write_to(&mut file, ByteOrder::LittleEndian)?;
             for chr in string.chars() {

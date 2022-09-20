@@ -183,7 +183,7 @@ impl MenuState {
                 println!("TO BE IMPLEMENTED");
                 println!();
                 //println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
-                println!("{:?}", crate::config().tickflows);
+                println!("{:?}", crate::config().btks);
             }
             SubMenu::Music => {
                 println!("Barista - Music");
