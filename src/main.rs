@@ -13,6 +13,7 @@ use ui_lib::BaristaUI;
 mod error;
 pub use self::error::{Error, Result};
 
+mod audio;
 mod format;
 mod launcher;
 mod scene;
@@ -55,10 +56,11 @@ fn main() {
     menu.render(&console, &versions);
 
     // Music test
-    let mut music_test =
-        format::bcstm::BCSTMFile::open_from_file("romfs:/audio/strm/bartender_construction.bcstm")
-            .unwrap();
-    //music_test.play();
+    let mut audio_player = audio::AudioManager::new();
+
+    // Initial values for audio player
+    audio_player.load("romfs:/audio/strm/bartender_construction.bcstm".to_string());
+    audio_player.play();
 
     // Init config
     *config_wrapped() =
@@ -82,8 +84,6 @@ fn main() {
             }
             MenuAction::ChangeMenu(_) | MenuAction::None | MenuAction::MoveCursor => {}
         }
-
-        music_test.tick().unwrap(); //TODO: test value, stop if false
     }
 
     unsafe {

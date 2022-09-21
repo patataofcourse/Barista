@@ -362,7 +362,6 @@ impl BCSTMFile {
 const CHANNEL_INFO: u32 = 0x4102;
 
 #[repr(u16)]
-#[allow(unused)]
 enum BlockType {
     InfoBlock = 0x4000,
     SeekBlock = 0x4001,
