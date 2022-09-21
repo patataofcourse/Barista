@@ -15,7 +15,7 @@ impl AudioManager {
     }
 
     pub fn load(&mut self, file: String) {
-        self.0.send(AudioMessage::LoadFile(file));
+        self.0.send(AudioMessage::LoadFile(file)).unwrap();
     }
 
     pub fn play(&mut self) {

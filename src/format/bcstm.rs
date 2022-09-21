@@ -158,11 +158,14 @@ impl BCSTMFile {
             loop_end / block_sample_count
         };
 
-        while u32::read_from(&mut file, endian)? != CHANNEL_INFO {}
-        {
-            let offset = u32::read_from(&mut file, endian)? as i64;
-            file.seek(SeekFrom::Current(offset + channel_count as i64 * 8 - 0xC))?;
-        }
+        //file.seek(SeekFrom::Current(0x10))?;
+
+        let track_ref_amt = u32::read_from(&mut file, endian)?;
+        file.seek(SeekFrom::Current(track_ref_amt as i64 * 8 + 8))?;
+        let channel0_info_offset = u32::read_from(&mut file, endian)?;
+        file.seek(SeekFrom::Current(channel0_info_offset as i64 - 8))?;
+        let channel0_adpcm_offset = u32::read_from(&mut file, endian)?;
+        file.seek(SeekFrom::Current(channel0_adpcm_offset as i64 - 8))?;
 
         // Get ADPCM data
         let mut adpcm_coefs = [[0; 16]; 2];
@@ -359,9 +362,10 @@ impl BCSTMFile {
     }
 }
 
-const CHANNEL_INFO: u32 = 0x4102;
+//const CHANNEL_INFO: u32 = 0x4102;
 
 #[repr(u16)]
+#[allow(unused)]
 enum BlockType {
     InfoBlock = 0x4000,
     SeekBlock = 0x4001,
