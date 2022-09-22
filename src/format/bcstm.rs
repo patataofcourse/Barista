@@ -104,7 +104,11 @@ impl BCSTMFile {
 
         let version = u32::read_from(&mut file, endian)?;
         if version != ninty_version!(2, 3, 1) {
-            Err(Error::OtherError(format!("BCSTM - unsupported revision {:X} // {:X}", ninty_version!(2,3,1), version)))?
+            Err(Error::OtherError(format!(
+                "BCSTM - unsupported revision {:X} // {:X}",
+                ninty_version!(2, 3, 1),
+                version
+            )))?
         }
 
         u32::read_from(&mut file, endian)?; // Complete filesize - unnecessary
@@ -147,7 +151,8 @@ impl BCSTMFile {
 
         file.seek(SeekFrom::Start(info_offset + 0x1C))?;
 
-        let channel_info_pos = u32::read_from(&mut file, endian)? as u64 + file.stream_position()? - 0x18;
+        let channel_info_pos =
+            u32::read_from(&mut file, endian)? as u64 + file.stream_position()? - 0x18;
 
         let encoding = u8::read_from(&mut file, endian)?;
         if encoding != 2 {
@@ -183,13 +188,13 @@ impl BCSTMFile {
         };
 
         // Get ADPCM data
-        let mut adpcm_coefs = [[0;   16]; 2];
+        let mut adpcm_coefs = [[0; 16]; 2];
         let mut adpcm_data = [[ndspAdpcmData::default(); 2]; 2];
-        
+
         for i in 0..channel_count {
-            file.seek(SeekFrom::Start(channel_info_pos + 4 + 8 * i as u64))?;
+            file.seek(SeekFrom::Start(channel_info_pos + 8 + 8 * i as u64))?;
             let adpcm_info_pos = u32::read_from(&mut file, endian)?;
-            file.seek(SeekFrom::Current(adpcm_info_pos as i64 - 4 - 8 * i as i64))?;
+            file.seek(SeekFrom::Current(adpcm_info_pos as i64 - 8 * (i+1) as i64 - 4))?;
 
             for j in 0..16 {
                 adpcm_coefs[i][j] = u16::read_from(&mut file, endian)?;
@@ -238,7 +243,7 @@ impl BCSTMFile {
             channel: [0, 0],
             wave_buf: [[ndspWaveBuf::default(); Self::BUFFER_COUNT]; 2],
             adpcm_data,
-            buffer_data: [buffer_data.clone(), buffer_data.clone()],
+            buffer_data: [buffer_data.clone(), buffer_data],
         };
 
         unsafe {

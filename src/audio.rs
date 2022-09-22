@@ -58,9 +58,8 @@ fn audio_main(rx: Receiver<AudioMessage>) {
         playing: false,
         rx,
     };
-    
-    loop{
 
+    loop {
         let msg = ctx
             .rx
             .recv_timeout(Duration::from_millis(20))
