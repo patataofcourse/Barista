@@ -17,6 +17,12 @@ use std::{
 
 static mut ACTIVE_NDSP_CHANNELS: u32 = 0;
 
+macro_rules! ninty_version {
+    ($major:literal, $minor:literal, $patch:literal) => {
+        $major << 24 + $minor << 16 + $patch << 8
+    };
+}
+
 #[derive(Clone)]
 pub struct LinearAllocator;
 
@@ -79,6 +85,10 @@ impl BCSTMFile {
     pub fn open_from_file(filename: impl Into<PathBuf>) -> Result<Self> {
         let mut file = File::open(filename.into())?;
 
+        // ************
+        // *  HEADER  *
+        // ************
+
         let mut magic_buf = [0u8; 4];
         file.read(&mut magic_buf)?;
         if magic_buf != [b'C', b'S', b'T', b'M'] {
@@ -90,8 +100,15 @@ impl BCSTMFile {
             0xFEFF => ByteOrder::LittleEndian,
             _ => Err(Error::OtherError(format!("BCSTM - Invalid BOM")))?,
         };
+        u16::read_from(&mut file, endian)?; // Header size - 0x40
 
-        file.seek(SeekFrom::Start(0x10))?;
+        let version = u32::read_from(&mut file, endian)?;
+        if version != ninty_version!(2, 3, 1) {
+            Err(Error::OtherError(format!("BCSTM - unsupported revision")))?
+        }
+
+        u32::read_from(&mut file, endian)?; // Complete filesize - unnecessary
+
         let section_block_count = u16::read_from(&mut file, endian)?;
         u16::read_from(&mut file, endian)?;
 
@@ -117,14 +134,17 @@ impl BCSTMFile {
             ))?
         };
         let info_offset = if let Some(c) = info_offset {
-            c
+            c as u64
         } else {
             Err(Error::OtherError(
                 "BCSTM: no info_offset section".to_string(),
             ))?
         };
 
-        file.seek(SeekFrom::Start(info_offset as u64 + 0x20))?;
+        file.seek(SeekFrom::Start(info_offset + 0x1C))?;
+
+        let channel_info_pos = u32::read_from(&mut file, endian)? as u64 + file.stream_position()? - 0x20;
+
         let encoding = u8::read_from(&mut file, endian)?;
         if encoding != 2 {
             Err(Error::OtherError(
@@ -158,19 +178,15 @@ impl BCSTMFile {
             loop_end / block_sample_count
         };
 
-        //file.seek(SeekFrom::Current(0x10))?;
-
-        let track_ref_amt = u32::read_from(&mut file, endian)?;
-        file.seek(SeekFrom::Current(track_ref_amt as i64 * 8 + 8))?;
-        let channel0_info_offset = u32::read_from(&mut file, endian)?;
-        file.seek(SeekFrom::Current(channel0_info_offset as i64 - 8))?;
-        let channel0_adpcm_offset = u32::read_from(&mut file, endian)?;
-        file.seek(SeekFrom::Current(channel0_adpcm_offset as i64 - 8))?;
-
         // Get ADPCM data
-        let mut adpcm_coefs = [[0; 16]; 2];
+        let mut adpcm_coefs = [[0;   16]; 2];
         let mut adpcm_data = [[ndspAdpcmData::default(); 2]; 2];
+        
         for i in 0..channel_count {
+            file.seek(SeekFrom::Start(channel_info_pos + 4 + 8 * i as u64))?;
+            let adpcm_info_pos = u32::read_from(&mut file, endian)?;
+            file.seek(SeekFrom::Current(adpcm_info_pos as i64 - 4 - 8 * i as i64))?;
+
             for j in 0..16 {
                 adpcm_coefs[i][j] = u16::read_from(&mut file, endian)?;
             }

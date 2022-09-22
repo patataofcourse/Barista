@@ -7,7 +7,7 @@ use ctru::{
     gfx::{Gfx, Screen},
     services::{apt::Apt, hid::Hid},
 };
-use std::panic::{self, PanicInfo};
+use std::{panic::{self, PanicInfo}, process};
 use ui_lib::BaristaUI;
 
 mod error;
@@ -124,7 +124,7 @@ fn panic_hook(info: &PanicInfo) {
     };
     unsafe {
         use ctru_sys::{
-            errorConf, errorDisp, errorInit, errorText, CFG_LANGUAGE_EN, ERROR_TEXT_WORD_WRAP,
+            aptExit, errorConf, errorDisp, errorInit, errorText, CFG_LANGUAGE_EN, ERROR_TEXT_WORD_WRAP,
         };
         let mut error_conf: errorConf = errorConf::default();
         errorInit(&mut error_conf, ERROR_TEXT_WORD_WRAP, CFG_LANGUAGE_EN);
@@ -132,5 +132,8 @@ fn panic_hook(info: &PanicInfo) {
 
         // Display the error
         errorDisp(&mut error_conf);
+        aptExit();
     }
+
+    process::exit(1);
 }
