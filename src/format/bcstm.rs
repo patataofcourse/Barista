@@ -19,7 +19,7 @@ static mut ACTIVE_NDSP_CHANNELS: u32 = 0;
 
 macro_rules! ninty_version {
     ($major:literal, $minor:literal, $patch:literal) => {
-        $major << 24 + $minor << 16 + $patch << 8
+        ($major << 24) + ($minor << 16) + ($patch << 8)
     };
 }
 
@@ -104,7 +104,7 @@ impl BCSTMFile {
 
         let version = u32::read_from(&mut file, endian)?;
         if version != ninty_version!(2, 3, 1) {
-            Err(Error::OtherError(format!("BCSTM - unsupported revision")))?
+            Err(Error::OtherError(format!("BCSTM - unsupported revision {:X} // {:X}", ninty_version!(2,3,1), version)))?
         }
 
         u32::read_from(&mut file, endian)?; // Complete filesize - unnecessary
@@ -141,9 +141,13 @@ impl BCSTMFile {
             ))?
         };
 
+        // ****************
+        // *  Info block  *
+        // ****************
+
         file.seek(SeekFrom::Start(info_offset + 0x1C))?;
 
-        let channel_info_pos = u32::read_from(&mut file, endian)? as u64 + file.stream_position()? - 0x20;
+        let channel_info_pos = u32::read_from(&mut file, endian)? as u64 + file.stream_position()? - 0x18;
 
         let encoding = u8::read_from(&mut file, endian)?;
         if encoding != 2 {
