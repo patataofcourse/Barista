@@ -194,7 +194,9 @@ impl BCSTMFile {
         for i in 0..channel_count {
             file.seek(SeekFrom::Start(channel_info_pos + 8 + 8 * i as u64))?;
             let adpcm_info_pos = u32::read_from(&mut file, endian)?;
-            file.seek(SeekFrom::Current(adpcm_info_pos as i64 - 8 * (i+1) as i64 - 4))?;
+            file.seek(SeekFrom::Current(
+                adpcm_info_pos as i64 - 8 * (i + 1) as i64 - 4,
+            ))?;
 
             for j in 0..16 {
                 adpcm_coefs[i][j] = u16::read_from(&mut file, endian)?;

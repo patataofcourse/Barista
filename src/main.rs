@@ -16,7 +16,9 @@ use ui_lib::BaristaUI;
 mod error;
 pub use self::error::{Error, Result};
 
+#[cfg(feature="audio")]
 mod audio;
+
 mod format;
 mod launcher;
 mod scene;
@@ -58,12 +60,15 @@ fn main() {
     let mut menu = MenuState::default();
     menu.render(&console, &versions);
 
-    // Music test
-    let mut audio_player = audio::AudioManager::new();
+    #[cfg(feature = "audio")]
+    {
+        // Music test
+        let mut audio_player = audio::AudioManager::new();
 
-    // Initial values for audio player
-    audio_player.load("romfs:/audio/strm/bartender_construction.bcstm".to_string());
-    audio_player.play();
+        // Initial values for audio player
+        audio_player.load("romfs:/audio/strm/bartender_construction.bcstm".to_string());
+        audio_player.play();
+    }
 
     // Init config
     *config_wrapped() =

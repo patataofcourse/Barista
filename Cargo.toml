@@ -20,3 +20,4 @@ lto = true
 [features]
 default = []
 jp = []
+audio = []
