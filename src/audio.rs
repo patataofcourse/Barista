@@ -5,35 +5,56 @@ use std::{
     time::Duration,
 };
 
-pub struct AudioManager(Sender<AudioMessage>);
+pub struct AudioManager {
+    tx: Sender<AudioMessage>,
+    is_loaded: bool,
+    is_playing: bool,
+}
 
 impl AudioManager {
     pub fn new() -> Self {
         let (tx, rx) = mpsc::channel();
         thread::spawn(move || audio_main(rx));
-        Self(tx)
+        Self {
+            tx,
+            is_loaded: false,
+            is_playing: false,
+        }
     }
 
     pub fn load(&mut self, file: String) {
-        self.0.send(AudioMessage::LoadFile(file)).unwrap();
+        self.is_loaded = true;
+        self.tx.send(AudioMessage::LoadFile(file)).unwrap();
     }
 
     pub fn play(&mut self) {
-        self.0.send(AudioMessage::Play).unwrap();
+        self.is_playing = self.is_loaded;
+        self.tx.send(AudioMessage::Play).unwrap();
     }
 
     pub fn pause(&mut self) {
-        self.0.send(AudioMessage::Play).unwrap();
+        self.is_playing = false;
+        self.tx.send(AudioMessage::Play).unwrap();
     }
 
     pub fn stop(&mut self) {
-        self.0.send(AudioMessage::Unload).unwrap();
+        self.is_playing = false;
+        self.is_loaded = false;
+        self.tx.send(AudioMessage::Unload).unwrap();
+    }
+
+    pub fn is_playing(&self) -> bool {
+        self.is_playing
+    }
+
+    pub fn is_loaded(&self) -> bool {
+        self.is_loaded
     }
 }
 
 impl Drop for AudioManager {
     fn drop(&mut self) {
-        self.0.send(AudioMessage::Exit).unwrap();
+        self.tx.send(AudioMessage::Exit).unwrap();
     }
 }
 

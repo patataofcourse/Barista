@@ -16,7 +16,7 @@ use ui_lib::BaristaUI;
 mod error;
 pub use self::error::{Error, Result};
 
-#[cfg(feature="audio")]
+#[cfg(feature = "audio")]
 mod audio;
 
 mod format;
@@ -30,6 +30,9 @@ pub(crate) mod plgldr;
 use launcher::GameVer;
 
 static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
+
+#[cfg(feature = "audio")]
+static mut AUDIO: Option<*const audio::AudioManager> = None;
 
 fn main() {
     let apt = Apt::init().unwrap();
@@ -60,14 +63,25 @@ fn main() {
     let mut menu = MenuState::default();
     menu.render(&console, &versions);
 
+    #[allow(unused)]
+    let mut audio_player;
+
+    #[allow(unused)]
+    #[cfg(not(feature = "audio"))]
+    {
+        audio_player = ();
+    }
+
     #[cfg(feature = "audio")]
     {
         // Music test
-        let mut audio_player = audio::AudioManager::new();
+        audio_player = audio::AudioManager::new();
 
         // Initial values for audio player
         audio_player.load("romfs:/audio/strm/bartender_construction.bcstm".to_string());
         audio_player.play();
+
+        unsafe { AUDIO = Some(&audio_player) }
     }
 
     // Init config
@@ -89,6 +103,14 @@ fn main() {
             MenuAction::Run => {
                 game_to_load = Some(versions[menu.cursor as usize].clone());
                 break;
+            }
+            #[cfg(feature = "audio")]
+            MenuAction::ToggleAudio => {
+                if audio_player.is_playing() {
+                    audio_player.pause()
+                } else {
+                    audio_player.play()
+                }
             }
             MenuAction::ChangeMenu(_) | MenuAction::None | MenuAction::MoveCursor => {}
         }
@@ -114,6 +136,11 @@ fn config() -> &'static mut format::saltwater_cfg::Config {
 
 fn config_wrapped() -> &'static mut Option<format::saltwater_cfg::Config> {
     unsafe { &mut CONFIG }
+}
+
+#[cfg(feature = "audio")]
+fn audio<'a>() -> &'a audio::AudioManager {
+    unsafe { &*AUDIO.expect("Audio not initialized") }
 }
 
 fn panic_hook(info: &PanicInfo) {

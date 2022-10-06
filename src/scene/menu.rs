@@ -27,6 +27,8 @@ pub enum MenuAction {
     Run,
     Exit,
     MoveCursor,
+    #[cfg(feature="audio")]
+    ToggleAudio,
 }
 
 impl Default for MenuState {
@@ -121,6 +123,8 @@ impl MenuState {
                 self.cursor = 0
             }
             MenuAction::MoveCursor => {}
+            #[cfg(feature = "audio")]
+            MenuAction::ToggleAudio => {}
         }
         self.render(console, versions);
     }
@@ -181,16 +185,35 @@ impl MenuState {
                 println!("Barista - Set up mods");
                 println!();
                 println!("TO BE IMPLEMENTED");
-                println!();
-                //println!(" [{}] Back", if self.cursor == 0 {"*"} else {" "})
                 println!("{:?}", crate::config().btks);
+                println!();
+                println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
             }
             SubMenu::Music => {
                 println!("Barista - Music");
                 println!();
-                println!("TO BE IMPLEMENTED");
-                println!();
-                println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
+                let pos;
+                #[cfg(feature = "audio")]
+                {
+                    pos = 1;
+                    println!("Current status: very broken");
+                    println!(
+                        "[{}] {}",
+                        if self.cursor == 0 { "*"} else {" "},
+                        if crate::audio().is_playing() {
+                            "Disable"
+                        } else {
+                            "Enable"
+                        }
+                    );
+                    println!();
+                }
+                #[cfg(not(feature = "audio"))]
+                {
+                    pos = 0;
+                    println!("TO BE IMPLEMENTED\n");
+                }
+                println!(" [{}] Back", if self.cursor == pos { "*" } else { " " })
             }
             SubMenu::Options => {
                 println!("Barista - Settings");
