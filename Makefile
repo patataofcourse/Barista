@@ -13,9 +13,11 @@ BANNERTOOL 	:= $(DEVKITPRO)/tools/bin/bannertool
 ifeq ($(DEBUG), 1)
 PROFILE 	:= debug
 CARGOFLAGS 	:=
+SYMBOLS		?= 1
 else
 PROFILE 	:= release
 CARGOFLAGS  := --release
+SYMBOLS		?= 0
 endif
 ifneq ($(FEATURES),)
 CARGOFLAGS	+= --features=$(FEATURES)
@@ -72,6 +74,11 @@ endif
 %.elf: plgldr
 	@xargo build $(CARGOFLAGS)
 	@$(NM) -Cn $@ > $(basename $@).lst
+ifeq ($(SYMBOLS), 1)
+	@cp $(basename $@).lst romfs
+else
+	@rm -f romfs/$(basename $(notdir $@)).lst
+endif
 
 %.smdh:
 	@$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" $(basename $@).smdh
@@ -86,6 +93,7 @@ clean:
 	@echo "clean ..."
 	@rm -rf target
 	@rm -rf dist
+	@rm -f romfs/barista.lst
 	@cd plgldr && make clean --no-print-directory
 
 cleanenv: clean

@@ -4,6 +4,8 @@ dist/
 **/build/
 **/lib/
 
+romfs/barista.lst
+
 .vscode
 
 *.rlib

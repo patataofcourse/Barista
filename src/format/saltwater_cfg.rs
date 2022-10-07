@@ -39,6 +39,7 @@ impl Config {
     }
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
+        //TODO: non-ASCII
         let fs = Fs::init()?;
         let mut file = File::create(&fs.sdmc()?, file.into())?;
         file.write(MAGIC)?;
@@ -46,7 +47,7 @@ impl Config {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;
             (string.len() as u16).write_to(&mut file, ByteOrder::LittleEndian)?;
             for chr in string.chars() {
-                let chru8 = chr as u8; // should already be ASCII
+                let chru8 = chr as u8;
                 chru8.write_to(&mut file, ByteOrder::LittleEndian)?;
             }
         }

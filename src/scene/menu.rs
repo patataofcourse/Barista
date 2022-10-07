@@ -51,6 +51,9 @@ impl SubMenu {
     ];
     const ACTIONS_RUN: [MenuAction; 2] = [MenuAction::Run, MenuAction::ChangeMenu(SubMenu::Main)];
     const ACTIONS_SETUP: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
+    #[cfg(feature = "audio")]
+    const ACTIONS_MUSIC: [MenuAction; 2] = [MenuAction::ToggleAudio, MenuAction::ChangeMenu(SubMenu::Main)];
+    #[cfg(not(feature = "audio"))]
     const ACTIONS_MUSIC: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
     const ACTIONS_OPTIONS: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
 
@@ -197,8 +200,9 @@ impl MenuState {
                 {
                     pos = 1;
                     println!("Current status: very broken");
+                    println!();
                     println!(
-                        "[{}] {}",
+                        " [{}] {}",
                         if self.cursor == 0 { "*"} else {" "},
                         if crate::audio().is_playing() {
                             "Disable"
@@ -206,7 +210,6 @@ impl MenuState {
                             "Enable"
                         }
                     );
-                    println!();
                 }
                 #[cfg(not(feature = "audio"))]
                 {
