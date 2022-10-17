@@ -114,7 +114,7 @@ doc:
 fmt:
 	@xargo fmt
 
-test: debug
+test: dist
 	@if which citra 2> /dev/null > /dev/null;\
 		then citra $(TARGET)/$(CRATE_NAME).elf;\
 		else flatpak run org.citra_emu.citra $(TARGET)/$(CRATE_NAME).elf;\
