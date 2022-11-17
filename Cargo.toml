@@ -3,7 +3,7 @@ name = "barista"
 description = "A launcher for Rhythm Heaven Megamix mods"
 authors = ["patataofcourse"]
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 ctru-rs = { git = "https://github.com/rust3ds/ctru-rs.git" }

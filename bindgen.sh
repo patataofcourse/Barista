@@ -1,14 +1,5 @@
 #!/usr/bin/env bash
 
-clang_version=$1
-
-if [ -z "$clang_version" ]; then
-    echo "  usage: ./bindgen.sh <clang_version>"
-    echo "example: ./bindgen.sh 5.0.0"
-    echo "Check your current version with \`clang -v\`."
-    exit 1
-fi
-
 set -euxo pipefail
 
 bindgen "library/plgldr/include/plgldr.h" \
@@ -25,7 +16,6 @@ bindgen "library/plgldr/include/plgldr.h" \
     --target=arm-none-eabi \
     --sysroot=$DEVKITARM/arm-none-eabi \
     -isystem$DEVKITARM/arm-none-eabi/include \
-    -isystem/usr/lib/clang/$clang_version/include \
     -I$DEVKITPRO/libctru/include \
     -mfloat-abi=hard \
     -march=armv6k \
