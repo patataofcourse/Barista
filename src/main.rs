@@ -4,14 +4,14 @@ extern crate barista_ui as ui_lib;
 
 use ctru::{
     console::Console,
-    gfx::{Gfx, Screen},
+    gfx::Gfx,
     services::{apt::Apt, hid::Hid},
 };
 use std::{
     panic::{self, PanicInfo},
     process,
 };
-use ui_lib::BaristaUI;
+use ui_lib::{BaristaUI, Screen};
 
 mod error;
 pub use self::error::{Error, Result};
@@ -35,10 +35,11 @@ static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 static mut AUDIO: Option<*const audio::AudioManager> = None;
 
 fn main() {
+    ctru::init();
     let apt = Apt::init().unwrap();
     let hid = Hid::init().unwrap();
-    let gfx = Gfx::default();
-    let console = Console::init(Screen::Bottom);
+    let gfx = Gfx::init().unwrap();
+    let console = Console::init(gfx.bottom_screen.borrow_mut());
     unsafe {
         ctru_sys::romfsMountSelf("romfs\0".as_ptr());
         ctru_sys::ndspInit();
@@ -121,9 +122,9 @@ fn main() {
         ctru_sys::ndspExit();
     }
 
+    drop(console);
     drop(gfx);
     drop(hid);
-    drop(console);
 
     if let Some(c) = game_to_load {
         launcher::launch(c)

@@ -17,6 +17,7 @@ dependencies = [
 name = "barista-ui"
 version = "0.1.0"
 dependencies = [
+ "citro2d-sys",
  "ctru-rs",
  "ctru-sys",
 ]
@@ -43,27 +44,107 @@ dependencies = [
 ]
 
 [[package]]
+name = "cfg-if"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "citro2d-sys"
+version = "0.1.0"
+dependencies = [
+ "libc",
+]
+
+[[package]]
+name = "const-zero"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1d3d68618a1f2c2d86e0bd2adec82e31960ca11aaeb5f353ff01746a4e08f36"
+
+[[package]]
 name = "ctru-rs"
 version = "0.7.1"
+source = "git+https://github.com/rust3ds/ctru-rs.git#4e221667dc2e3e22d1a93539d70609d8aab9045b"
 dependencies = [
  "bitflags",
+ "cfg-if",
+ "const-zero",
  "ctru-sys",
  "libc",
+ "linker-fix-3ds",
+ "once_cell",
+ "pthread-3ds",
+ "toml",
  "widestring",
 ]
 
 [[package]]
 name = "ctru-sys"
-version = "0.4.0"
+version = "0.4.1"
+source = "git+https://github.com/rust3ds/ctru-rs.git#4e221667dc2e3e22d1a93539d70609d8aab9045b"
 dependencies = [
  "libc",
 ]
 
 [[package]]
 name = "libc"
-version = "0.2.132"
+version = "0.2.137"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8371e4e5341c3a96db127eb2465ac681ced4c433e01dd0e938adbef26ba93ba5"
+checksum = "fc7fcc620a3bff7cdd7a365be3376c97191aeaccc2a603e600951e452615bf89"
+
+[[package]]
+name = "linker-fix-3ds"
+version = "0.1.0"
+source = "git+https://github.com/rust3ds/rust-linker-fix-3ds.git#ed1ec9c79e1a34d597018b7ec6f6eedaf0628062"
+dependencies = [
+ "ctru-sys",
+ "libc",
+]
+
+[[package]]
+name = "once_cell"
+version = "1.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86f0b0d4bf799edbc74508c1e8bf170ff5f41238e5f8225603ca7caaae2b7860"
+
+[[package]]
+name = "pthread-3ds"
+version = "0.1.0"
+source = "git+https://github.com/rust3ds/pthread-3ds.git#c132988a9a102673382e5a7ed292e69cc81e9e3f"
+dependencies = [
+ "ctru-sys",
+ "libc",
+ "spin",
+ "static_assertions",
+]
+
+[[package]]
+name = "serde"
+version = "1.0.147"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d193d69bae983fc11a79df82342761dfbf28a99fc8d203dca4c3c1b590948965"
+
+[[package]]
+name = "spin"
+version = "0.9.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f6002a767bff9e83f8eeecf883ecb8011875a21ae8da43bffb817a57e78cc09"
+
+[[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "toml"
+version = "0.5.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d82e1a7758622a465f8cee077614c73484dac5b836c02ff6a40d5d1010324d7"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "widestring"

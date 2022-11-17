@@ -7,5 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ctru-rs = { path = "../../3ds-rust-env/ctru-rs/ctru-rs" }
-ctru-sys = { path = "../../3ds-rust-env/ctru-rs/ctru-sys" }
+ctru-rs = { git = "https://github.com/rust3ds/ctru-rs.git" }
+ctru-sys = { git = "https://github.com/rust3ds/ctru-rs.git" }
+citro2d-sys = { path = "../citro2d" }

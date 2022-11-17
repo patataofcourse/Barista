@@ -1,7 +1,6 @@
 const PI: f32 = std::f64::consts::PI as f32;
 
-use ctru::gfx::Screen;
-use ctru_sys::{
+use citro2d_sys::{
     C2D_SpriteSheet,
     C2D_SpriteSheetGetImage,
     C2D_DrawParams,
@@ -20,6 +19,13 @@ use ctru_sys::{
 };
 use std::collections::HashMap;
 
+#[repr(u32)]
+#[derive(Clone, Debug)]
+pub enum Screen {
+    Top = 0,
+    Bottom = 1
+}
+
 pub struct BaristaUI<'a> {
     pub top_scene: Option<&'a Scene<'a>>,
     pub bottom_scene: Option<&'a Scene<'a>>,
@@ -37,14 +43,14 @@ impl<'a> BaristaUI <'a> {
 
     pub fn init() -> Self {
         unsafe {
-            ctru_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
-            ctru_sys::C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
-            ctru_sys::C2D_Prepare();
+            citro2d_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+            citro2d_sys::C2D_Init(C2D_DEFAULT_MAX_OBJECTS.into());
+            citro2d_sys::C2D_Prepare();
             BaristaUI {
                 bottom_scene: None,
                 top_scene: None,
-                top_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
-                bottom_screen_target: ctru_sys::C2D_CreateScreenTarget(Screen::Bottom as u32, GFX_LEFT),
+                top_screen_target: citro2d_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
+                bottom_screen_target: citro2d_sys::C2D_CreateScreenTarget(Screen::Bottom as u32, GFX_LEFT),
             }
         }
     }
@@ -64,7 +70,7 @@ impl<'a> BaristaUI <'a> {
                 },
                 None => (false, vec![]),
             };
-            ctru_sys::C3D_FrameEnd(0);
+            citro2d_sys::C3D_FrameEnd(0);
             [out_top, out_bottom]
         }
     }
@@ -104,8 +110,8 @@ impl Scene<'_> {
         unsafe {
             C2D_TargetClear(self.target, 0xFFFFFFFF);
             C2D_Flush();
-            ctru_sys::C3D_FrameDrawOn(self.target);
-            ctru_sys::C2D_SceneSize(
+            citro2d_sys::C3D_FrameDrawOn(self.target);
+            citro2d_sys::C2D_SceneSize(
                 (*self.target).frameBuf.width.into(),
                 (*self.target).frameBuf.height.into(),
                 (*self.target).linked,
@@ -193,7 +199,7 @@ impl SpriteSheet {
     pub fn from_file(filename: &'static str) -> Option<Self> {
         let val: C2D_SpriteSheet;
         unsafe {
-            val = ctru_sys::C2D_SpriteSheetLoad((filename.to_string() + "\0").as_ptr());
+            val = citro2d_sys::C2D_SpriteSheetLoad((filename.to_string() + "\0").as_ptr());
         }
         if val.is_null() {
             None

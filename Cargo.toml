@@ -5,9 +5,9 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-ctru-rs = { path = "../3ds-rust-env/ctru-rs/ctru-rs" }
-ctru-sys = { path = "../3ds-rust-env/ctru-rs/ctru-sys" }
-barista-ui = { path = "ui" }
+ctru-rs = { git = "https://github.com/rust3ds/ctru-rs.git" }
+ctru-sys = { git = "https://github.com/rust3ds/ctru-rs.git" }
+barista-ui = { path = "library/ui" }
 libc = "0.2"
 bytestream = "0.4"
 

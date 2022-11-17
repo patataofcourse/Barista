@@ -6,7 +6,6 @@ DEBUG 		?= 1
 FEATURES 	?=
 
 NM 			:= $(DEVKITARM)/bin/arm-none-eabi-nm
-3DSXTOOL 	:= $(DEVKITPRO)/tools/bin/3dsxtool
 SMDHTOOL 	:= $(DEVKITPRO)/tools/bin/smdhtool
 BANNERTOOL 	:= $(DEVKITPRO)/tools/bin/bannertool
 
@@ -25,7 +24,7 @@ endif
 
 CARGOFLAGS  += --color=always
 
-TARGET		:= target/3ds/$(PROFILE)
+TARGET		:= target/armv6k-nintendo-3ds/$(PROFILE)
 DIST		:= dist/barista_$(PROFILE)
 ROMFS 		:= romfs
 RSF			:= app.rsf
@@ -38,13 +37,6 @@ PROG_ICON 	:= icon.png
 
 # Prepend devkitarm bin to PATH, in case there is another arm-none-eabi-gcc installed
 export PATH := $(DEVKITARM)/bin:$(PATH)
-
-# Xargo
-export XARGO_RUST_SRC	= ../3ds-rust-env/rust-3ds-fork/library
-export RUST_TARGET_PATH	= $(shell pwd)
-
-# Rust fork needs this
-export CC_3ds = $(DEVKITARM)/bin/arm-none-eabi-gcc
 
 .PHONY: all clean dist plgldr check doc fmt test update
 
@@ -72,7 +64,7 @@ endif
 	@makerom -f cia -o $@ -exefslogo -elf $(basename $@).elf -rsf app.rsf -ver 0 -icon $(dir $@)icon.icn -banner $(dir $@)banner.bnr
 
 %.elf: plgldr
-	@xargo build $(CARGOFLAGS)
+	@cargo 3ds build $(CARGOFLAGS)
 	@$(NM) -Cn $@ > $(basename $@).lst
 ifeq ($(SYMBOLS), 1)
 	@cp $(basename $@).lst romfs
@@ -96,10 +88,6 @@ clean:
 	@rm -f romfs/barista.lst
 	@cd plgldr && make clean --no-print-directory
 
-cleanenv: clean
-	@rm -rf ~/.xargo
-
-
 ### C libraries ###
 
 plgldr:
@@ -109,19 +97,16 @@ plgldr:
 ### Useful Cargo stuff ###
 
 doc:
-	@xargo doc --open
+	@cargo doc --open
 
 fmt:
-	@xargo fmt
+	@cargo fmt
 
 test: dist
-	@if which citra 2> /dev/null > /dev/null;\
-		then citra $(TARGET)/$(CRATE_NAME).elf;\
-		else flatpak run org.citra_emu.citra $(TARGET)/$(CRATE_NAME).elf;\
-	fi
+	@cargo 3ds run
 
 check:
-	@xargo check --features=$(FEATURES)
+	@cargo check --features=$(FEATURES)
 
 update:
-	@xargo update
+	@cargo update

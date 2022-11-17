@@ -1,6 +1,5 @@
-use ctru::gfx::Screen;
 use std::{collections::HashMap, iter::FromIterator};
-use ui_lib::{BaristaUI, Image, Object, Scene, SpriteSheet, StaticObject};
+use ui_lib::{BaristaUI, Image, Object, Scene, SpriteSheet, StaticObject, Screen};
 
 pub struct BaristaSprites {
     pub depth: f32,

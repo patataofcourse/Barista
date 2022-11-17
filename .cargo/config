@@ -1,18 +1,9 @@
 [build]
-target = "3ds"
+target = ["armv6k-nintendo-3ds"]
 
-[target.3ds]
-linker = "arm-none-eabi-gcc"
-rustflags = [
-    "-Clink-arg=-specs=3dsx.specs",
-    "-Clink-arg=-mfloat-abi=hard",
-    "-Clink-arg=-march=armv6k",
-    "-Clink-arg=-mtune=mpcore",
-    "-Clink-arg=-mfpu=vfp",
-    "-Clink-arg=-mtp=soft",
-    "-Clink-arg=-z",
-    "-Clink-arg=muldefs",
-    "-Clink-arg=-lgcc",
-    "-Clink-arg=-lsysbase",
-    "-Clink-arg=-lc"
-]
+[target.armv6k-nintendo-3ds]
+#cc = "/opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc"
+#cxx = "/opt/devkitpro/devkitARM/bin/arm-none-eabi-g++"
+ar = "/opt/devkitpro/devkitARM/bin/arm-none-eabi-ar"
+#ranlib = "/opt/devkitpro/devkitARM/bin/arm-none-eabi-ranlib"
+linker = "/opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc"
