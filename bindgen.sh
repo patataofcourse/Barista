@@ -11,7 +11,7 @@ fi
 
 set -euxo pipefail
 
-bindgen "c/include/plgldr.h" \
+bindgen "library/plgldr/include/plgldr.h" \
     --rust-target nightly \
     --use-core \
     --distrust-clang-mangling \
@@ -21,10 +21,6 @@ bindgen "c/include/plgldr.h" \
     --no-prepend-enum-name \
     --generate "functions,types,vars" \
     --blacklist-type "u(8|16|32|64)" \
-    --blacklist-type "__builtin_va_list" \
-    --blacklist-type "__va_list" \
-    --opaque-type "MiiData" \
-    --with-derive-default \
     -- \
     --target=arm-none-eabi \
     --sysroot=$DEVKITARM/arm-none-eabi \

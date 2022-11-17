@@ -7,6 +7,7 @@ FEATURES 	?=
 
 NM 			:= $(DEVKITARM)/bin/arm-none-eabi-nm
 SMDHTOOL 	:= $(DEVKITPRO)/tools/bin/smdhtool
+3DSXTOOL	:= $(DEVKITPRO)/tools/bin/3dsxtool
 BANNERTOOL 	:= $(DEVKITPRO)/tools/bin/bannertool
 
 ifeq ($(DEBUG), 1)
@@ -75,9 +76,8 @@ endif
 %.smdh:
 	@$(SMDHTOOL) --create "${PROG_NAME}" "${PROG_DESC}" "${PROG_AUTHOR}" "${PROG_ICON}" $(basename $@).smdh
 
-%.3dsx: %.elf %.smdh
-	@$(3DSXTOOL) $(basename $@).elf $(basename $@).3dsx --smdh=$(basename $@).smdh --romfs=$(ROMFS)
-
+%.3dsx: %.elf %_.smdh
+	@$(3DSXTOOL) $(basename $@).elf $(basename $@).3dsx --smdh=$(basename $@)_.smdh --romfs=$(ROMFS)
 
 ### Clean
 
@@ -86,27 +86,27 @@ clean:
 	@rm -rf target
 	@rm -rf dist
 	@rm -f romfs/barista.lst
-	@cd plgldr && make clean --no-print-directory
+	@cd library/plgldr && make clean --no-print-directory
 
 ### C libraries ###
 
 plgldr:
-	@make --no-print-directory -C plgldr
+	@make --no-print-directory -C library/plgldr
 
 
 ### Useful Cargo stuff ###
 
 doc:
-	@cargo doc --open
+	@cargo 3ds doc --open
 
 fmt:
-	@cargo fmt
+	@cargo 3ds fmt
 
 test: dist
 	@cargo 3ds run
 
 check:
-	@cargo check --features=$(FEATURES)
+	@cargo 3ds check --features=$(FEATURES)
 
 update:
-	@cargo update
+	@cargo 3ds update
