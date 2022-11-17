@@ -15,19 +15,14 @@ BANNERTOOL 	:= $(DEVKITPRO)/tools/bin/bannertool
 CARGOFLAGS  := --color=always
 
 ifeq ($(CARGO3DS),0)
-
 CARGO 		:= cargo
 CARGOFLAGS  += --target=armv6k-nintendo-3ds
-
 # build STD if it doesn't exist
 ifeq ($(wildcard $(STD)),)
 CARGOFLAGS += -Zbuild-std
 endif
-
 else
-
 CARGO		:= cargo 3ds
-
 endif
 
 
@@ -56,9 +51,11 @@ PROG_ICON 	:= icon.png
 
 export RUSTFLAGS = -L$(DEVKITPRO)/libctru/lib -lctru
 
-.PHONY: all clean dist plgldr check doc fmt test update
+.PHONY: all clean dist check doc fmt test update
 
 all: dist
+
+FORCE:
 
 ### Main executable ###
 
@@ -81,7 +78,7 @@ endif
 	@bannertool makebanner -i banner.png -a banner.wav -o $(dir $@)banner.bnr
 	@makerom -f cia -o $@ -exefslogo -elf $(basename $@).elf -rsf app.rsf -ver 0 -icon $(dir $@)icon.icn -banner $(dir $@)banner.bnr
 
-%.elf: plgldr
+%.elf: FORCE
 	@$(CARGO) build $(CARGOFLAGS)
 	@$(NM) -Cn $@ > $(basename $@).lst
 ifeq ($(SYMBOLS), 1)
@@ -102,12 +99,6 @@ clean:
 	@rm -rf dist
 	@rm -f romfs/barista.lst
 	@cd library/plgldr && make clean --no-print-directory
-
-### C libraries ###
-
-plgldr:
-	@make --no-print-directory -C library/plgldr
-
 
 ### Useful Cargo stuff ###
 

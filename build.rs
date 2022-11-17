@@ -1,6 +1,9 @@
 use std::env;
 
 fn main() {
-    println!("cargo:rustc-link-search=native=library/plgldr/lib");
-    println!("cargo:rustc-link-lib=static=plgldr")
+    cc::Build::new()
+    .file("library/plgldr/src/plgldr.c")
+    .include("library/plgldr/include")
+    .include(env!("DEVKITPRO").to_owned() + "/libctru/include")
+    .compile("plgldr")
 }

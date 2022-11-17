@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "barista-ui",
  "bytestream",
+ "cc",
  "ctru-rs",
  "ctru-sys",
  "libc",
@@ -42,6 +43,12 @@ checksum = "04f720842a717d6afaf69fee2dc69b771edc165f12cc3eb1b0e8eeef53a86454"
 dependencies = [
  "byteorder",
 ]
+
+[[package]]
+name = "cc"
+version = "1.0.76"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76a284da2e6fe2092f2353e51713435363112dfd60030e22add80be333fb928f"
 
 [[package]]
 name = "cfg-if"
