@@ -122,7 +122,7 @@ fmt:
 	@cargo fmt
 
 test: dist
-	@$(CARGO) run $(CARGOFLAGS)
+	@$(CARGO) run --features=$(FEATURES) $(CARGOFLAGS)
 
 check:
 	@$(CARGO) check --features=$(FEATURES) $(CARGOFLAGS)
