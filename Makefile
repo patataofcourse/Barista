@@ -116,16 +116,16 @@ plgldr:
 ### Useful Cargo stuff ###
 
 doc:
-	@$(CARGO) doc --open
+	@$(CARGO) doc --open $(CARGOFLAGS)
 
 fmt:
-	@$(CARGO) fmt
+	@cargo fmt
 
 test: dist
-	@$(CARGO) run
+	@$(CARGO) run $(CARGOFLAGS)
 
 check:
-	@$(CARGO) check --features=$(FEATURES)
+	@$(CARGO) check --features=$(FEATURES) $(CARGOFLAGS)
 
 update:
-	@$(CARGO) update
+	@cargo update

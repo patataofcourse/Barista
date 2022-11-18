@@ -1,5 +1,5 @@
 use std::{collections::HashMap, iter::FromIterator};
-use ui_lib::{BaristaUI, Image, Object, Scene, SpriteSheet, StaticObject, Screen};
+use ui_lib::{BaristaUI, Image, Object, Scene, Screen, SpriteSheet, StaticObject};
 
 pub struct BaristaSprites {
     pub depth: f32,

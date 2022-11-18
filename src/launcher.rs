@@ -96,7 +96,7 @@ impl Into<[u32; 32]> for LoaderConfig {
 pub fn get_available_games() -> Vec<GameVer> {
     let mut available_games = vec![];
     unsafe {
-        amInit();
+        assert!(amInit() == 0);
         let null: *mut AM_TitleEntry = &mut AM_TitleEntry {
             titleID: 0,
             size: 0,

@@ -41,8 +41,8 @@ fn main() {
     let gfx = Gfx::init().unwrap();
     let console = Console::init(gfx.bottom_screen.borrow_mut());
     unsafe {
-        ctru_sys::romfsMountSelf("romfs\0".as_ptr());
-        ctru_sys::ndspInit();
+        assert!(ctru_sys::romfsMountSelf("romfs\0".as_ptr()) == 0);
+        assert!(ctru_sys::ndspInit() == 0);
         ctru_sys::ndspSetOutputMode(ctru_sys::NDSP_OUTPUT_STEREO);
     }
 
@@ -118,7 +118,7 @@ fn main() {
     }
 
     unsafe {
-        ctru_sys::romfsUnmount("romfs\0".as_ptr());
+        assert!(ctru_sys::romfsUnmount("romfs\0".as_ptr()) == 0);
         ctru_sys::ndspExit();
     }
 

@@ -27,7 +27,7 @@ pub enum MenuAction {
     Run,
     Exit,
     MoveCursor,
-    #[cfg(feature="audio")]
+    #[cfg(feature = "audio")]
     ToggleAudio,
 }
 
@@ -52,7 +52,10 @@ impl SubMenu {
     const ACTIONS_RUN: [MenuAction; 2] = [MenuAction::Run, MenuAction::ChangeMenu(SubMenu::Main)];
     const ACTIONS_SETUP: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
     #[cfg(feature = "audio")]
-    const ACTIONS_MUSIC: [MenuAction; 2] = [MenuAction::ToggleAudio, MenuAction::ChangeMenu(SubMenu::Main)];
+    const ACTIONS_MUSIC: [MenuAction; 2] = [
+        MenuAction::ToggleAudio,
+        MenuAction::ChangeMenu(SubMenu::Main),
+    ];
     #[cfg(not(feature = "audio"))]
     const ACTIONS_MUSIC: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
     const ACTIONS_OPTIONS: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
@@ -203,7 +206,7 @@ impl MenuState {
                     println!();
                     println!(
                         " [{}] {}",
-                        if self.cursor == 0 { "*"} else {" "},
+                        if self.cursor == 0 { "*" } else { " " },
                         if crate::audio().is_playing() {
                             "Disable"
                         } else {
