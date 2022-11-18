@@ -54,7 +54,11 @@ PROG_DESC 	:= A launcher for Rhythm Heaven Megamix mods
 PROG_AUTHOR := patataofcourse, RHModding
 PROG_ICON 	:= icon.png
 
+ifeq ($(DEBUG),0)
 export RUSTFLAGS = -L$(DEVKITPRO)/libctru/lib -lctru
+else
+export RUSTFLAGS = -L$(DEVKITPRO)/libctru/lib -lctrud
+endif
 
 .PHONY: all clean dist plgldr check doc fmt test update
 
