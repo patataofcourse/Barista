@@ -62,7 +62,7 @@ fn main() {
 
     // Init menu
     let mut menu = MenuState::default();
-    menu.render(&console, &versions);
+    menu.render(&console, &versions).unwrap();
 
     #[allow(unused)]
     let mut audio_player;
@@ -87,7 +87,7 @@ fn main() {
 
     // Init config
     *config_wrapped() =
-        Some(format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap());
+        Some(format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap_or_default());
 
     // Main loop
     while apt.main_loop() {
@@ -97,7 +97,7 @@ fn main() {
 
         ui.render();
 
-        menu.run(&hid, &console, &versions);
+        menu.run(&hid, &console, &versions).unwrap();
 
         match &menu.action {
             MenuAction::Exit => break,

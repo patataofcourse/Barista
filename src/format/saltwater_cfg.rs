@@ -7,6 +7,7 @@ use std::{
     path::PathBuf,
 };
 
+#[derive(Default)]
 pub struct Config {
     pub btks: HashMap<u16, String>,
 }

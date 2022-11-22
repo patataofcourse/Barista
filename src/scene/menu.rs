@@ -1,7 +1,12 @@
-use crate::launcher::GameVer;
+use std::ffi::OsStr;
+
+use crate::{launcher::GameVer, Result};
 use ctru::{
     console::Console,
-    services::hid::{Hid, KeyPad},
+    services::{
+        fs::{self, Fs},
+        hid::{Hid, KeyPad},
+    },
 };
 
 #[derive(Clone, Debug)]
@@ -88,12 +93,12 @@ impl MenuState {
         self.sub_menu.cursor_option_len(versions)
     }
 
-    pub fn run(&mut self, hid: &Hid, console: &Console, versions: &Vec<GameVer>) {
+    pub fn run(&mut self, hid: &Hid, console: &Console, versions: &Vec<GameVer>) -> Result<()> {
         self.action = MenuAction::None;
 
         if hid.keys_down().contains(KeyPad::KEY_START) {
             self.action = MenuAction::Exit;
-            return;
+            return Ok(());
         }
 
         if hid.keys_down().contains(KeyPad::KEY_DUP) && self.cursor > 0 {
@@ -123,7 +128,7 @@ impl MenuState {
         }
 
         match &self.action {
-            MenuAction::Exit | MenuAction::Run | MenuAction::None => return,
+            MenuAction::Exit | MenuAction::Run | MenuAction::None => return Ok(()),
             MenuAction::ChangeMenu(c) => {
                 self.sub_menu = *c;
                 self.cursor = 0
@@ -132,10 +137,10 @@ impl MenuState {
             #[cfg(feature = "audio")]
             MenuAction::ToggleAudio => {}
         }
-        self.render(console, versions);
+        self.render(console, versions)
     }
 
-    pub fn render(&mut self, console: &Console, versions: &Vec<GameVer>) {
+    pub fn render(&mut self, console: &Console, versions: &Vec<GameVer>) -> Result<()> {
         console.clear();
         match &self.sub_menu {
             SubMenu::Main => {
@@ -188,10 +193,25 @@ impl MenuState {
                 );
             }
             SubMenu::SetUp => {
+                let fs = Fs::init()?;
                 println!("Barista - Set up mods");
                 println!();
                 println!("TO BE IMPLEMENTED");
                 println!("{:?}", crate::config().btks);
+                println!("{:?}", {
+                    //TODO: do this ONCE and that's it
+                    let mut v = vec![];
+                    let mut sdmc = fs.sdmc()?;
+                    let mut iter = fs::read_dir(&sdmc, "/spicerack/mods")?;
+                    for f in iter {
+                        let f = f?;
+                        let path = f.path();
+                        if path.as_path().extension() == Some(&OsStr::new("btk")) && f.metadata()?.is_file() {
+                            v.push(path);
+                        }
+                    }
+                    v
+                });
                 println!();
                 println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
             }
@@ -229,5 +249,6 @@ impl MenuState {
                 println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
             }
         }
+        Ok(())
     }
 }
