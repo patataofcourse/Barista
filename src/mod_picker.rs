@@ -17,6 +17,6 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
     Ok(v)
 }
 
-pub fn show_page(paths: &Vec<PathBuf>, page: usize) -> Vec<String> {
+pub fn show_page(paths: &Vec<PathBuf>, loaded: &Vec<PathBuf>, page: usize) -> Vec<(String, bool)> {
     todo!();
 }

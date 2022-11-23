@@ -102,12 +102,20 @@ impl MenuState {
         }
 
         if hid.keys_down().contains(KeyPad::KEY_DUP) && self.cursor > 0 {
-            self.cursor -= 1;
+            if self.cursor > 0 {
+                self.cursor -= 1;
+            } else {
+                self.cursor = self.cursor_option_len(versions) - 1;
+            }
             self.action = MenuAction::MoveCursor
         } else if hid.keys_down().contains(KeyPad::KEY_DDOWN)
-            && self.cursor < self.cursor_option_len(versions) - 1
         {
-            self.cursor += 1;
+            if self.cursor < self.cursor_option_len(versions) - 1 {
+                self.cursor += 1;
+            }
+            else {
+                self.cursor = 0;
+            }
             self.action = MenuAction::MoveCursor
         } else if hid.keys_down().contains(KeyPad::KEY_B) {
             if let SubMenu::Main = self.sub_menu {

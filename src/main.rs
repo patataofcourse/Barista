@@ -43,7 +43,7 @@ fn main() {
         Err(c) => {
             let error = match c {
                 Error::CtruError(c) => match c {
-                    ctru::Error::Os(c) => format!("System error {:#X}", c),
+                    ctru::Error::Os(c) => format!("System error {:#X} (", c),
                     ctru::Error::Libc(c) => format!("libc error:\n{}", c),
                     ctru::Error::ServiceAlreadyActive => format!("Service already active"),
                     ctru::Error::OutputAlreadyRedirected => format!("Output already redirected"),
@@ -63,9 +63,9 @@ fn main() {
 
 fn run() -> error::Result<()> {
     ctru::init();
-    let apt = Apt::init().unwrap();
-    let hid = Hid::init().unwrap();
-    let gfx = Gfx::init().unwrap();
+    let apt = Apt::init()?;
+    let hid = Hid::init()?;
+    let gfx = Gfx::init()?;
     let console = Console::init(gfx.bottom_screen.borrow_mut());
     unsafe {
         assert!(ctru_sys::romfsMountSelf("romfs\0".as_ptr()) == 0);
