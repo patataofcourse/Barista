@@ -7,6 +7,7 @@ use ctru::{
     gfx::Gfx,
     services::{apt::Apt, hid::Hid},
 };
+use error::error_applet;
 use std::{
     panic::{self, PanicInfo},
     process,
@@ -14,20 +15,22 @@ use std::{
 use ui_lib::{BaristaUI, Screen};
 
 mod error;
-pub use self::error::{Error, Result};
+use self::error::{Error, Result};
 
 #[cfg(feature = "audio")]
 mod audio;
 
 mod format;
 mod launcher;
+mod mod_picker;
 mod scene;
-pub use self::scene::menu::{MenuAction, MenuState};
+use self::{
+    launcher::GameVer,
+    scene::menu::{MenuAction, MenuState},
+};
 
-#[allow(warnings)]
-pub(crate) mod plgldr;
-
-use launcher::GameVer;
+/// Bindings + safe abstraction for plgldr.c
+mod plgldr;
 
 static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 
@@ -35,6 +38,30 @@ static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 static mut AUDIO: Option<*const audio::AudioManager> = None;
 
 fn main() {
+    match run() {
+        Ok(_) => {}
+        Err(c) => {
+            let error = match c {
+                Error::CtruError(c) => match c {
+                    ctru::Error::Os(c) => format!("System error {:#X}", c),
+                    ctru::Error::Libc(c) => format!("libc error:\n{}", c),
+                    ctru::Error::ServiceAlreadyActive => format!("Service already active"),
+                    ctru::Error::OutputAlreadyRedirected => format!("Output already redirected"),
+                    _ => todo!(),
+                },
+                Error::IoError(c) => {
+                    todo!();
+                }
+                Error::OtherError(c) => c,
+            };
+            error_applet(error);
+
+            process::exit(1);
+        }
+    }
+}
+
+fn run() -> error::Result<()> {
     ctru::init();
     let apt = Apt::init().unwrap();
     let hid = Hid::init().unwrap();
@@ -60,9 +87,11 @@ fn main() {
     let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
 
+    let mods = mod_picker::get_available_mods()?;
+
     // Init menu
     let mut menu = MenuState::default();
-    menu.render(&console, &versions).unwrap();
+    menu.render(&console, &versions);
 
     #[allow(unused)]
     let mut audio_player;
@@ -86,8 +115,10 @@ fn main() {
     }
 
     // Init config
-    *config_wrapped() =
-        Some(format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg").unwrap_or_default());
+    *config_wrapped() = Some(
+        format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg")
+            .unwrap_or_default(),
+    );
 
     // Main loop
     while apt.main_loop() {
@@ -97,7 +128,7 @@ fn main() {
 
         ui.render();
 
-        menu.run(&hid, &console, &versions).unwrap();
+        menu.run(&hid, &console, &versions);
 
         match &menu.action {
             MenuAction::Exit => break,
@@ -129,6 +160,8 @@ fn main() {
     if let Some(c) = game_to_load {
         launcher::launch(c)
     }
+
+    Ok(())
 }
 
 fn config() -> &'static mut format::saltwater_cfg::Config {
@@ -158,19 +191,7 @@ fn panic_hook(info: &PanicInfo) {
     } else {
         format!("panic{}\0", location_info)
     };
-    unsafe {
-        use ctru_sys::{
-            aptExit, errorConf, errorDisp, errorInit, errorText, CFG_LANGUAGE_EN,
-            ERROR_TEXT_WORD_WRAP,
-        };
-        let mut error_conf: errorConf = errorConf::default();
-        errorInit(&mut error_conf, ERROR_TEXT_WORD_WRAP, CFG_LANGUAGE_EN);
-        errorText(&mut error_conf, msg.as_ptr() as *const ::libc::c_char);
-
-        // Display the error
-        errorDisp(&mut error_conf);
-        aptExit();
-    }
+    error_applet(msg);
 
     process::exit(1);
 }

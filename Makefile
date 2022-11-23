@@ -60,7 +60,7 @@ else
 export RUSTFLAGS = -L$(DEVKITPRO)/libctru/lib -lctrud
 endif
 
-.PHONY: all clean dist plgldr check doc fmt test update
+.PHONY: all clean dist plgldr check doc fmt fix test update
 
 all: dist
 

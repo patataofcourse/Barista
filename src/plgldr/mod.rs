@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+
+#[allow(warnings)]
 mod bindings;
 
 use std::ffi::CString;
