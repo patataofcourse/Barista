@@ -47,10 +47,10 @@ fn main() {
                     ctru::Error::Libc(c) => format!("libc error:\n{}", c),
                     ctru::Error::ServiceAlreadyActive => format!("Service already active"),
                     ctru::Error::OutputAlreadyRedirected => format!("Output already redirected"),
-                    _ => todo!(),
+                    c => format!("Unknown ctru error\n{}", c),
                 },
                 Error::IoError(c) => {
-                    todo!();
+                    format!("IO error: {}", c)
                 }
                 Error::OtherError(c) => c,
             };
@@ -115,10 +115,12 @@ fn run() -> error::Result<()> {
     }
 
     // Init config
-    *config_wrapped() = Some(
-        format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg")
-            .unwrap_or_default(),
-    );
+    unsafe {
+        CONFIG = Some(
+            format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg")
+                .unwrap_or_default(),
+        );
+    }
 
     // Main loop
     while apt.main_loop() {
@@ -166,10 +168,6 @@ fn run() -> error::Result<()> {
 
 fn config() -> &'static mut format::saltwater_cfg::Config {
     unsafe { CONFIG.as_mut().expect("Config not initialized") }
-}
-
-fn config_wrapped() -> &'static mut Option<format::saltwater_cfg::Config> {
-    unsafe { &mut CONFIG }
 }
 
 #[cfg(feature = "audio")]

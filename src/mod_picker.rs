@@ -18,5 +18,10 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
 }
 
 pub fn show_page(paths: &Vec<PathBuf>, loaded: &Vec<PathBuf>, page: usize) -> Vec<(String, bool)> {
-    todo!();
+    let mut out = vec![];
+    for i in page * 9..page * 9 + 9 {
+        let path = &paths[i];
+        out.push((path.to_str().unwrap().to_owned(), loaded.contains(path)));
+    }
+    out
 }

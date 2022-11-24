@@ -32,6 +32,7 @@ impl Config {
             let file_len = u16::read_from(&mut file, ByteOrder::LittleEndian)?;
             let mut fname = String::new();
             for _ in 0..file_len {
+                //TODO: non-ascii
                 fname.push(u8::read_from(&mut file, ByteOrder::LittleEndian)? as char);
             }
             btks.insert(index, fname);

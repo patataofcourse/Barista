@@ -108,12 +108,10 @@ impl MenuState {
                 self.cursor = self.cursor_option_len(versions) - 1;
             }
             self.action = MenuAction::MoveCursor
-        } else if hid.keys_down().contains(KeyPad::KEY_DDOWN)
-        {
+        } else if hid.keys_down().contains(KeyPad::KEY_DDOWN) {
             if self.cursor < self.cursor_option_len(versions) - 1 {
                 self.cursor += 1;
-            }
-            else {
+            } else {
                 self.cursor = 0;
             }
             self.action = MenuAction::MoveCursor
