@@ -78,10 +78,10 @@ impl SubMenu {
     pub fn cursor_option_len(&self, versions: &Vec<GameVer>) -> u32 {
         (self.actions().len()
             + if let SubMenu::Run = self {
-                versions.len() - 1
+                versions.len() as isize - 1
             } else {
                 0
-            }) as u32
+            } as usize) as u32
     }
 }
 

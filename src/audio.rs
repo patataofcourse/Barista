@@ -105,7 +105,7 @@ fn audio_main(rx: Receiver<AudioMessage>) {
 
         if let Some(ref mut c) = ctx.bcstm {
             if !c.tick().unwrap() {
-                break
+                break;
             }
         }
     }

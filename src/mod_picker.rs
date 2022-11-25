@@ -6,7 +6,13 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
     let fs = Fs::init()?;
     let mut v = vec![];
     let sdmc = fs.sdmc()?;
-    let iter = fs::read_dir(&sdmc, "/spicerack/mods")?;
+    let iter = match fs::read_dir(&sdmc, "/spicerack/mods") {
+        Ok(c) => c,
+        Err(_) => {
+            fs::create_dir_all(&sdmc, "/spicerack/mods")?;
+            fs::read_dir(&sdmc, "/spicerack/mods")?
+        }
+    };
     for f in iter {
         let f = f?;
         let path = f.path();

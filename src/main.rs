@@ -69,8 +69,6 @@ fn run() -> error::Result<()> {
     let console = Console::init(gfx.bottom_screen.borrow_mut());
     unsafe {
         assert!(ctru_sys::romfsMountSelf("romfs\0".as_ptr()) == 0);
-        assert!(ctru_sys::ndspInit() == 0);
-        ctru_sys::ndspSetOutputMode(ctru_sys::NDSP_OUTPUT_STEREO);
     }
 
     panic::set_hook(Box::new(panic_hook));
@@ -87,7 +85,8 @@ fn run() -> error::Result<()> {
     let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
 
-    let mods = mod_picker::get_available_mods()?;
+    // apparently broken???
+    //let mods = mod_picker::get_available_mods()?;
 
     // Init menu
     let mut menu = MenuState::default();
@@ -104,6 +103,11 @@ fn run() -> error::Result<()> {
 
     #[cfg(feature = "audio")]
     {
+        unsafe {
+            assert!(ctru_sys::ndspInit() == 0);
+            ctru_sys::ndspSetOutputMode(ctru_sys::NDSP_OUTPUT_STEREO);
+        }
+
         // Music test
         audio_player = audio::AudioManager::new();
 
