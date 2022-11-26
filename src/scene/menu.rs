@@ -27,12 +27,21 @@ pub enum SubMenu {
 
 #[derive(Clone, Debug)]
 pub enum MenuAction {
+    // All
     None,
     ChangeMenu(SubMenu),
-    Run,
     Exit,
     MoveCursor,
+
+    // Run
+    Run,
+
+    // SetUp
     ChangePage(bool),
+    SaveConfig,
+    ChangeIndex(bool),
+
+    // Music
     #[cfg(feature = "audio")]
     ToggleAudio,
 }
@@ -55,8 +64,12 @@ impl SubMenu {
         MenuAction::ChangeMenu(SubMenu::Options),
         MenuAction::Exit,
     ];
-    const ACTIONS_RUN: [MenuAction; 2] = [MenuAction::Run, MenuAction::ChangeMenu(SubMenu::Main)];
-    const ACTIONS_SETUP: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
+    const ACTIONS_RUN: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
+    const ACTIONS_SETUP: [MenuAction; 3] = [
+        MenuAction::ChangePage(false),
+        MenuAction::ChangePage(true),
+        MenuAction::SaveConfig,
+    ];
     #[cfg(feature = "audio")]
     const ACTIONS_MUSIC: [MenuAction; 2] = [
         MenuAction::ToggleAudio,
@@ -66,7 +79,7 @@ impl SubMenu {
     const ACTIONS_MUSIC: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
     const ACTIONS_OPTIONS: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
 
-    pub const fn actions(&self) -> &[MenuAction] {
+    pub fn actions(&self) -> &[MenuAction] {
         match &self {
             SubMenu::Main => &Self::ACTIONS_MAIN,
             SubMenu::Run => &Self::ACTIONS_RUN,
@@ -76,22 +89,24 @@ impl SubMenu {
         }
     }
 
-    pub fn cursor_option_len(&self, versions: &Vec<GameVer>) -> u32 {
+    pub fn cursor_option_len(&self, versions: &Vec<GameVer>, mods: &Vec<(String, u16)>) -> u32 {
         (self.actions().len()
             + if let SubMenu::Run = self {
-                versions.len() as isize - 1
+                versions.len()
+            } else if let SubMenu::SetUp = self {
+                mods.len()
             } else {
                 0
-            } as usize) as u32
+            }) as u32
     }
 }
 
 impl MenuState {
-    pub const fn actions(&self) -> &[MenuAction] {
+    pub fn actions(&self) -> &[MenuAction] {
         self.sub_menu.actions()
     }
-    pub fn cursor_option_len(&self, versions: &Vec<GameVer>) -> u32 {
-        self.sub_menu.cursor_option_len(versions)
+    pub fn cursor_option_len(&self, versions: &Vec<GameVer>, mods: &Vec<(String, u16)>) -> u32 {
+        self.sub_menu.cursor_option_len(versions, mods)
     }
 
     pub fn run(
@@ -104,6 +119,8 @@ impl MenuState {
     ) {
         self.action = MenuAction::None;
 
+        let old_page = &mod_picker::show_page(mods, crate::config(), *page);
+
         if hid.keys_down().contains(KeyPad::KEY_START) {
             self.action = MenuAction::Exit;
             return;
@@ -113,11 +130,11 @@ impl MenuState {
             if self.cursor > 0 {
                 self.cursor -= 1;
             } else {
-                self.cursor = self.cursor_option_len(versions) - 1;
+                self.cursor = self.cursor_option_len(versions, old_page) - 1;
             }
             self.action = MenuAction::MoveCursor
         } else if hid.keys_down().contains(KeyPad::KEY_DDOWN) {
-            if self.cursor < self.cursor_option_len(versions) - 1 {
+            if self.cursor < self.cursor_option_len(versions, old_page) - 1 {
                 self.cursor += 1;
             } else {
                 self.cursor = 0;
@@ -131,11 +148,13 @@ impl MenuState {
             }
         } else if hid.keys_down().contains(KeyPad::KEY_A) {
             if let SubMenu::Run = self.sub_menu {
-                if self.cursor == self.cursor_option_len(versions) - 1 {
+                if self.cursor == self.cursor_option_len(versions, old_page) - 1 {
                     self.action = MenuAction::ChangeMenu(SubMenu::Main)
                 } else {
                     self.action = MenuAction::Run
                 }
+            } else if let SubMenu::SetUp = self.sub_menu {
+                todo!()
             } else {
                 self.action = self.actions()[self.cursor as usize].clone()
             }
@@ -162,6 +181,8 @@ impl MenuState {
                     *page += 1;
                 }
             }
+            MenuAction::SaveConfig => todo!(),
+            MenuAction::ChangeIndex(c) => todo!(),
             MenuAction::MoveCursor => {}
             #[cfg(feature = "audio")]
             MenuAction::ToggleAudio => {}
@@ -169,7 +190,7 @@ impl MenuState {
         self.render(
             console,
             versions,
-            &mod_picker::show_page(mods, &vec![], *page),
+            &mod_picker::show_page(mods, crate::config(), *page),
             *page,
             mod_picker::num_pages(mods),
         )
@@ -179,7 +200,7 @@ impl MenuState {
         &mut self,
         console: &Console,
         versions: &Vec<GameVer>,
-        mods: &Vec<(String, bool)>,
+        mods: &Vec<(String, u16)>,
         page: usize,
         num_pages: usize,
     ) {
@@ -241,22 +262,55 @@ impl MenuState {
                     println!(
                         "Put some mods in your /spicerack/mods\nfolder in order to load them!"
                     );
+                    println!();
+                    println!("- [*] Back")
                 } else {
                     println!("Choose what mods to load with Saltwater");
-                    println!("Currently selected mods have a ! before their name");
+                    println!("Disabled mods show index --- instead");
                     println!();
-                    println!("Press L/R or select Prev/Next to change page");
+                    println!("L/R buttons or Prev/Next to change page");
+                    println!("DPad Left/Right to change index");
                     println!();
                     println!("Page {} of {}", page + 1, num_pages);
-                    for elmt in mods {
-                        println!("- [ ] {}{}", if elmt.1 { "! " } else { "" }, elmt.0);
+                    for i in 0..mods.len() {
+                        let elmt = &mods[i];
+                        println!(
+                            "- [{}] {} {}",
+                            if self.cursor == i as u32 { "*" } else { " " },
+                            match elmt.1 {
+                                u16::MAX => "---".to_string(),
+                                c => format!("{:03}", c),
+                            },
+                            elmt.0
+                        );
                     }
                     println!();
-                    println!("- [ ] Prev");
-                    println!("- [ ] Next");
+                    println!(
+                        "- [{}] Prev",
+                        if self.cursor == self.cursor_option_len(versions, mods) - 3 {
+                            "*"
+                        } else {
+                            " "
+                        }
+                    );
+                    println!(
+                        "- [{}] Next",
+                        if self.cursor == self.cursor_option_len(versions, mods) - 2 {
+                            "*"
+                        } else {
+                            " "
+                        }
+                    );
+                    println!();
+                    println!(
+                        "- [{}] Back",
+                        if self.cursor == self.cursor_option_len(versions, mods) - 1 {
+                            "*"
+                        } else {
+                            " "
+                        }
+                    );
                 }
-                println!();
-                println!("- [{}] Back", if self.cursor == 0 { "*" } else { " " })
             }
             SubMenu::Music => {
                 println!("Barista - Music");

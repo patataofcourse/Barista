@@ -1,6 +1,8 @@
-use crate::error::Result;
+use crate::{error::Result, format::saltwater_cfg::Config};
 use ctru::services::fs::{self, Fs};
-use std::{ffi::OsStr, path::PathBuf};
+use std::{collections::HashMap, ffi::OsStr, path::PathBuf};
+
+const ENTRIES_PER_PAGE: usize = 13;
 
 pub fn get_available_mods() -> Result<Vec<PathBuf>> {
     let fs = Fs::init()?;
@@ -23,20 +25,33 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
     Ok(v)
 }
 
-pub fn show_page(paths: &Vec<PathBuf>, loaded: &Vec<PathBuf>, page: usize) -> Vec<(String, bool)> {
+pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String, u16)> {
     let mut out = vec![];
-    for i in page * 14..paths.len().min(page * 14 + 14) {
+    for i in page * ENTRIES_PER_PAGE..paths.len().min(page * ENTRIES_PER_PAGE + ENTRIES_PER_PAGE) {
         let path = &paths[i];
         let mut name = path.file_name().unwrap().to_str().unwrap().to_owned();
-        if name.len() > 33 {
-            name.truncate(30);
+        if name.len() > 30 {
+            name.truncate(27);
             name += "...";
         }
-        out.push((name, loaded.contains(path)));
+
+        let mut loaded = HashMap::<String, u16>::new();
+
+        for (k, v) in &cfg.btks {
+            loaded.insert(v.clone() + ".btk", *k);
+        }
+
+        let num = if let Some(c) = loaded.get(&name) {
+            *c
+        } else {
+            u16::MAX
+        };
+
+        out.push((name, num));
     }
     out
 }
 
 pub fn num_pages(paths: &Vec<PathBuf>) -> usize {
-    (paths.len() as f32 / 14.0).ceil() as usize
+    paths.len().div_ceil(ENTRIES_PER_PAGE)
 }

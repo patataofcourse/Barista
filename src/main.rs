@@ -1,4 +1,4 @@
-#![feature(allocator_api)]
+#![feature(allocator_api, int_roundings)]
 
 extern crate barista_ui as ui_lib;
 
@@ -38,6 +38,8 @@ static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 static mut AUDIO: Option<*const audio::AudioManager> = None;
 
 fn main() {
+    panic::set_hook(Box::new(panic_hook));
+
     match run() {
         Ok(_) => {}
         Err(c) => {
@@ -71,8 +73,6 @@ fn run() -> error::Result<()> {
         assert!(ctru_sys::romfsMountSelf("romfs\0".as_ptr()) == 0);
     }
 
-    panic::set_hook(Box::new(panic_hook));
-
     // Initialize GFX stuff
     let mut ui = BaristaUI::init();
 
@@ -83,8 +83,9 @@ fn run() -> error::Result<()> {
     let versions = launcher::get_available_games();
 
     let mut game_to_load: Option<GameVer> = None;
-    launcher::check_for_plgldr();
+    //launcher::check_for_plgldr();
 
+    //TODO: removing deleted mods from the cfg
     let mods = mod_picker::get_available_mods()?;
 
     // Init menu
@@ -154,7 +155,9 @@ fn run() -> error::Result<()> {
             MenuAction::ChangeMenu(_)
             | MenuAction::None
             | MenuAction::MoveCursor
-            | MenuAction::ChangePage(_) => {}
+            | MenuAction::ChangePage(_)
+            | MenuAction::ChangeIndex(_)
+            | MenuAction::SaveConfig => {}
         }
     }
 
