@@ -85,12 +85,11 @@ fn run() -> error::Result<()> {
     let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
 
-    // apparently broken???
-    //let mods = mod_picker::get_available_mods()?;
+    let mods = mod_picker::get_available_mods()?;
 
     // Init menu
     let mut menu = MenuState::default();
-    menu.render(&console, &versions);
+    menu.render(&console, &versions, &vec![], 0, 0);
 
     #[allow(unused)]
     let mut audio_player;
@@ -126,6 +125,8 @@ fn run() -> error::Result<()> {
         );
     }
 
+    let mut page = 0;
+
     // Main loop
     while apt.main_loop() {
         gfx.wait_for_vblank();
@@ -134,7 +135,7 @@ fn run() -> error::Result<()> {
 
         ui.render();
 
-        menu.run(&hid, &console, &versions);
+        menu.run(&hid, &console, &versions, &mods, &mut page);
 
         match &menu.action {
             MenuAction::Exit => break,
@@ -150,7 +151,10 @@ fn run() -> error::Result<()> {
                     audio_player.play()
                 }
             }
-            MenuAction::ChangeMenu(_) | MenuAction::None | MenuAction::MoveCursor => {}
+            MenuAction::ChangeMenu(_)
+            | MenuAction::None
+            | MenuAction::MoveCursor
+            | MenuAction::ChangePage(_) => {}
         }
     }
 

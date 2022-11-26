@@ -1,12 +1,12 @@
-use std::ffi::OsStr;
+// Menu: Let's Get This Done For The First Release Edition
+// Wonder if anything from here will be salvageable
 
-use crate::{launcher::GameVer, Result};
+use std::path::PathBuf;
+
+use crate::{launcher::GameVer, mod_picker};
 use ctru::{
     console::Console,
-    services::{
-        fs::{self, Fs},
-        hid::{Hid, KeyPad},
-    },
+    services::hid::{Hid, KeyPad},
 };
 
 #[derive(Clone, Debug)]
@@ -32,6 +32,7 @@ pub enum MenuAction {
     Run,
     Exit,
     MoveCursor,
+    ChangePage(bool),
     #[cfg(feature = "audio")]
     ToggleAudio,
 }
@@ -93,7 +94,14 @@ impl MenuState {
         self.sub_menu.cursor_option_len(versions)
     }
 
-    pub fn run(&mut self, hid: &Hid, console: &Console, versions: &Vec<GameVer>) {
+    pub fn run(
+        &mut self,
+        hid: &Hid,
+        console: &Console,
+        versions: &Vec<GameVer>,
+        mods: &Vec<PathBuf>,
+        page: &mut usize,
+    ) {
         self.action = MenuAction::None;
 
         if hid.keys_down().contains(KeyPad::KEY_START) {
@@ -132,21 +140,49 @@ impl MenuState {
                 self.action = self.actions()[self.cursor as usize].clone()
             }
         }
+        if let SubMenu::SetUp = &self.sub_menu {
+            if hid.keys_down().contains(KeyPad::KEY_L) {
+                self.action = MenuAction::ChangePage(false)
+            } else if hid.keys_down().contains(KeyPad::KEY_R) {
+                self.action = MenuAction::ChangePage(true)
+            }
+        }
 
         match &self.action {
             MenuAction::Exit | MenuAction::Run | MenuAction::None => return,
             MenuAction::ChangeMenu(c) => {
                 self.sub_menu = *c;
-                self.cursor = 0
+                self.cursor = 0;
+                *page = 0;
+            }
+            MenuAction::ChangePage(c) => {
+                if !c && *page > 0 {
+                    *page -= 1;
+                } else if *c && *page < mod_picker::num_pages(mods) - 1 {
+                    *page += 1;
+                }
             }
             MenuAction::MoveCursor => {}
             #[cfg(feature = "audio")]
             MenuAction::ToggleAudio => {}
         }
-        self.render(console, versions)
+        self.render(
+            console,
+            versions,
+            &mod_picker::show_page(mods, &vec![], *page),
+            *page,
+            mod_picker::num_pages(mods),
+        )
     }
 
-    pub fn render(&mut self, console: &Console, versions: &Vec<GameVer>) {
+    pub fn render(
+        &mut self,
+        console: &Console,
+        versions: &Vec<GameVer>,
+        mods: &Vec<(String, bool)>,
+        page: usize,
+        num_pages: usize,
+    ) {
         console.clear();
         match &self.sub_menu {
             SubMenu::Main => {
@@ -201,9 +237,26 @@ impl MenuState {
             SubMenu::SetUp => {
                 println!("Barista - Set up mods");
                 println!();
-                println!("TO BE IMPLEMENTED");
+                if mods.len() == 0 {
+                    println!(
+                        "Put some mods in your /spicerack/mods\nfolder in order to load them!"
+                    );
+                } else {
+                    println!("Choose what mods to load with Saltwater");
+                    println!("Currently selected mods have a ! before their name");
+                    println!();
+                    println!("Press L/R or select Prev/Next to change page");
+                    println!();
+                    println!("Page {} of {}", page + 1, num_pages);
+                    for elmt in mods {
+                        println!("- [ ] {}{}", if elmt.1 { "! " } else { "" }, elmt.0);
+                    }
+                    println!();
+                    println!("- [ ] Prev");
+                    println!("- [ ] Next");
+                }
                 println!();
-                println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
+                println!("- [{}] Back", if self.cursor == 0 { "*" } else { " " })
             }
             SubMenu::Music => {
                 println!("Barista - Music");

@@ -25,9 +25,18 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
 
 pub fn show_page(paths: &Vec<PathBuf>, loaded: &Vec<PathBuf>, page: usize) -> Vec<(String, bool)> {
     let mut out = vec![];
-    for i in page * 9..page * 9 + 9 {
+    for i in page * 14..paths.len().min(page * 14 + 14) {
         let path = &paths[i];
-        out.push((path.to_str().unwrap().to_owned(), loaded.contains(path)));
+        let mut name = path.file_name().unwrap().to_str().unwrap().to_owned();
+        if name.len() > 33 {
+            name.truncate(30);
+            name += "...";
+        }
+        out.push((name, loaded.contains(path)));
     }
     out
+}
+
+pub fn num_pages(paths: &Vec<PathBuf>) -> usize {
+    (paths.len() as f32 / 14.0).ceil() as usize
 }
