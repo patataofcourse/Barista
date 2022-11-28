@@ -5,12 +5,14 @@ endif
 DEBUG 		?= 1
 FEATURES 	?=
 CARGO3DS	?= 0
+TEST		?= 0
 
 STD			:= $(shell rustc --print sysroot)/rustlib/armv6k-nintendo-3ds
 NM 			:= $(DEVKITARM)/bin/arm-none-eabi-nm
 SMDHTOOL 	:= $(DEVKITPRO)/tools/bin/smdhtool
 3DSXTOOL	:= $(DEVKITPRO)/tools/bin/3dsxtool
 BANNERTOOL 	:= $(DEVKITPRO)/tools/bin/bannertool
+CITRA		:= $(shell which citra 2> /dev/null || true)
 
 CARGOFLAGS  := --color=always
 
@@ -30,6 +32,10 @@ CARGO		:= cargo 3ds
 
 endif
 
+# Assume flatpak
+ifeq ($(CITRA),)
+CITRA 		:= flatpak run org.citra_emu.citra
+endif
 
 ifeq ($(DEBUG), 1)
 PROFILE 	:= debug
@@ -39,8 +45,13 @@ PROFILE 	:= release
 CARGOFLAGS  += --release
 SYMBOLS		?= 0
 endif
+
+ifneq ($(TEST),0)
+CARGOFLAGS += --no-default-features
+endif
+
 ifneq ($(FEATURES),)
-CARGOFLAGS	+= --features=$(FEATURES)
+CARGOFLAGS	+= --features="$(FEATURES)"
 endif
 
 BUILD		:= target/armv6k-nintendo-3ds/$(PROFILE)
@@ -62,7 +73,11 @@ endif
 
 .PHONY: all clean dist plgldr check doc fmt fix test update
 
+ifeq ($(TEST),0)
 all: dist
+else
+all: test
+endif
 
 ### Main executable ###
 
@@ -100,7 +115,6 @@ endif
 
 ### Clean ###
 
-# cargo 3ds clean fails fsr
 clean:
 	@cargo clean
 	@rm -rf dist
@@ -122,10 +136,10 @@ fmt:
 	@cargo fmt
 
 test: dist
-	@$(CARGO) run --features=$(FEATURES) $(CARGOFLAGS)
+	@$(CITRA) $(DIST)/barista.3dsx
 
 check:
-	@$(CARGO) check --features=$(FEATURES) $(CARGOFLAGS)
+	@$(CARGO) check $(CARGOFLAGS)
 
 update:
 	@cargo update

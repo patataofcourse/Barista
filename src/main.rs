@@ -34,6 +34,9 @@ mod plgldr;
 
 static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 
+#[cfg(all(feature = "audio", not(feature = "no_citra")))]
+compile_error!("Citra currently doesn't support audio!");
+
 #[cfg(feature = "audio")]
 static mut AUDIO: Option<*const audio::AudioManager> = None;
 
@@ -83,7 +86,8 @@ fn run() -> error::Result<()> {
     let versions = launcher::get_available_games();
 
     let mut game_to_load: Option<GameVer> = None;
-    //launcher::check_for_plgldr();
+    #[cfg(feature = "no_citra")]
+    launcher::check_for_plgldr();
 
     //TODO: removing deleted mods from the cfg
     let mods = mod_picker::get_available_mods()?;
@@ -170,6 +174,7 @@ fn run() -> error::Result<()> {
     drop(gfx);
     drop(hid);
 
+    #[cfg(feature = "no_citra")]
     if let Some(c) = game_to_load {
         launcher::launch(c)
     }
