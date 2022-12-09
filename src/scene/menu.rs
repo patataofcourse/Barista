@@ -3,7 +3,10 @@
 
 use std::path::PathBuf;
 
-use crate::{launcher::GameVer, mod_picker};
+use crate::{
+    launcher::GameVer,
+    mod_picker,
+};
 use ctru::{
     console::Console,
     services::hid::{Hid, KeyPad},
@@ -39,6 +42,7 @@ pub enum MenuAction {
     // SetUp
     ChangePage(bool),
     SaveConfig,
+    ToggleMod,
     ChangeIndex(bool),
 
     // Music
@@ -119,22 +123,22 @@ impl MenuState {
     ) {
         self.action = MenuAction::None;
 
-        let old_page = &mod_picker::show_page(mods, crate::config(), *page);
+        let mut mod_page = mod_picker::show_page(mods, crate::config(), *page);
 
         if hid.keys_down().contains(KeyPad::KEY_START) {
             self.action = MenuAction::Exit;
             return;
         }
 
-        if hid.keys_down().contains(KeyPad::KEY_DUP) && self.cursor > 0 {
+        if hid.keys_down().contains(KeyPad::KEY_DUP) {
             if self.cursor > 0 {
                 self.cursor -= 1;
             } else {
-                self.cursor = self.cursor_option_len(versions, old_page) - 1;
+                self.cursor = self.cursor_option_len(versions, &mod_page) - 1;
             }
             self.action = MenuAction::MoveCursor
         } else if hid.keys_down().contains(KeyPad::KEY_DDOWN) {
-            if self.cursor < self.cursor_option_len(versions, old_page) - 1 {
+            if self.cursor < self.cursor_option_len(versions, &mod_page) - 1 {
                 self.cursor += 1;
             } else {
                 self.cursor = 0;
@@ -148,13 +152,17 @@ impl MenuState {
             }
         } else if hid.keys_down().contains(KeyPad::KEY_A) {
             if let SubMenu::Run = self.sub_menu {
-                if self.cursor == self.cursor_option_len(versions, old_page) - 1 {
+                if self.cursor == self.cursor_option_len(versions, &mod_page) - 1 {
                     self.action = MenuAction::ChangeMenu(SubMenu::Main)
                 } else {
                     self.action = MenuAction::Run
                 }
             } else if let SubMenu::SetUp = self.sub_menu {
-                todo!()
+                if self.cursor_option_len(versions, &mod_page) - self.cursor <= 3 {
+                    self.action = SubMenu::ACTIONS_SETUP[self.cursor as usize - &mod_page.len()].clone();
+                } else {
+                    self.action = MenuAction::ToggleMod;
+                }
             } else {
                 self.action = self.actions()[self.cursor as usize].clone()
             }
@@ -164,7 +172,9 @@ impl MenuState {
                 self.action = MenuAction::ChangePage(false)
             } else if hid.keys_down().contains(KeyPad::KEY_R) {
                 self.action = MenuAction::ChangePage(true)
-            } else if hid.keys_down().contains(KeyPad::KEY_DLEFT) {
+            }
+            //TODO: hold X/Y to scroll faster
+            else if hid.keys_down().contains(KeyPad::KEY_DLEFT) {
                 self.action = MenuAction::ChangeIndex(false)
             } else if hid.keys_down().contains(KeyPad::KEY_DRIGHT) {
                 self.action = MenuAction::ChangeIndex(true)
@@ -178,6 +188,11 @@ impl MenuState {
                 self.cursor = 0;
                 *page = 0;
             }
+            MenuAction::SaveConfig => {
+                self.sub_menu = SubMenu::Main;
+                self.cursor = 0;
+                *page = 0;
+            },
             MenuAction::ChangePage(c) => {
                 if !c && *page > 0 {
                     *page -= 1;
@@ -185,8 +200,48 @@ impl MenuState {
                     *page += 1;
                 }
             }
-            MenuAction::SaveConfig => todo!(),
-            MenuAction::ChangeIndex(c) => todo!(),
+            MenuAction::ChangeIndex(i) => {
+                if let Some(m) = mod_page.get_mut(self.cursor as usize) {
+                    let config = crate::config();
+                    if m.1 != u16::MAX {
+                        config.btks.remove(&m.1);
+                        let step: i16 = if *i { 1 } else { -1 };
+                        let mut out = m.1.wrapping_add_signed(step);
+
+                        while !mod_picker::is_valid_slot(out) || config.btks.contains_key(&out)  {
+                            out = match out.wrapping_add_signed(step) {
+                                0x8000..=u16::MAX => 0x10F,
+                                0x110..=0x7FFF => 0,
+                                c => c,
+                            }
+                        }
+
+                        config.btks.insert(
+                            out,
+                            mod_picker::get_mod_name(mods, *page, self.cursor as usize)
+                        );
+                        m.1 = out;
+                    }
+                }
+            }
+            MenuAction::ToggleMod => {
+                if let Some(m) = mod_page.get_mut(self.cursor as usize) {
+                    let config = crate::config();
+                    if m.1 == u16::MAX {
+                        let mut val = 0;
+                        while val <= 0x10F && config.btks.contains_key(&val) {
+                            val+=1;
+                        }
+                        if val <= 0x10F {
+                            config.btks.insert(val, mod_picker::get_mod_name(mods, *page, self.cursor as usize));
+                        }
+                        m.1 = val;
+                    } else {
+                        config.btks.remove(&m.1);
+                        m.1 = u16::MAX;
+                    }
+                }
+            },
             MenuAction::MoveCursor => {}
             #[cfg(feature = "audio")]
             MenuAction::ToggleAudio => {}
@@ -194,7 +249,7 @@ impl MenuState {
         self.render(
             console,
             versions,
-            &mod_picker::show_page(mods, crate::config(), *page),
+            &mod_page,
             *page,
             mod_picker::num_pages(mods),
         )
@@ -283,7 +338,7 @@ impl MenuState {
                             if self.cursor == i as u32 { "*" } else { " " },
                             match elmt.1 {
                                 u16::MAX => "---".to_string(),
-                                c => format!("{:03}", c),
+                                c => format!("{:03X}", c),
                             },
                             elmt.0
                         );

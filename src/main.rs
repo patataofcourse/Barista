@@ -41,6 +41,7 @@ compile_error!("Citra currently doesn't support audio!");
 static mut AUDIO: Option<*const audio::AudioManager> = None;
 
 fn main() {
+    #[cfg(feature = "no_citra")]
     panic::set_hook(Box::new(panic_hook));
 
     match run() {
@@ -156,12 +157,15 @@ fn run() -> error::Result<()> {
                     audio_player.play()
                 }
             }
+            MenuAction::SaveConfig => {
+                config().to_file("/spicerack/bin/saltwater.cfg")?;
+            }
             MenuAction::ChangeMenu(_)
             | MenuAction::None
             | MenuAction::MoveCursor
             | MenuAction::ChangePage(_)
             | MenuAction::ChangeIndex(_)
-            | MenuAction::SaveConfig => {}
+            | MenuAction::ToggleMod => {}
         }
     }
 

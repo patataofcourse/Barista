@@ -2,7 +2,7 @@ use crate::{error::Result, format::saltwater_cfg::Config};
 use ctru::services::fs::{self, Fs};
 use std::{collections::HashMap, ffi::OsStr, path::PathBuf};
 
-const ENTRIES_PER_PAGE: usize = 13;
+pub const ENTRIES_PER_PAGE: usize = 13;
 
 pub fn get_available_mods() -> Result<Vec<PathBuf>> {
     let fs = Fs::init()?;
@@ -29,10 +29,11 @@ pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String
     let mut out = vec![];
     for i in page * ENTRIES_PER_PAGE..paths.len().min(page * ENTRIES_PER_PAGE + ENTRIES_PER_PAGE) {
         let path = &paths[i];
-        let mut name = path.file_name().unwrap().to_str().unwrap().to_owned();
+        let name = path.file_name().unwrap().to_str().unwrap().to_owned();
+        let mut out_name = name.clone();
         if name.len() > 30 {
-            name.truncate(27);
-            name += "...";
+            out_name.truncate(27);
+            out_name += "...";
         }
 
         let mut loaded = HashMap::<String, u16>::new();
@@ -47,9 +48,18 @@ pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String
             u16::MAX
         };
 
-        out.push((name, num));
+        out.push((out_name, num));
     }
     out
+}
+
+pub fn get_mod_name(mods: &Vec<PathBuf>, page: usize, pos: usize) -> String {
+    let m = &mods[page * ENTRIES_PER_PAGE + pos];
+    m.with_extension("").file_name().unwrap().to_str().unwrap().to_owned()
+}
+
+pub fn is_valid_slot(slot: u16) -> bool {
+    slot <= 0x67 || (slot >= 0x100 && slot <= 0x10F)
 }
 
 pub fn num_pages(paths: &Vec<PathBuf>) -> usize {
