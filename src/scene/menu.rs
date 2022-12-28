@@ -26,6 +26,8 @@ pub enum SubMenu {
     Options,
     Music,
     SetUp,
+    #[cfg(debug_assertions)]
+    Log,
 }
 
 #[derive(Clone, Debug)]
@@ -90,6 +92,8 @@ impl SubMenu {
             SubMenu::SetUp => &Self::ACTIONS_SETUP,
             SubMenu::Music => &Self::ACTIONS_MUSIC,
             SubMenu::Options => &Self::ACTIONS_OPTIONS,
+            #[cfg(debug_assertions)]
+            SubMenu::Log => &[MenuAction::ChangeMenu(SubMenu::Main)],
         }
     }
 
@@ -166,6 +170,10 @@ impl MenuState {
             } else {
                 self.action = self.actions()[self.cursor as usize].clone()
             }
+        }
+        #[cfg(debug_assertions)]
+        if hid.keys_down().contains(KeyPad::KEY_SELECT) {
+            self.action = MenuAction::ChangeMenu(SubMenu::Log)
         }
         if let SubMenu::SetUp = &self.sub_menu {
             if hid.keys_down().contains(KeyPad::KEY_L) {
@@ -272,7 +280,9 @@ impl MenuState {
                 println!("- DPad up/down: move cursor");
                 println!("- A: choose selected option");
                 println!("- B: go to prev menu");
-                println!("- Start - exit Barista");
+                println!("- Start: exit Barista");
+                #[cfg(debug_assertions)]
+                println!("- Select: open debug log");
                 println!();
                 println!(
                     " [{}] Run Saltwater",
@@ -403,6 +413,10 @@ impl MenuState {
                 println!("TO BE IMPLEMENTED");
                 println!();
                 println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
+            }
+            #[cfg(debug_assertions)]
+            SubMenu::Log => {
+                println!("{}", unsafe {&crate::log::LOG});
             }
         }
     }

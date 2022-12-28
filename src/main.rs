@@ -17,6 +17,9 @@ use ui_lib::{BaristaUI, Screen};
 mod error;
 use self::error::{Error, Result};
 
+#[macro_use]
+mod log;
+
 #[cfg(feature = "audio")]
 mod audio;
 
@@ -76,6 +79,8 @@ fn run() -> error::Result<()> {
     unsafe {
         assert!(ctru_sys::romfsMountSelf("romfs\0".as_ptr()) == 0);
     }
+
+    log!(General, "test");
 
     // Initialize GFX stuff
     let mut ui = BaristaUI::init();
