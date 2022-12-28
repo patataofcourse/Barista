@@ -37,15 +37,21 @@ mod plgldr;
 
 static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 
-#[cfg(all(feature = "audio", not(feature = "no_citra")))]
-compile_error!("Citra currently doesn't support audio!");
-
 #[cfg(feature = "audio")]
 static mut AUDIO: Option<*const audio::AudioManager> = None;
 
 fn main() {
-    #[cfg(feature = "no_citra")]
-    panic::set_hook(Box::new(panic_hook));
+    let is_citra = unsafe {
+        let mut citra_info = 0i64;
+        match ctru_sys::svcGetSystemInfo(&mut citra_info, 0x20000, 0) {
+            0 => true,
+            _ => false,
+        }
+    };
+
+    if !is_citra {
+        panic::set_hook(Box::new(panic_hook));
+    }
 
     match run() {
         Ok(_) => {}
@@ -92,7 +98,6 @@ fn run() -> error::Result<()> {
     let versions = launcher::get_available_games();
 
     let mut game_to_load: Option<GameVer> = None;
-    #[cfg(feature = "no_citra")]
     launcher::check_for_plgldr();
 
     //TODO: removing deleted mods from the cfg
@@ -183,7 +188,6 @@ fn run() -> error::Result<()> {
     drop(gfx);
     drop(hid);
 
-    #[cfg(feature = "no_citra")]
     if let Some(c) = game_to_load {
         launcher::launch(c)
     }

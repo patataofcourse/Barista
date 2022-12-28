@@ -359,10 +359,12 @@ impl BCSTMFile {
 
                     self.buffer_data[j][i].resize(block_size, 0);
                     self.file.read(&mut self.buffer_data[j][i])?;
-                    assert!(DSP_FlushDataCache(
-                        self.buffer_data[j][i].as_ptr() as *const libc::c_void,
-                        self.block_size,
-                    ) == 0);
+                    assert!(
+                        DSP_FlushDataCache(
+                            self.buffer_data[j][i].as_ptr() as *const libc::c_void,
+                            self.block_size,
+                        ) == 0
+                    );
 
                     if self.current_block == 0 {
                         buf.adpcm_data = &mut self.adpcm_data[j][0];

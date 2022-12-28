@@ -55,7 +55,12 @@ pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String
 
 pub fn get_mod_name(mods: &Vec<PathBuf>, page: usize, pos: usize) -> String {
     let m = &mods[page * ENTRIES_PER_PAGE + pos];
-    m.with_extension("").file_name().unwrap().to_str().unwrap().to_owned()
+    m.with_extension("")
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_owned()
 }
 
 pub fn is_valid_slot(slot: u16) -> bool {

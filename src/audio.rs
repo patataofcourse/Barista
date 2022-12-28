@@ -34,7 +34,7 @@ impl AudioManager {
 
     pub fn pause(&mut self) {
         self.is_playing = false;
-        self.tx.send(AudioMessage::Play).unwrap();
+        self.tx.send(AudioMessage::Pause).unwrap();
     }
 
     pub fn stop(&mut self) {

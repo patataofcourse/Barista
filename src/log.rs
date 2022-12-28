@@ -1,4 +1,5 @@
 #[cfg(debug_assertions)]
+#[allow(unused)]
 pub enum Log {
     General,
     Audio,

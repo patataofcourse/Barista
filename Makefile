@@ -5,7 +5,6 @@ endif
 DEBUG 		?= 1
 FEATURES 	?=
 CARGO3DS	?= 0
-TEST		?= 0
 
 STD			:= $(shell rustc --print sysroot)/rustlib/armv6k-nintendo-3ds
 NM 			:= $(DEVKITARM)/bin/arm-none-eabi-nm
@@ -46,10 +45,6 @@ CARGOFLAGS  += --release
 SYMBOLS		?= 0
 endif
 
-ifneq ($(TEST),0)
-CARGOFLAGS += --no-default-features
-endif
-
 ifneq ($(FEATURES),)
 CARGOFLAGS	+= --features="$(FEATURES)"
 endif
@@ -73,11 +68,7 @@ endif
 
 .PHONY: all clean dist plgldr check doc fmt fix test update
 
-ifeq ($(TEST),0)
 all: dist
-else
-all: test
-endif
 
 ### Main executable ###
 

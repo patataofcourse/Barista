@@ -3,10 +3,7 @@
 
 use std::path::PathBuf;
 
-use crate::{
-    launcher::GameVer,
-    mod_picker,
-};
+use crate::{launcher::GameVer, mod_picker};
 use ctru::{
     console::Console,
     services::hid::{Hid, KeyPad},
@@ -163,7 +160,8 @@ impl MenuState {
                 }
             } else if let SubMenu::SetUp = self.sub_menu {
                 if self.cursor_option_len(versions, &mod_page) - self.cursor <= 3 {
-                    self.action = SubMenu::ACTIONS_SETUP[self.cursor as usize - &mod_page.len()].clone();
+                    self.action =
+                        SubMenu::ACTIONS_SETUP[self.cursor as usize - &mod_page.len()].clone();
                 } else {
                     self.action = MenuAction::ToggleMod;
                 }
@@ -200,7 +198,7 @@ impl MenuState {
                 self.sub_menu = SubMenu::Main;
                 self.cursor = 0;
                 *page = 0;
-            },
+            }
             MenuAction::ChangePage(c) => {
                 if !c && *page > 0 {
                     *page -= 1;
@@ -216,7 +214,7 @@ impl MenuState {
                         let step: i16 = if *i { 1 } else { -1 };
                         let mut out = m.1.wrapping_add_signed(step);
 
-                        while !mod_picker::is_valid_slot(out) || config.btks.contains_key(&out)  {
+                        while !mod_picker::is_valid_slot(out) || config.btks.contains_key(&out) {
                             out = match out.wrapping_add_signed(step) {
                                 0x8000..=u16::MAX => 0x10F,
                                 0x110..=0x7FFF => 0,
@@ -226,7 +224,7 @@ impl MenuState {
 
                         config.btks.insert(
                             out,
-                            mod_picker::get_mod_name(mods, *page, self.cursor as usize)
+                            mod_picker::get_mod_name(mods, *page, self.cursor as usize),
                         );
                         m.1 = out;
                     }
@@ -238,10 +236,13 @@ impl MenuState {
                     if m.1 == u16::MAX {
                         let mut val = 0;
                         while val <= 0x10F && config.btks.contains_key(&val) {
-                            val+=1;
+                            val += 1;
                         }
                         if val <= 0x10F {
-                            config.btks.insert(val, mod_picker::get_mod_name(mods, *page, self.cursor as usize));
+                            config.btks.insert(
+                                val,
+                                mod_picker::get_mod_name(mods, *page, self.cursor as usize),
+                            );
                         }
                         m.1 = val;
                     } else {
@@ -249,7 +250,7 @@ impl MenuState {
                         m.1 = u16::MAX;
                     }
                 }
-            },
+            }
             MenuAction::MoveCursor => {}
             #[cfg(feature = "audio")]
             MenuAction::ToggleAudio => {}
@@ -416,7 +417,7 @@ impl MenuState {
             }
             #[cfg(debug_assertions)]
             SubMenu::Log => {
-                println!("{}", unsafe {&crate::log::LOG});
+                println!("{}", unsafe { &crate::log::LOG });
             }
         }
     }

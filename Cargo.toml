@@ -13,7 +13,6 @@ libc = "0.2"
 bytestream = "0.4"
 
 [features]
-default = ["no_citra"]
+default = []
 jp = []         # Enables SpiceRack with Japanese Megamix (Tickflow doesn't work)
 audio = []      # Enables audio - broken/experimental
-no_citra = []   # Disables plgldr in order to be able to test graphics on Citra
