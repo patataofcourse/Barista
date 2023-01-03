@@ -17,7 +17,7 @@ use citro2d_sys::{
     C3D_FrameBegin,
     GFX_LEFT,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, ptr};
 
 #[repr(u32)]
 #[derive(Clone, Debug)]
@@ -114,7 +114,7 @@ impl Scene<'_> {
             citro2d_sys::C2D_SceneSize(
                 (*self.target).frameBuf.width.into(),
                 (*self.target).frameBuf.height.into(),
-                (*self.target).linked,
+                true,
             );
         }
         let out1 = match &self.background{
@@ -173,16 +173,16 @@ impl Image {
         unsafe {
             let mut params = C2D_DrawParams {
                 pos: C2D_DrawParams_pos {
-                    x: 240.0 - y as f32,
-                    y: x as f32,
-                    w: (*self.0.subtex).width as f32 * scale_y,
-                    h: (*self.0.subtex).height as f32 * scale_x,
+                    x: x as f32,
+                    y: y as f32,
+                    w: (*self.0.subtex).width as f32 * scale_x,
+                    h: (*self.0.subtex).height as f32 * scale_y,
                 },
                 center: C2D_DrawParams_center {
                     x: 0.0,
                     y: 0.0,
                 },
-                angle: (rotation + 90.0) / 360.0 * 2.0 * PI,
+                angle: rotation / 360.0 * 2.0 * PI,
                 depth: depth,
             };
             C2D_DrawImage(self.0, &mut params, std::ptr::null())
