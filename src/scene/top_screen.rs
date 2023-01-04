@@ -1,4 +1,4 @@
-use std::{collections::HashMap, iter::FromIterator};
+use std::{cmp::Ordering, collections::HashMap, iter::FromIterator};
 use ui_lib::{
     sprite::{Image, SpriteSheet},
     BaristaUI, Object, Scene, Screen, StaticObject,
@@ -40,79 +40,84 @@ pub struct Textbox {
     pub y: u16,
     pub width: u16,
     pub height: u16,
-    pub speaker: (u16, u16),
+    pub speaker: (u16, bool),
 }
 
 impl Object for Textbox {
     fn draw(&self) -> bool {
-        let center = (self.width / 2 + self.x, self.height / 2 + self.y);
+        const OUTLINE_WIDTH: f32 = 2.0;
+        const STEM_SIZE: f32 = 10.0;
+        
+        // do not change this!!
+        const STEM_HEIGHT: f32 = STEM_SIZE * 2.0;
 
-        // some triangulation...
-        let cutoff_y = if self.speaker.1 > self.y {
-            self.y + self.height + 5
+        let center_x = (self.width / 2 + self.x) as f32;
+
+        let stem_base_x = self.speaker.0 as f32;
+        let stem_base_y = if !self.speaker.1 {
+            self.x
         } else {
-            self.y - 5
+            self.x + self.height
         } as f32;
-        let cutoff_x = center.0 as f32
-            - (center.1 as f32 - cutoff_y)
-                / ((center.1 as f32 - self.speaker.1 as f32)
-                    * (center.0 as f32 - self.speaker.0 as f32));
 
-        // trig time now ig
-        const OUTLINE_WIDTH: f32 = 3.0;
-        let speaker_outline = if center.0 == self.speaker.0 {
-            // won't be properly rendered anyway so no outline for you
-            (0.0, 0.0)
-        } else if center.1 == self.speaker.1 {
-            (0.0, OUTLINE_WIDTH)
-        } else {
-            let og_distance_vec = (
-                (center.0 as f32 - self.speaker.0 as f32),
-                (center.1 as f32 - self.speaker.1 as f32),
-            );
-            let angle = (og_distance_vec.0 / og_distance_vec.1).atan();
-            let og_distance = og_distance_vec.0 / angle.sin();
-            let new_distance = og_distance - OUTLINE_WIDTH;
-            let new_distance_vec = (new_distance * angle.sin(), new_distance * angle.cos());
-            (
-                og_distance_vec.0 - new_distance_vec.0,
-                og_distance_vec.1 - new_distance_vec.1,
-            )
+        let (stem_point, stem_outline_l, stem_outline_r, stem_outline_px, stem_outline_py);
+        match stem_base_x.total_cmp(&center_x) {
+            Ordering::Equal => {
+                stem_point = stem_base_x;
+                stem_outline_l = OUTLINE_WIDTH / -22.5f32.cos();
+                stem_outline_r = OUTLINE_WIDTH / -22.5f32.cos();
+                stem_outline_px = 0.0;
+                stem_outline_py = -OUTLINE_WIDTH * 2.0f32.sqrt();
+            }
+            Ordering::Less => {
+                stem_point = stem_base_x - STEM_SIZE;
+                stem_outline_l = OUTLINE_WIDTH;
+                stem_outline_r = OUTLINE_WIDTH * 2.0f32.sqrt();
+                stem_outline_px = OUTLINE_WIDTH;
+                stem_outline_py = -OUTLINE_WIDTH * 2.0;
+            }
+            Ordering::Greater => {
+                stem_point = stem_base_x + STEM_SIZE;
+                stem_outline_l = OUTLINE_WIDTH * 2.0f32.sqrt();
+                stem_outline_r = OUTLINE_WIDTH;
+                stem_outline_px = -OUTLINE_WIDTH;
+                stem_outline_py = -OUTLINE_WIDTH * 2.0;
+            }
         };
 
         unsafe {
             citro2d_sys::C2D_DrawRectangle(
-                self.x as f32 - 7.0,
-                self.y as f32 - 7.0,
+                self.x as f32 - (5.0 + OUTLINE_WIDTH),
+                self.y as f32 - (5.0 + OUTLINE_WIDTH),
                 0.0,
-                self.width as f32 + 14.0,
-                self.height as f32 + 14.0,
+                self.width as f32 + 10.0 + OUTLINE_WIDTH * 2.0,
+                self.height as f32 + 10.0 + OUTLINE_WIDTH * 2.0,
                 0xFF000000,
                 0xFF000000,
                 0xFF000000,
                 0xFF000000,
             );
             citro2d_sys::C2D_DrawTriangle(
-                cutoff_x - 30.0,
-                cutoff_y,
+                stem_base_x - STEM_SIZE,
+                stem_base_y,
                 0xFF000000,
-                cutoff_x + 30.0,
-                cutoff_y,
+                stem_base_x + STEM_SIZE,
+                stem_base_y,
                 0xFF000000,
-                self.speaker.0 as f32,
-                self.speaker.1 as f32,
+                stem_point,
+                stem_base_y + STEM_HEIGHT,
                 0xFF000000,
                 0.0,
             );
             citro2d_sys::C2D_DrawTriangle(
-                cutoff_x - 20.0,
-                cutoff_y,
+                stem_base_x - (STEM_SIZE - stem_outline_l),
+                stem_base_y,
                 0xFFFFFFFF,
-                cutoff_x + 20.0,
-                cutoff_y,
+                stem_base_x + (STEM_SIZE - stem_outline_r),
+                stem_base_y,
                 0xFFFFFFFF,
-                self.speaker.0 as f32 - speaker_outline.0,
-                self.speaker.1 as f32 - speaker_outline.1,
+                stem_point + stem_outline_px,
+                stem_base_y + STEM_HEIGHT + stem_outline_py,
                 0xFFFFFFFF,
                 0.0,
             );
@@ -224,7 +229,7 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
             y: 20,
             width: text.width(),
             height: text.height(),
-            speaker: (200, 75),
+            speaker: (230, true),
         },
     );
 

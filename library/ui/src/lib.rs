@@ -2,7 +2,7 @@ use citro2d_sys::{
     C2D_Flush, C2D_TargetClear, C3D_FrameBegin, C3D_RenderTarget, C2D_DEFAULT_MAX_OBJECTS,
     C3D_DEFAULT_CMDBUF_SIZE, C3D_FRAME_SYNCDRAW, GFX_LEFT,
 };
-use std::{collections::HashMap, ptr};
+use std::collections::HashMap;
 
 pub mod sprite;
 pub mod text;
