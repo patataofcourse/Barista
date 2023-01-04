@@ -12,6 +12,8 @@ citro2d-sys = { path = "library/citro2d" }
 barista-ui = { path = "library/ui" }
 libc = "0.2"
 bytestream = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.5"
 
 [features]
 default = []

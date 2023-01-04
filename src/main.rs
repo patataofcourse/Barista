@@ -58,7 +58,7 @@ fn main() {
         Err(c) => {
             let error = match c {
                 Error::CtruError(c) => match c {
-                    ctru::Error::Os(c) => format!("System error {:#X} (", c),
+                    ctru::Error::Os(c) => format!("System error {:#X}", c),
                     ctru::Error::Libc(c) => format!("libc error:\n{}", c),
                     ctru::Error::ServiceAlreadyActive => format!("Service already active"),
                     ctru::Error::OutputAlreadyRedirected => format!("Output already redirected"),
@@ -67,9 +67,23 @@ fn main() {
                 Error::IoError(c) => {
                     format!("IO error: {}", c)
                 }
+                Error::TomlDeError(c) => {
+                    format!("TOML deserialize error: {}", c)
+                }
+                Error::TomlSeError(c) => {
+                    format!("TOML serialize error: {}", c)
+                }
                 Error::OtherError(c) => c,
             };
-            error_applet(error);
+            if is_citra {
+                //TODO: proper implementation
+                let gfx = Gfx::init().unwrap();
+                let c = ctru::console::Console::init(gfx.bottom_screen.borrow_mut());
+                println!("Error: {}", error);
+                std::thread::sleep_ms(20000);
+            } else {
+                error_applet(error);
+            }
 
             process::exit(1);
         }
@@ -133,13 +147,16 @@ fn run() -> error::Result<()> {
         unsafe { AUDIO = Some(&audio_player) }
     }
 
-    // Init config
+    // Init Saltwater config
     unsafe {
         CONFIG = Some(
             format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg")
                 .unwrap_or_default(),
         );
     }
+
+    // Init Barista config
+    let settings = format::barista_cfg::BaristaConfig::from_file("/spicerack/cfg.toml");
 
     let mut page = 0;
 

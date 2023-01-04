@@ -3,6 +3,7 @@ use std::{
     fmt::{self, Display, Result as FmtResult},
     io::Error as IoError,
 };
+use toml::{de::Error as TomlDeError, ser::Error as TomlSeError};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -10,6 +11,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     CtruError(CtruError),
     IoError(IoError),
+    TomlDeError(TomlDeError),
+    TomlSeError(TomlSeError),
     OtherError(String),
 }
 
@@ -22,6 +25,8 @@ impl Display for self::Error {
                 Self::IoError(c) => c.to_string(),
                 Self::CtruError(c) => c.to_string(),
                 Self::OtherError(c) => c.to_string(),
+                Self::TomlDeError(c) => c.to_string(),
+                Self::TomlSeError(c) => c.to_string(),
             }
         )
     }
@@ -38,6 +43,18 @@ impl From<CtruError> for self::Error {
 impl From<IoError> for self::Error {
     fn from(err: IoError) -> Self {
         Self::IoError(err)
+    }
+}
+
+impl From<TomlDeError> for self::Error {
+    fn from(err: TomlDeError) -> Self {
+        Self::TomlDeError(err)
+    }
+}
+
+impl From<TomlSeError> for self::Error {
+    fn from(err: TomlSeError) -> Self {
+        Self::TomlSeError(err)
     }
 }
 
