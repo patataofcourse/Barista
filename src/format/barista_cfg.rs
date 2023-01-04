@@ -6,12 +6,15 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct BaristaConfig {
+    #[serde(skip, default="bool::default")]
+    pub is_new: bool,
     pub original_gates: bool,
 }
 
 impl Default for BaristaConfig {
     fn default() -> Self {
         Self {
+            is_new: true,
             original_gates: false,
         }
     }
@@ -25,8 +28,7 @@ impl BaristaConfig {
             Ok(mut file) => {
                 let mut string = String::new();
                 file.read_to_string(&mut string)?;
-                toml::from_str(&string)?;
-                todo!();
+                Ok(toml::from_str(&string)?)
             }
             Err(e) => {
                 let ctru::Error::Os(err) = *e.into_inner().unwrap().downcast::<ctru::Error>().unwrap() else {panic!("error not OS error")};
