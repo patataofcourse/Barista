@@ -124,7 +124,7 @@ doc:
 	@$(CARGO) doc --open $(CARGOFLAGS)
 
 fmt:
-	@cargo fmt
+	@cargo fmt --all
 
 test: dist
 	@$(CITRA) $(DIST)/barista.3dsx

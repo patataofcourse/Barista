@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 ctru-rs = { git = "https://github.com/rust3ds/ctru-rs.git" }
 ctru-sys = { git = "https://github.com/rust3ds/ctru-rs.git" }
+citro2d-sys = { path = "library/citro2d" }
 barista-ui = { path = "library/ui" }
 libc = "0.2"
 bytestream = "0.4"

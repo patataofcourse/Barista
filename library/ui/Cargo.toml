@@ -2,7 +2,7 @@
 name = "barista-ui"
 version = "0.1.0"
 authors = ["patataofcourse <patataofcourse@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,3 +10,4 @@ edition = "2018"
 ctru-rs = { git = "https://github.com/rust3ds/ctru-rs.git" }
 ctru-sys = { git = "https://github.com/rust3ds/ctru-rs.git" }
 citro2d-sys = { path = "../citro2d" }
+libc = "0.2"

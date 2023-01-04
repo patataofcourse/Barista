@@ -1,29 +1,19 @@
-const PI: f32 = std::f64::consts::PI as f32;
-
 use citro2d_sys::{
-    C2D_SpriteSheet,
-    C2D_SpriteSheetGetImage,
-    C2D_DrawParams,
-    C2D_DrawParams__bindgen_ty_1 as C2D_DrawParams_pos,
-    C2D_DrawParams__bindgen_ty_2 as C2D_DrawParams_center,
-    C3D_DEFAULT_CMDBUF_SIZE,
-    C2D_DEFAULT_MAX_OBJECTS,
-    C3D_RenderTarget,
-    C2D_Image,
-    C2D_DrawImage,
-    C2D_TargetClear,
-    C2D_Flush,
-    C3D_FRAME_SYNCDRAW,
-    C3D_FrameBegin,
-    GFX_LEFT,
+    C2D_Flush, C2D_TargetClear, C3D_FrameBegin, C3D_RenderTarget, C2D_DEFAULT_MAX_OBJECTS,
+    C3D_DEFAULT_CMDBUF_SIZE, C3D_FRAME_SYNCDRAW, GFX_LEFT,
 };
 use std::{collections::HashMap, ptr};
+
+pub mod sprite;
+pub mod text;
+
+pub use text::Text;
 
 #[repr(u32)]
 #[derive(Clone, Debug)]
 pub enum Screen {
     Top = 0,
-    Bottom = 1
+    Bottom = 1,
 }
 
 pub struct BaristaUI<'a> {
@@ -33,7 +23,7 @@ pub struct BaristaUI<'a> {
     bottom_screen_target: *mut C3D_RenderTarget,
 }
 
-impl<'a> BaristaUI <'a> {
+impl<'a> BaristaUI<'a> {
     pub(crate) fn get_target(&self, screen: Screen) -> *mut C3D_RenderTarget {
         match screen {
             Screen::Top => self.top_screen_target.clone(),
@@ -49,8 +39,14 @@ impl<'a> BaristaUI <'a> {
             BaristaUI {
                 bottom_scene: None,
                 top_scene: None,
-                top_screen_target: citro2d_sys::C2D_CreateScreenTarget(Screen::Top as u32, GFX_LEFT),
-                bottom_screen_target: citro2d_sys::C2D_CreateScreenTarget(Screen::Bottom as u32, GFX_LEFT),
+                top_screen_target: citro2d_sys::C2D_CreateScreenTarget(
+                    Screen::Top as u32,
+                    GFX_LEFT,
+                ),
+                bottom_screen_target: citro2d_sys::C2D_CreateScreenTarget(
+                    Screen::Bottom as u32,
+                    GFX_LEFT,
+                ),
             }
         }
     }
@@ -59,15 +55,11 @@ impl<'a> BaristaUI <'a> {
         unsafe {
             C3D_FrameBegin(C3D_FRAME_SYNCDRAW as u8);
             let out_top = match &self.top_scene {
-                Some(c) => {
-                    c.draw()
-                },
+                Some(c) => c.draw(),
                 None => (false, vec![]),
             };
             let out_bottom = match &self.bottom_scene {
-                Some(c) => {
-                    c.draw()
-                },
+                Some(c) => c.draw(),
                 None => (false, vec![]),
             };
             citro2d_sys::C3D_FrameEnd(0);
@@ -86,18 +78,18 @@ impl<'a> BaristaUI <'a> {
 pub struct Scene<'a> {
     target: *mut C3D_RenderTarget,
     screen: Screen,
-    pub background: Option<Image>,
+    pub background: Option<sprite::Image>,
     pub objects: HashMap<&'static str, Box<dyn Object + 'a>>,
 }
 
 impl Scene<'_> {
-    pub fn new(ui: &BaristaUI, screen: Screen, background: Option<Image>) -> Self {
-            Self {
-                screen: screen.clone(),
-                target: ui.get_target(screen),
-                background,
-                objects: HashMap::new(),
-            }
+    pub fn new(ui: &BaristaUI, screen: Screen, background: Option<sprite::Image>) -> Self {
+        Self {
+            screen: screen.clone(),
+            target: ui.get_target(screen),
+            background,
+            objects: HashMap::new(),
+        }
     }
 
     pub fn get_screen(&self) -> Screen {
@@ -117,12 +109,12 @@ impl Scene<'_> {
                 true,
             );
         }
-        let out1 = match &self.background{
+        let out1 = match &self.background {
             Some(c) => c.draw(0, 0, 1.0, 1.0, 0.0, 0.0),
             None => false,
         };
         let mut out2 = vec![];
-        for( _, object) in &self.objects {
+        for (_, object) in &self.objects {
             out2.push(object.as_ref().draw());
         }
         (out1, out2)
@@ -130,8 +122,9 @@ impl Scene<'_> {
 }
 
 impl<'a> Scene<'a> {
-    pub fn add_object<T: 'a>(&mut self, name:&'static str, object: T)
-        where T: Object
+    pub fn add_object<T: 'a>(&mut self, name: &'static str, object: T)
+    where
+        T: Object,
     {
         self.objects.insert(name, Box::from(object));
     }
@@ -149,77 +142,18 @@ pub struct StaticObject {
     pub scale_y: f32,
     pub rotation: f32,
     pub depth: f32,
-    pub image: Image,
+    pub image: sprite::Image,
 }
 
 impl Object for StaticObject {
     fn draw(&self) -> bool {
-        self.image.draw(self.x, self.y, self.scale_x, self.scale_y, self.rotation, self.depth)
-    }
-}
-
-pub struct Image(C2D_Image);
-
-impl Image {
-    pub fn draw(
-        &self,
-        x: u16,
-        y: u16,
-        scale_x: f32,
-        scale_y: f32,
-        rotation: f32,
-        depth: f32
-    ) -> bool {
-        unsafe {
-            let mut params = C2D_DrawParams {
-                pos: C2D_DrawParams_pos {
-                    x: x as f32,
-                    y: y as f32,
-                    w: (*self.0.subtex).width as f32 * scale_x,
-                    h: (*self.0.subtex).height as f32 * scale_y,
-                },
-                center: C2D_DrawParams_center {
-                    x: 0.0,
-                    y: 0.0,
-                },
-                angle: rotation / 360.0 * 2.0 * PI,
-                depth: depth,
-            };
-            C2D_DrawImage(self.0, &mut params, std::ptr::null())
-        }
-    }
-}
-
-pub struct SpriteSheet {
-    pub filename: String,
-    val: C2D_SpriteSheet,
-}
-
-impl SpriteSheet {
-    pub fn from_file(filename: &'static str) -> Option<Self> {
-        let val: C2D_SpriteSheet;
-        unsafe {
-            val = citro2d_sys::C2D_SpriteSheetLoad((filename.to_string() + "\0").as_ptr());
-        }
-        if val.is_null() {
-            None
-        } else {
-            Some(Self {
-                filename: filename.to_string(),
-                val,
-            })
-        }
-    }
-
-    pub fn get_sprite(&self, index: u32) -> Option<Image> {
-        let image: C2D_Image;
-        unsafe {
-            image = C2D_SpriteSheetGetImage(self.val, index);
-        }
-        if image.subtex.is_null() {
-            None
-        } else {
-            Some(Image(image))
-        }
+        self.image.draw(
+            self.x,
+            self.y,
+            self.scale_x,
+            self.scale_y,
+            self.rotation,
+            self.depth,
+        )
     }
 }

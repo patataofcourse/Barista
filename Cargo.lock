@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "barista-ui",
  "bytestream",
+ "citro2d-sys",
  "ctru-rs",
  "ctru-sys",
  "libc",
@@ -20,6 +21,7 @@ dependencies = [
  "citro2d-sys",
  "ctru-rs",
  "ctru-sys",
+ "libc",
 ]
 
 [[package]]

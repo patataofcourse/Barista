@@ -1,5 +1,8 @@
 use std::{collections::HashMap, iter::FromIterator};
-use ui_lib::{BaristaUI, Image, Object, Scene, Screen, SpriteSheet, StaticObject};
+use ui_lib::{
+    sprite::{Image, SpriteSheet},
+    BaristaUI, Object, Scene, Screen, StaticObject,
+};
 
 pub struct BaristaSprites {
     pub depth: f32,
@@ -30,6 +33,26 @@ pub struct Sign {
     pub sign_text: HashMap<String, Image>,
     pub cur_text: &'static str,
     pub depth: f32,
+}
+
+pub struct Textbox{
+    pub x: u16,
+    pub y: u16,
+    pub width: u16,
+    pub height: u16,
+    pub speaker: (u16, u16),
+}
+
+impl Object for Textbox {
+    fn draw(&self) -> bool {
+        unsafe {
+            citro2d_sys::C2D_DrawRectangle(self.x as f32 - 7.0, self.y as f32 - 7.0, 0.0, self.width as f32 + 14.0, self.height as f32 + 14.0, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
+            //citro2d_sys::C2D_DrawTriangle(235.0, 20.0 + text.lines as f32 * 30.0 * 0.6, 0xFF000000, 265.0, 20.0 + text.lines as f32 * 30.0 * 0.6, 0xFF000000, 280.0, 80.0, 0xFF000000, 0.0);
+            //citro2d_sys::C2D_DrawTriangle(240.0, 20.0 + text.lines as f32 * 30.0 * 0.6, 0xFFFFFFFF, 260.0, 20.0 + text.lines as f32 * 30.0 * 0.6, 0xFFFFFFFF, 275.0, 75.0, 0xFFFFFFFF, 0.0);
+            citro2d_sys::C2D_DrawRectangle(self.x as f32 - 5.0, self.y as f32 - 5.0, 0.0, self.width as f32 + 10.0, self.height as f32 + 10.0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+        }
+        true
+    }
 }
 
 impl Object for Sign {
@@ -107,6 +130,30 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
             depth: 0.0,
             cur_text: "opening",
         },
+    );
+
+    let text = ui_lib::text::Text::new(
+        "Welcome! We're still under\nconstruction, sorry for the mess!".to_string(),
+        20,
+        20,
+        18,
+    );
+
+    // Text
+    let text = ui_lib::text::Text::new(
+        "Welcome! We're still under\nconstruction, sorry for the mess!".to_string(),
+        20,
+        20,
+        18,
+    );
+
+    scene.add_object("textbox", Textbox {
+        x: 20, y: 20, width: text.width(), height: text.height(), speaker: (275, 75)
+    });
+
+    scene.add_object(
+        "text",
+        text,
     );
 
     scene
