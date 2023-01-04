@@ -48,21 +48,31 @@ impl Text {
         unsafe {
             let mut w = 0.0;
             let mut _h = 0.0;
-            citro2d_sys::C2D_TextGetDimensions(&self.inner, self.size as f32 / 30.0, self.size as f32 / 30.0, &mut w, &mut _h);
+            citro2d_sys::C2D_TextGetDimensions(
+                &self.inner,
+                self.size as f32 / 30.0,
+                self.size as f32 / 30.0,
+                &mut w,
+                &mut _h,
+            );
             w as u16
         }
     }
-
 
     pub fn height(&self) -> u16 {
         unsafe {
             let mut _w = 0.0;
             let mut h = 0.0;
-            citro2d_sys::C2D_TextGetDimensions(&self.inner, self.size as f32 / 30.0, self.size as f32 / 30.0, &mut _w, &mut h);
+            citro2d_sys::C2D_TextGetDimensions(
+                &self.inner,
+                self.size as f32 / 30.0,
+                self.size as f32 / 30.0,
+                &mut _w,
+                &mut h,
+            );
             h as u16
         }
     }
-
 }
 
 impl crate::Object for Text {

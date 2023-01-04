@@ -35,7 +35,7 @@ pub struct Sign {
     pub depth: f32,
 }
 
-pub struct Textbox{
+pub struct Textbox {
     pub x: u16,
     pub y: u16,
     pub width: u16,
@@ -45,11 +45,88 @@ pub struct Textbox{
 
 impl Object for Textbox {
     fn draw(&self) -> bool {
+        let center = (self.width / 2 + self.x, self.height / 2 + self.y);
+
+        // some triangulation...
+        let cutoff_y = if self.speaker.1 > self.y {
+            self.y + self.height + 5
+        } else {
+            self.y - 5
+        } as f32;
+        let cutoff_x = center.0 as f32
+            - (center.1 as f32 - cutoff_y)
+                / ((center.1 as f32 - self.speaker.1 as f32)
+                    * (center.0 as f32 - self.speaker.0 as f32));
+
+        // trig time now ig
+        const OUTLINE_WIDTH: f32 = 3.0;
+        let speaker_outline = if center.0 == self.speaker.0 {
+            // won't be properly rendered anyway so no outline for you
+            (0.0, 0.0)
+        } else if center.1 == self.speaker.1 {
+            (0.0, OUTLINE_WIDTH)
+        } else {
+            let og_distance_vec = (
+                (center.0 as f32 - self.speaker.0 as f32),
+                (center.1 as f32 - self.speaker.1 as f32),
+            );
+            let angle = (og_distance_vec.0 / og_distance_vec.1).atan();
+            let og_distance = og_distance_vec.0 / angle.sin();
+            let new_distance = og_distance - OUTLINE_WIDTH;
+            let new_distance_vec = (new_distance * angle.sin(), new_distance * angle.cos());
+            (
+                og_distance_vec.0 - new_distance_vec.0,
+                og_distance_vec.1 - new_distance_vec.1,
+            )
+        };
+
         unsafe {
-            citro2d_sys::C2D_DrawRectangle(self.x as f32 - 7.0, self.y as f32 - 7.0, 0.0, self.width as f32 + 14.0, self.height as f32 + 14.0, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
-            //citro2d_sys::C2D_DrawTriangle(235.0, 20.0 + text.lines as f32 * 30.0 * 0.6, 0xFF000000, 265.0, 20.0 + text.lines as f32 * 30.0 * 0.6, 0xFF000000, 280.0, 80.0, 0xFF000000, 0.0);
-            //citro2d_sys::C2D_DrawTriangle(240.0, 20.0 + text.lines as f32 * 30.0 * 0.6, 0xFFFFFFFF, 260.0, 20.0 + text.lines as f32 * 30.0 * 0.6, 0xFFFFFFFF, 275.0, 75.0, 0xFFFFFFFF, 0.0);
-            citro2d_sys::C2D_DrawRectangle(self.x as f32 - 5.0, self.y as f32 - 5.0, 0.0, self.width as f32 + 10.0, self.height as f32 + 10.0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+            citro2d_sys::C2D_DrawRectangle(
+                self.x as f32 - 7.0,
+                self.y as f32 - 7.0,
+                0.0,
+                self.width as f32 + 14.0,
+                self.height as f32 + 14.0,
+                0xFF000000,
+                0xFF000000,
+                0xFF000000,
+                0xFF000000,
+            );
+            citro2d_sys::C2D_DrawTriangle(
+                cutoff_x - 30.0,
+                cutoff_y,
+                0xFF000000,
+                cutoff_x + 30.0,
+                cutoff_y,
+                0xFF000000,
+                self.speaker.0 as f32,
+                self.speaker.1 as f32,
+                0xFF000000,
+                0.0,
+            );
+            citro2d_sys::C2D_DrawTriangle(
+                cutoff_x - 20.0,
+                cutoff_y,
+                0xFFFFFFFF,
+                cutoff_x + 20.0,
+                cutoff_y,
+                0xFFFFFFFF,
+                self.speaker.0 as f32 - speaker_outline.0,
+                self.speaker.1 as f32 - speaker_outline.1,
+                0xFFFFFFFF,
+                0.0,
+            );
+            citro2d_sys::C2D_DrawRectangle(
+                self.x as f32 - 5.0,
+                self.y as f32 - 5.0,
+                0.0,
+                self.width as f32 + 10.0,
+                self.height as f32 + 10.0,
+                0xFFFFFFFF,
+                0xFFFFFFFF,
+                0xFFFFFFFF,
+                0xFFFFFFFF,
+            );
         }
         true
     }
@@ -132,13 +209,6 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
         },
     );
 
-    let text = ui_lib::text::Text::new(
-        "Welcome! We're still under\nconstruction, sorry for the mess!".to_string(),
-        20,
-        20,
-        18,
-    );
-
     // Text
     let text = ui_lib::text::Text::new(
         "Welcome! We're still under\nconstruction, sorry for the mess!".to_string(),
@@ -147,14 +217,18 @@ pub fn top_screen_scene<'a>(ui: &BaristaUI) -> Scene<'a> {
         18,
     );
 
-    scene.add_object("textbox", Textbox {
-        x: 20, y: 20, width: text.width(), height: text.height(), speaker: (275, 75)
-    });
-
     scene.add_object(
-        "text",
-        text,
+        "textbox",
+        Textbox {
+            x: 20,
+            y: 20,
+            width: text.width(),
+            height: text.height(),
+            speaker: (200, 75),
+        },
     );
+
+    scene.add_object("text", text);
 
     scene
 }
