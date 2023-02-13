@@ -3,6 +3,7 @@ use ctru::services::fs::{self, File, Fs};
 use std::{
     ffi::CString,
     fmt::{self, Display},
+    mem::transmute,
 };
 
 use ctru_sys::{amExit, amInit, AM_GetTitleInfo, AM_TitleEntry, MEDIATYPE_GAME_CARD, MEDIATYPE_SD};
@@ -185,8 +186,11 @@ pub fn check_for_rhmpatch() -> bool {
 }
 
 pub fn launch(ver: GameVer) {
-    //disable rhmpatch if it exists
+    let mut params = [0u8; 128];
+
+    // disable rhmpatch if it exists
     if check_for_rhmpatch() {
+        params[0] = 1;
         let fs = Fs::init().unwrap();
         fs::rename(
             &fs.sdmc().unwrap(),
@@ -196,12 +200,14 @@ pub fn launch(ver: GameVer) {
         .unwrap()
     }
 
+    let params = unsafe { transmute(params) };
+
     plgldr::init().unwrap();
     plgldr::set_params(
         true,
         ver.region.id(),
         CString::new("/spicerack/bin/Saltwater.3gx").unwrap(),
-        [0; 32],
+        params,
     )
     .unwrap();
     plgldr::exit();
