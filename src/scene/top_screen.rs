@@ -47,7 +47,7 @@ impl Object for Textbox {
     fn draw(&self) -> bool {
         const OUTLINE_WIDTH: f32 = 2.0;
         const STEM_SIZE: f32 = 10.0;
-        
+
         // do not change this!!
         const STEM_HEIGHT: f32 = STEM_SIZE * 2.0;
 

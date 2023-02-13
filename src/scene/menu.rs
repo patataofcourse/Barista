@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use crate::{launcher::GameVer, mod_picker};
+use crate::{format::barista_cfg::BaristaConfig, launcher::GameVer, mod_picker};
 use ctru::{
     console::Console,
     services::hid::{Hid, KeyPad},
@@ -37,6 +37,10 @@ pub enum MenuAction {
 
     // Run
     Run,
+
+    // Options
+    ToggleSetting(u8),
+    SaveSettings,
 
     // SetUp
     ChangePage(bool),
@@ -80,7 +84,8 @@ impl SubMenu {
     ];
     #[cfg(not(feature = "audio"))]
     const ACTIONS_MUSIC: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
-    const ACTIONS_OPTIONS: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
+    const ACTIONS_OPTIONS: [MenuAction; 2] =
+        [MenuAction::ToggleSetting(0), MenuAction::SaveSettings];
 
     pub fn actions(&self) -> &[MenuAction] {
         match &self {
@@ -121,6 +126,7 @@ impl MenuState {
         versions: &Vec<GameVer>,
         mods: &Vec<PathBuf>,
         page: &mut usize,
+        settings: &mut BaristaConfig,
     ) {
         self.action = MenuAction::None;
 
@@ -194,7 +200,7 @@ impl MenuState {
                 self.cursor = 0;
                 *page = 0;
             }
-            MenuAction::SaveConfig => {
+            MenuAction::SaveConfig | MenuAction::SaveSettings => {
                 self.sub_menu = SubMenu::Main;
                 self.cursor = 0;
                 *page = 0;
@@ -216,7 +222,7 @@ impl MenuState {
 
                         while !mod_picker::is_valid_slot(out) || config.btks.contains_key(&out) {
                             out = match out.wrapping_add_signed(step) {
-                                0x8000..=u16::MAX => 0x10F,
+                                0x8000..=u16::MAX => 0x113,
                                 0x110..=0x7FFF => 0,
                                 c => c,
                             }
@@ -232,13 +238,14 @@ impl MenuState {
             }
             MenuAction::ToggleMod => {
                 if let Some(m) = mod_page.get_mut(self.cursor as usize) {
+                    //TODO: make it work properly on new gate mode
                     let config = crate::config();
                     if m.1 == u16::MAX {
                         let mut val = 0;
-                        while val <= 0x10F && config.btks.contains_key(&val) {
+                        while val <= 0x113 && config.btks.contains_key(&val) {
                             val += 1;
                         }
-                        if val <= 0x10F {
+                        if val <= 0x113 {
                             config.btks.insert(
                                 val,
                                 mod_picker::get_mod_name(mods, *page, self.cursor as usize),
@@ -251,6 +258,12 @@ impl MenuState {
                     }
                 }
             }
+            MenuAction::ToggleSetting(c) => match c {
+                0 => {
+                    settings.original_gates = !settings.original_gates;
+                }
+                _ => {}
+            },
             MenuAction::MoveCursor => {}
             #[cfg(feature = "audio")]
             MenuAction::ToggleAudio => {}
@@ -261,6 +274,7 @@ impl MenuState {
             &mod_page,
             *page,
             mod_picker::num_pages(mods),
+            settings,
         )
     }
 
@@ -271,6 +285,7 @@ impl MenuState {
         mods: &Vec<(String, u16)>,
         page: usize,
         num_pages: usize,
+        settings: &BaristaConfig,
     ) {
         console.clear();
         match &self.sub_menu {
@@ -349,7 +364,22 @@ impl MenuState {
                             if self.cursor == i as u32 { "*" } else { " " },
                             match elmt.1 {
                                 u16::MAX => "---".to_string(),
-                                c => format!("{:03X}", c),
+                                c =>
+                                    if c >= 0x100 && settings.original_gates {
+                                        format!(
+                                            "G{}{}",
+                                            if c >= 0x110 { c & 3 } else { (c & 0xFF) >> 2 },
+                                            if c >= 0x110 {
+                                                "P".to_string()
+                                            } else if c & 3 == 3 {
+                                                "E".to_string()
+                                            } else {
+                                                (c & 3).to_string()
+                                            }
+                                        )
+                                    } else {
+                                        format!("{:03X}", c)
+                                    },
                             },
                             elmt.0
                         );
@@ -411,9 +441,13 @@ impl MenuState {
             SubMenu::Options => {
                 println!("Barista - Settings");
                 println!();
-                println!("TO BE IMPLEMENTED");
+                println!(
+                    " [{}] ({}) Use 0x100 format for gates",
+                    if self.cursor == 0 { "*" } else { " " },
+                    if settings.original_gates { "x" } else { " " }
+                );
                 println!();
-                println!(" [{}] Back", if self.cursor == 0 { "*" } else { " " })
+                println!(" [{}] Back", if self.cursor == 1 { "*" } else { " " })
             }
             #[cfg(debug_assertions)]
             SubMenu::Log => {

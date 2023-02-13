@@ -64,7 +64,7 @@ pub fn get_mod_name(mods: &Vec<PathBuf>, page: usize, pos: usize) -> String {
 }
 
 pub fn is_valid_slot(slot: u16) -> bool {
-    slot <= 0x67 || (slot >= 0x100 && slot <= 0x10F)
+    slot <= 0x67 || (slot >= 0x100 && slot <= 0x113)
 }
 
 pub fn num_pages(paths: &Vec<PathBuf>) -> usize {

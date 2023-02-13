@@ -1,12 +1,15 @@
-use std::{path::PathBuf, io::{Read, Write}};
+use std::{
+    io::{Read, Write},
+    path::PathBuf,
+};
 
 use crate::Result;
-use ctru::services::fs::{Fs, File};
-use serde::{Serialize, Deserialize};
+use ctru::services::fs::{File, Fs};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct BaristaConfig {
-    #[serde(skip, default="bool::default")]
+    #[serde(skip, default = "bool::default")]
     pub is_new: bool,
     pub original_gates: bool,
 }

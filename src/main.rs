@@ -5,12 +5,13 @@ extern crate barista_ui as ui_lib;
 use ctru::{
     console::Console,
     gfx::Gfx,
-    services::{apt::Apt, hid::Hid},
+    services::{apt::Apt, hid::Hid, ps},
 };
 use error::error_applet;
 use std::{
     panic::{self, PanicInfo},
     process,
+    time::Duration,
 };
 use ui_lib::{BaristaUI, Screen};
 
@@ -78,9 +79,9 @@ fn main() {
             if is_citra {
                 //TODO: proper implementation
                 let gfx = Gfx::init().unwrap();
-                let c = ctru::console::Console::init(gfx.bottom_screen.borrow_mut());
-                println!("Error: {}", error);
-                std::thread::sleep_ms(20000);
+                let _ = ctru::console::Console::init(gfx.bottom_screen.borrow_mut());
+                println!("Error: {}\n\nExiting in 20 seconds...", error);
+                std::thread::sleep(Duration::from_secs(20));
             } else {
                 error_applet(error);
             }
@@ -117,9 +118,17 @@ fn run() -> error::Result<()> {
     //TODO: removing deleted mods from the cfg
     let mods = mod_picker::get_available_mods()?;
 
+    // Init Barista config
+    let mut settings = format::barista_cfg::BaristaConfig::from_file("/spicerack/cfg.toml")?;
+    let mut random = [0u8; 1];
+    ps::generate_random_bytes(&mut random)?;
+    if !settings.is_new && random == [0u8; 1] {
+        //nicole easter egg
+    }
+
     // Init menu
     let mut menu = MenuState::default();
-    menu.render(&console, &versions, &vec![], 0, 0);
+    menu.render(&console, &versions, &vec![], 0, 0, &mut settings);
 
     #[allow(unused)]
     let mut audio_player;
@@ -155,9 +164,6 @@ fn run() -> error::Result<()> {
         );
     }
 
-    // Init Barista config
-    let settings = format::barista_cfg::BaristaConfig::from_file("/spicerack/cfg.toml");
-
     let mut page = 0;
 
     // Main loop
@@ -168,7 +174,7 @@ fn run() -> error::Result<()> {
 
         ui.render();
 
-        menu.run(&hid, &console, &versions, &mods, &mut page);
+        menu.run(&hid, &console, &versions, &mods, &mut page, &mut settings);
 
         match &menu.action {
             MenuAction::Exit => break,
@@ -187,12 +193,16 @@ fn run() -> error::Result<()> {
             MenuAction::SaveConfig => {
                 config().to_file("/spicerack/bin/saltwater.cfg")?;
             }
+            MenuAction::SaveSettings => {
+                settings.to_file("/spicerack/cfg.toml")?;
+            }
             MenuAction::ChangeMenu(_)
             | MenuAction::None
             | MenuAction::MoveCursor
             | MenuAction::ChangePage(_)
             | MenuAction::ChangeIndex(_)
-            | MenuAction::ToggleMod => {}
+            | MenuAction::ToggleMod
+            | MenuAction::ToggleSetting(_) => {}
         }
     }
 
