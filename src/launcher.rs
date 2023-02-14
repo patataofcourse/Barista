@@ -195,7 +195,7 @@ pub fn launch(ver: GameVer) {
         fs::rename(
             &fs.sdmc().unwrap(),
             "/luma/titles/000400000018A400/code.ips",
-            "/luma/titles/000400000018A400/_code.ips",
+            "/luma/titles/000400000018A400/code.old.ips",
         )
         .unwrap()
     }
