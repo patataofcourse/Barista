@@ -1,9 +1,8 @@
-use crate::plgldr;
+use crate::plgldr::{self, SaltwaterParams};
 use ctru::services::fs::{self, File, Fs};
 use std::{
     ffi::CString,
     fmt::{self, Display},
-    mem::transmute,
 };
 
 use ctru_sys::{amExit, amInit, AM_GetTitleInfo, AM_TitleEntry, MEDIATYPE_GAME_CARD, MEDIATYPE_SD};
@@ -186,11 +185,12 @@ pub fn check_for_rhmpatch() -> bool {
 }
 
 pub fn launch(ver: GameVer) {
-    let mut params = [0u8; 128];
+    plgldr::init().unwrap();
+    let mut params = SaltwaterParams::default();
 
     // disable rhmpatch if it exists
     if check_for_rhmpatch() {
-        params[0] = 1;
+        params.reenable_rhmpatch = true;
         let fs = Fs::init().unwrap();
         fs::rename(
             &fs.sdmc().unwrap(),
@@ -199,10 +199,13 @@ pub fn launch(ver: GameVer) {
         )
         .unwrap()
     }
+    
+    // enable plugin loader if it's not
+    if !plgldr::is_enabled().unwrap() {
+        params.disable_plgldr = true;
+        plgldr::set_state(true).unwrap();
+    }
 
-    let params = unsafe { transmute(params) };
-
-    plgldr::init().unwrap();
     plgldr::set_params(
         true,
         ver.region.id(),

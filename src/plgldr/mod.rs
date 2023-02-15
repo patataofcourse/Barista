@@ -3,6 +3,24 @@
 #[allow(warnings)]
 mod bindings;
 
+pub struct SaltwaterParams {
+    pub barista: u16,
+    pub reenable_rhmpatch: bool,
+    pub disable_plgldr: bool,
+    pub null: [u32; 31],
+}
+
+impl Default for SaltwaterParams {
+    fn default() -> Self {
+        Self {
+            barista: 0xD06,
+            reenable_rhmpatch: false,
+            disable_plgldr: false,
+            null: [0; 31],
+        }
+    }
+}
+
 use std::ffi::CString;
 
 pub fn init() -> Result<(), i32> {
@@ -45,7 +63,7 @@ pub fn set_params(
     no_flash: bool,
     low_title_id: u32,
     path: CString,
-    config: [u32; 32],
+    config: SaltwaterParams,
 ) -> Result<(), i32> {
     let path = path.as_bytes();
     if path.len() > 256 {
@@ -60,6 +78,8 @@ pub fn set_params(
         path_bytes[c] = *byte;
         c += 1;
     }
+
+    let config = unsafe {std::mem::transmute(config)};
 
     let result = unsafe {
         PARAMS = bindings::PluginLoadParameters {
