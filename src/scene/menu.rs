@@ -365,7 +365,7 @@ impl MenuState {
                             match elmt.1 {
                                 u16::MAX => "---".to_string(),
                                 c =>
-                                    if c >= 0x100 && settings.original_gates {
+                                    if c >= 0x100 && !settings.original_gates {
                                         format!(
                                             "G{}{}",
                                             if c >= 0x110 { c & 3 } else { (c & 0xFF) >> 2 },
