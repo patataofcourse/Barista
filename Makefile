@@ -39,10 +39,12 @@ endif
 ifeq ($(DEBUG), 1)
 PROFILE 	:= debug
 SYMBOLS		?= 1
+CIA			?= 0
 else
 PROFILE 	:= release
 CARGOFLAGS  += --release
 SYMBOLS		?= 0
+CIA			?= 1
 endif
 
 ifneq ($(FEATURES),)
@@ -72,7 +74,7 @@ all: dist
 
 ### Main executable ###
 
-ifneq ($(DEBUG), 1)
+ifneq ($(CIA), 0)
 dist: $(BUILD)/$(CRATE_NAME).cia
 endif
 
@@ -81,7 +83,7 @@ dist: $(BUILD)/$(CRATE_NAME).3dsx
 	@cp $(BUILD)/$(CRATE_NAME).elf $(DIST)
 	@cp $(BUILD)/$(CRATE_NAME).lst $(DIST)
 	@cp $(BUILD)/$(CRATE_NAME).3dsx $(DIST)
-ifneq ($(DEBUG), 1)
+ifneq ($(CIA), 0)
 	@cp $(BUILD)/$(CRATE_NAME).cia $(DIST)
 endif
 	@cp $(PROG_ICON) $(DIST)/$(notdir $(PROG_ICON))
