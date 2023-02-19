@@ -1,5 +1,7 @@
 use crate::plgldr::{self, SaltwaterParams};
+use citro2d_sys::svcExitProcess;
 use ctru::services::fs::{self, File, Fs};
+use libc::c_void;
 use std::{
     ffi::CString,
     fmt::{self, Display},
@@ -184,7 +186,7 @@ pub fn check_for_rhmpatch() -> bool {
     }
 }
 
-pub fn launch(ver: GameVer) {
+pub fn launch(ver: GameVer, is_citra: bool) {
     plgldr::init().unwrap();
     let mut params = SaltwaterParams::default();
 
@@ -214,14 +216,27 @@ pub fn launch(ver: GameVer) {
     )
     .unwrap();
     plgldr::exit();
+
+    let mediatype = if ver.is_digital {
+        ctru_sys::MEDIATYPE_SD
+    } else {
+        ctru_sys::MEDIATYPE_GAME_CARD
+    } as u8;
+
     unsafe {
-        ctru_sys::aptSetChainloader(
-            ver.region.id_long(),
-            if ver.is_digital {
-                ctru_sys::MEDIATYPE_SD
-            } else {
-                ctru_sys::MEDIATYPE_GAME_CARD
-            } as u8,
-        );
+        if is_citra {
+            assert!(ctru_sys::APT_PrepareToDoApplicationJump(0, ver.region.id_long(), mediatype) == 0);
+            assert!(ctru_sys::APT_DoApplicationJump(&[] as *const c_void, 0, &[0u8; 0x20] as *const u8 as *const c_void)==0);
+            svcExitProcess();
+        } else {
+            ctru_sys::aptSetChainloader(
+                ver.region.id_long(),
+                if ver.is_digital {
+                    ctru_sys::MEDIATYPE_SD
+                } else {
+                    ctru_sys::MEDIATYPE_GAME_CARD
+                } as u8,
+            );
+        }
     }
 }

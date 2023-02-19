@@ -85,6 +85,8 @@ dist: $(BUILD)/$(CRATE_NAME).3dsx
 	@cp $(BUILD)/$(CRATE_NAME).3dsx $(DIST)
 ifneq ($(CIA), 0)
 	@cp $(BUILD)/$(CRATE_NAME).cia $(DIST)
+else
+	@rm $(DIST)/$(CRATE_NAME).cia
 endif
 	@cp $(PROG_ICON) $(DIST)/$(notdir $(PROG_ICON))
 

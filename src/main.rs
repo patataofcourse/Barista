@@ -54,7 +54,7 @@ fn main() {
         panic::set_hook(Box::new(panic_hook));
     }
 
-    match run() {
+    match run(is_citra) {
         Ok(_) => {}
         Err(c) => {
             let error = match c {
@@ -91,7 +91,7 @@ fn main() {
     }
 }
 
-fn run() -> error::Result<()> {
+fn run(is_citra: bool) -> error::Result<()> {
     ctru::init();
     let apt = Apt::init()?;
     let hid = Hid::init()?;
@@ -216,7 +216,7 @@ fn run() -> error::Result<()> {
     drop(hid);
 
     if let Some(c) = game_to_load {
-        launcher::launch(c)
+        launcher::launch(c, is_citra)
     }
 
     Ok(())
