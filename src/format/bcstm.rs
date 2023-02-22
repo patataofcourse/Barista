@@ -28,7 +28,7 @@ pub struct LinearAllocator;
 
 unsafe impl Allocator for LinearAllocator {
     fn allocate(&self, layout: Layout) -> std::result::Result<NonNull<[u8]>, AllocError> {
-        let out = unsafe { linearAlloc(layout.size() as u32) };
+        let out = unsafe { linearAlloc(layout.size()) };
         match unsafe { (out as *mut u8).as_ref() } {
             Some(_) => unsafe {
                 Ok(slice::from_raw_parts_mut(out as *mut u8, layout.size()).into())

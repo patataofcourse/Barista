@@ -5,7 +5,7 @@ extern crate barista_ui as ui_lib;
 use ctru::{
     console::Console,
     gfx::Gfx,
-    services::{apt::Apt, hid::Hid, ps},
+    services::{apt::Apt, hid::Hid, ps::Ps},
 };
 use error::error_applet;
 use std::{
@@ -92,10 +92,10 @@ fn main() {
 }
 
 fn run(is_citra: bool) -> error::Result<()> {
-    ctru::init();
     let apt = Apt::init()?;
     let hid = Hid::init()?;
     let gfx = Gfx::init()?;
+    let ps = Ps::new()?;
     let console = Console::init(gfx.bottom_screen.borrow_mut());
     unsafe {
         assert!(ctru_sys::romfsMountSelf("romfs\0".as_ptr()) == 0);
@@ -121,7 +121,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     // Init Barista config
     let mut settings = format::barista_cfg::BaristaConfig::from_file("/spicerack/cfg.toml")?;
     let mut random = [0u8; 1];
-    ps::generate_random_bytes(&mut random)?;
+    ps.generate_random_bytes(&mut random)?;
     if !settings.is_new && random == [0u8; 1] {
         //nicole easter egg
     }

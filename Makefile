@@ -69,6 +69,7 @@ export RUSTFLAGS = -L$(DEVKITPRO)/libctru/lib -lctrud
 endif
 
 .PHONY: all clean dist plgldr check doc fmt fix test update
+.PRECIOUS: $(BUILD)/$(CRATE_NAME).elf 
 
 all: dist
 
@@ -86,7 +87,7 @@ dist: $(BUILD)/$(CRATE_NAME).3dsx
 ifneq ($(CIA), 0)
 	@cp $(BUILD)/$(CRATE_NAME).cia $(DIST)
 else
-	@rm $(DIST)/$(CRATE_NAME).cia
+	@rm -f $(DIST)/$(CRATE_NAME).cia
 endif
 	@cp $(PROG_ICON) $(DIST)/$(notdir $(PROG_ICON))
 
