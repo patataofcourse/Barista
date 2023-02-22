@@ -2,7 +2,6 @@ use citro2d_sys::{
     C2D_Flush, C2D_TargetClear, C3D_FrameBegin, C3D_RenderTarget, C2D_DEFAULT_MAX_OBJECTS,
     C3D_DEFAULT_CMDBUF_SIZE, C3D_FRAME_SYNCDRAW, GFX_LEFT,
 };
-use std::collections::HashMap;
 
 pub mod sprite;
 pub mod text;
@@ -79,7 +78,7 @@ pub struct Scene<'a> {
     target: *mut C3D_RenderTarget,
     screen: Screen,
     pub background: Option<sprite::Image>,
-    pub objects: HashMap<&'static str, Box<dyn Object + 'a>>,
+    pub objects: Vec<(&'static str, Box<dyn Object + 'a>)>,
 }
 
 impl Scene<'_> {
@@ -88,7 +87,7 @@ impl Scene<'_> {
             screen: screen.clone(),
             target: ui.get_target(screen),
             background,
-            objects: HashMap::new(),
+            objects: Vec::new(),
         }
     }
 
@@ -126,7 +125,16 @@ impl<'a> Scene<'a> {
     where
         T: Object,
     {
-        self.objects.insert(name, Box::from(object));
+        self.objects.push((name, Box::from(object)));
+    }
+
+    pub fn get_object(&self, name: &str) -> Option<&Box<dyn Object + 'a>> {
+        for (oname, object) in &self.objects {
+            if oname == &name {
+                return Some(&object);
+            }
+        }
+        None
     }
 }
 

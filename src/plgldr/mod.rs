@@ -79,7 +79,7 @@ pub fn set_params(
         c += 1;
     }
 
-    let config = unsafe {std::mem::transmute(config)};
+    let config = unsafe { std::mem::transmute(config) };
 
     let result = unsafe {
         PARAMS = bindings::PluginLoadParameters {

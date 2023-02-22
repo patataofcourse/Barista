@@ -201,7 +201,7 @@ pub fn launch(ver: GameVer, is_citra: bool) {
         )
         .unwrap()
     }
-    
+
     // enable plugin loader if it's not
     if !plgldr::is_enabled().unwrap() {
         params.disable_plgldr = true;
@@ -225,8 +225,16 @@ pub fn launch(ver: GameVer, is_citra: bool) {
 
     unsafe {
         if is_citra {
-            assert!(ctru_sys::APT_PrepareToDoApplicationJump(0, ver.region.id_long(), mediatype) == 0);
-            assert!(ctru_sys::APT_DoApplicationJump(&[] as *const c_void, 0, &[0u8; 0x20] as *const u8 as *const c_void)==0);
+            assert!(
+                ctru_sys::APT_PrepareToDoApplicationJump(0, ver.region.id_long(), mediatype) == 0
+            );
+            assert!(
+                ctru_sys::APT_DoApplicationJump(
+                    &[] as *const c_void,
+                    0,
+                    &[0u8; 0x20] as *const u8 as *const c_void
+                ) == 0
+            );
             svcExitProcess();
         } else {
             ctru_sys::aptSetChainloader(
