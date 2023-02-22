@@ -3,6 +3,7 @@
 #[allow(warnings)]
 mod bindings;
 
+#[repr(C)]
 pub struct SaltwaterParams {
     pub barista: u16,
     pub reenable_rhmpatch: bool,
