@@ -46,7 +46,7 @@ pub enum MenuAction {
     ChangePage(bool),
     SaveConfig,
     ToggleMod,
-    ChangeIndex(bool),
+    ChangeIndex(bool, bool),
 
     // Music
     #[cfg(feature = "audio")]
@@ -185,11 +185,18 @@ impl MenuState {
             } else if hid.keys_down().contains(KeyPad::KEY_R) {
                 self.action = MenuAction::ChangePage(true)
             }
-            //TODO: hold X/Y to scroll faster
             else if hid.keys_down().contains(KeyPad::KEY_DLEFT) {
-                self.action = MenuAction::ChangeIndex(false)
+                if hid.keys_held().contains(KeyPad::KEY_X) {
+                    self.action = MenuAction::ChangeIndex(false, true)
+                } else {
+                    self.action = MenuAction::ChangeIndex(false, false)
+                }
             } else if hid.keys_down().contains(KeyPad::KEY_DRIGHT) {
-                self.action = MenuAction::ChangeIndex(true)
+                if hid.keys_held().contains(KeyPad::KEY_X) {
+                    self.action = MenuAction::ChangeIndex(true, true)
+                } else {
+                    self.action = MenuAction::ChangeIndex(true, false)
+                }
             }
         }
 
@@ -212,12 +219,16 @@ impl MenuState {
                     *page += 1;
                 }
             }
-            MenuAction::ChangeIndex(i) => {
+            //TODO: properly order stuff in new gate mode (both ChangeIndex and ToggleMod)
+            MenuAction::ChangeIndex(i, fast) => {
                 if let Some(m) = mod_page.get_mut(self.cursor as usize) {
                     let config = crate::config();
                     if m.1 != u16::MAX {
                         config.btks.remove(&m.1);
-                        let step: i16 = if *i { 1 } else { -1 };
+                        let mut step: i16 = if *i { 1 } else { -1 };
+                        if *fast {
+                            step *= 0x10
+                        }
                         let mut out = m.1.wrapping_add_signed(step);
 
                         while !mod_picker::is_valid_slot(out) || config.btks.contains_key(&out) {
@@ -238,7 +249,6 @@ impl MenuState {
             }
             MenuAction::ToggleMod => {
                 if let Some(m) = mod_page.get_mut(self.cursor as usize) {
-                    //TODO: make it work properly on new gate mode
                     let config = crate::config();
                     if m.1 == u16::MAX {
                         let mut val = 0;
@@ -250,6 +260,8 @@ impl MenuState {
                                 val,
                                 mod_picker::get_mod_name(mods, *page, self.cursor as usize),
                             );
+                        } else {
+                            val = u16::MAX;
                         }
                         m.1 = val;
                     } else {
