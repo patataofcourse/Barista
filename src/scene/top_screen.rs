@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::HashMap, iter::FromIterator, any::Any};
+use std::{cmp::Ordering, collections::HashMap, iter::FromIterator};
 use ui_lib::{
     sprite::{Image, SpriteSheet},
     BaristaUI, Object, Scene, Screen, StaticObject,
@@ -17,13 +17,6 @@ impl Object for BaristaSprites {
             None => return false,
         };
         img.2.draw(img.0, img.1, 1.0, 1.0, 0.0, self.depth)
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
     }
 }
 
@@ -142,13 +135,6 @@ impl Object for Textbox {
         }
         true
     }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
 }
 
 impl Object for Sign {
@@ -161,13 +147,6 @@ impl Object for Sign {
         self.sign_image
             .draw(self.x, self.y, 1.0, 1.0, 0.0, self.depth)
             && text.draw(self.x, self.y, 1.0, 1.0, 0.0, self.depth)
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
     }
 }
 
@@ -260,8 +239,8 @@ pub fn top_screen_scene(ui: &BaristaUI, screen: Screen) -> Scene {
 }
 
 pub fn nicole_easter_egg(ui: &mut BaristaUI) {
-    let top_scene = ui.get_scene_mut(Screen::Top).expect("No scene loaded in the top screen");
-    let barista_sprites = top_scene.get_object_mut("barista").expect("Top screen scene is not barista::scene::top_screen");
-    let barista_sprites: &mut BaristaSprites = barista_sprites.as_any_mut().downcast_mut().expect("Top screen scene is not barista::scene::top_screen");
+    let barista_sprites: &mut BaristaSprites = ui
+        .downcast_object_mut(Screen::Top, "barista")
+        .expect("Top screen scene is not barista::scene::top_screen");
     barista_sprites.switch("nicole");
 }

@@ -184,8 +184,7 @@ impl MenuState {
                 self.action = MenuAction::ChangePage(false)
             } else if hid.keys_down().contains(KeyPad::KEY_R) {
                 self.action = MenuAction::ChangePage(true)
-            }
-            else if hid.keys_down().contains(KeyPad::KEY_DLEFT) {
+            } else if hid.keys_down().contains(KeyPad::KEY_DLEFT) {
                 if hid.keys_held().contains(KeyPad::KEY_X) {
                     self.action = MenuAction::ChangeIndex(false, true)
                 } else {

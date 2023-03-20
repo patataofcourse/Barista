@@ -1,9 +1,12 @@
-use std::{collections::HashMap, any::Any};
+use std::{collections::HashMap};
 
 use citro2d_sys::{
     C2D_Flush, C2D_TargetClear, C3D_FrameBegin, C3D_RenderTarget, C2D_DEFAULT_MAX_OBJECTS,
     C3D_DEFAULT_CMDBUF_SIZE, C3D_FRAME_SYNCDRAW, GFX_LEFT,
 };
+
+#[macro_use]
+extern crate mopa;
 
 pub mod sprite;
 pub mod text;
@@ -88,6 +91,34 @@ impl BaristaUI {
             Screen::Bottom => self.bottom_scene.as_mut(),
         }
     }
+
+    pub fn get_object(&self, screen: Screen, name: &str) -> Option<&Box<dyn Object>> {
+        match screen {
+            Screen::Top => self.top_scene.as_ref()?.get_object(name),
+            Screen::Bottom => self.bottom_scene.as_ref()?.get_object(name),
+        }
+    }
+
+    pub fn get_object_mut(&mut self, screen: Screen, name: &str) -> Option<&mut Box<dyn Object>> {
+        match screen {
+            Screen::Top => self.top_scene.as_mut()?.get_object_mut(name),
+            Screen::Bottom => self.bottom_scene.as_mut()?.get_object_mut(name),
+        }
+    }
+
+    pub fn downcast_object<T: Object>(&self, screen: Screen, name: &str) -> Option<&T> {
+        match screen {
+            Screen::Top => self.top_scene.as_ref()?.get_object(name).unwrap().downcast_ref(),
+            Screen::Bottom => self.bottom_scene.as_ref()?.get_object(name).unwrap().downcast_ref(),
+        }
+    }
+
+    pub fn downcast_object_mut <T: Object>(&mut self, screen: Screen, name: &str) -> Option<&mut T> {
+        match screen {
+            Screen::Top => self.top_scene.as_mut()?.get_object_mut(name).unwrap().downcast_mut(),
+            Screen::Bottom => self.bottom_scene.as_mut()?.get_object_mut(name).unwrap().downcast_mut(),
+        }
+    }
 }
 
 pub struct Scene {
@@ -163,13 +194,11 @@ impl Scene {
     }
 }
 
-// TODO: use mopa crate!!!!
-pub trait Object {
+pub trait Object : mopa::Any {
     fn draw(&self) -> bool;
-
-    fn as_any(&self) -> &dyn Any;
-    fn as_any_mut(&mut self) -> &mut dyn Any;
 }
+
+mopafy!(Object);
 
 /// An Object with only one sprite associated
 pub struct StaticObject {
@@ -192,13 +221,6 @@ impl Object for StaticObject {
             self.rotation,
             self.depth,
         )
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
     }
 }
 
