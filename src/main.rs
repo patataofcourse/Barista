@@ -106,8 +106,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     // Initialize GFX stuff
     let mut ui = BaristaUI::init();
 
-    let top_scene = scene::top_screen_scene(&ui);
-    ui.set_scene(Screen::Top, &top_scene);
+    ui.set_scene(Screen::Top, scene::top_screen_scene);
 
     // Init loader
     let versions = launcher::get_available_games();
@@ -123,7 +122,8 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut random = [0u8; 1];
     ps.generate_random_bytes(&mut random)?;
     if !settings.is_new && random == [0u8; 1] {
-        //nicole easter egg
+        //TODO: nicole easter egg
+        scene::top_screen::nicole_easter_egg(&mut ui);
     }
 
     // Init menu

@@ -1,3 +1,5 @@
+use std::{collections::HashMap, any::Any};
+
 use citro2d_sys::{
     C2D_Flush, C2D_TargetClear, C3D_FrameBegin, C3D_RenderTarget, C2D_DEFAULT_MAX_OBJECTS,
     C3D_DEFAULT_CMDBUF_SIZE, C3D_FRAME_SYNCDRAW, GFX_LEFT,
@@ -15,14 +17,14 @@ pub enum Screen {
     Bottom = 1,
 }
 
-pub struct BaristaUI<'a> {
-    pub top_scene: Option<&'a Scene<'a>>,
-    pub bottom_scene: Option<&'a Scene<'a>>,
+pub struct BaristaUI {
+    pub top_scene: Option<Scene>,
+    pub bottom_scene: Option<Scene>,
     top_screen_target: *mut C3D_RenderTarget,
     bottom_screen_target: *mut C3D_RenderTarget,
 }
 
-impl<'a> BaristaUI<'a> {
+impl BaristaUI {
     pub(crate) fn get_target(&self, screen: Screen) -> *mut C3D_RenderTarget {
         match screen {
             Screen::Top => self.top_screen_target.clone(),
@@ -66,22 +68,36 @@ impl<'a> BaristaUI<'a> {
         }
     }
 
-    pub fn set_scene(&mut self, screen: Screen, scene: &'a Scene) {
+    pub fn set_scene(&mut self, screen: Screen, scene: impl Fn(&Self, Screen) -> Scene) {
         match screen {
-            Screen::Top => self.top_scene = Some(scene),
-            Screen::Bottom => self.bottom_scene = Some(scene),
+            Screen::Top => self.top_scene = Some(scene(self, screen)),
+            Screen::Bottom => self.bottom_scene = Some(scene(self, screen)),
+        }
+    }
+
+    pub fn get_scene(&self, screen: Screen) -> Option<&Scene> {
+        match screen {
+            Screen::Top => self.top_scene.as_ref(),
+            Screen::Bottom => self.bottom_scene.as_ref(),
+        }
+    }
+
+    pub fn get_scene_mut(&mut self, screen: Screen) -> Option<&mut Scene> {
+        match screen {
+            Screen::Top => self.top_scene.as_mut(),
+            Screen::Bottom => self.bottom_scene.as_mut(),
         }
     }
 }
 
-pub struct Scene<'a> {
+pub struct Scene {
     target: *mut C3D_RenderTarget,
     screen: Screen,
     pub background: Option<sprite::Image>,
-    pub objects: Vec<(&'static str, Box<dyn Object + 'a>)>,
+    pub objects: Vec<(&'static str, Box<dyn Object>)>,
 }
 
-impl Scene<'_> {
+impl Scene {
     pub fn new(ui: &BaristaUI, screen: Screen, background: Option<sprite::Image>) -> Self {
         Self {
             screen: screen.clone(),
@@ -120,26 +136,39 @@ impl Scene<'_> {
     }
 }
 
-impl<'a> Scene<'a> {
-    pub fn add_object<T: 'a>(&mut self, name: &'static str, object: T)
+impl Scene {
+    pub fn add_object<T>(&mut self, name: &'static str, object: T)
     where
-        T: Object,
+        T: Object + 'static,
     {
         self.objects.push((name, Box::from(object)));
     }
 
-    pub fn get_object(&self, name: &str) -> Option<&Box<dyn Object + 'a>> {
+    pub fn get_object(&self, name: &str) -> Option<&Box<dyn Object>> {
         for (oname, object) in &self.objects {
             if oname == &name {
-                return Some(&object);
+                return Some(object);
+            }
+        }
+        None
+    }
+
+    pub fn get_object_mut(&mut self, name: &str) -> Option<&mut Box<dyn Object>> {
+        for (oname, object) in &mut self.objects {
+            if oname == &name {
+                return Some(object);
             }
         }
         None
     }
 }
 
+// TODO: use mopa crate!!!!
 pub trait Object {
     fn draw(&self) -> bool;
+
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 
 /// An Object with only one sprite associated
@@ -164,4 +193,31 @@ impl Object for StaticObject {
             self.depth,
         )
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
 }
+
+/*
+/// An Object with multiple sprites associated, which can be switched between
+pub struct MultiSpriteObj {
+    pub x: u16,
+    pub y: u16, 
+    pub scale_x: f32,
+    pub scale_y: f32,
+    pub rotation: f32,
+    pub depth: f32,
+    pub images: HashMap<String, MultiSpriteSpr>,
+}
+
+pub struct MultiSpriteSpr {
+    pub x_offset: u16,
+    pub y_offset: u16,
+    pub image: sprite::Image,
+}
+
+*/
