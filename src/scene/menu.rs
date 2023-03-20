@@ -367,6 +367,7 @@ impl MenuState {
                     println!();
                     println!("L/R buttons or Prev/Next to change page");
                     println!("DPad Left/Right to change index");
+                    println!("Hold X to change index by 0x10 rather than 1");
                     println!();
                     println!("Page {} of {}", page + 1, num_pages);
                     for (i, elmt) in mods.iter().enumerate() {
