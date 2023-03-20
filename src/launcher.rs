@@ -85,6 +85,7 @@ impl GameRegion {
 
 pub fn get_available_games() -> Vec<GameVer> {
     let mut available_games = vec![];
+    //TODO: ctru-rs AM, whenever they add GetTitleInfo
     unsafe {
         assert!(amInit() == 0);
         let null: *mut AM_TitleEntry = &mut AM_TitleEntry {
