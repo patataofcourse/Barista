@@ -9,11 +9,11 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-    CtruError(CtruError),
-    IoError(IoError),
-    TomlDeError(TomlDeError),
-    TomlSeError(TomlSeError),
-    OtherError(String),
+    Ctru(CtruError),
+    Io(IoError),
+    TomlDe(TomlDeError),
+    TomlSer(TomlSeError),
+    Other(String),
 }
 
 impl Display for self::Error {
@@ -22,11 +22,11 @@ impl Display for self::Error {
             fmt,
             "{}",
             match self {
-                Self::IoError(c) => c.to_string(),
-                Self::CtruError(c) => c.to_string(),
-                Self::OtherError(c) => c.to_string(),
-                Self::TomlDeError(c) => c.to_string(),
-                Self::TomlSeError(c) => c.to_string(),
+                Self::Io(c) => c.to_string(),
+                Self::Ctru(c) => c.to_string(),
+                Self::Other(c) => c.to_string(),
+                Self::TomlDe(c) => c.to_string(),
+                Self::TomlSer(c) => c.to_string(),
             }
         )
     }
@@ -36,25 +36,25 @@ impl std::error::Error for self::Error {}
 
 impl From<CtruError> for self::Error {
     fn from(err: CtruError) -> Self {
-        Self::CtruError(err)
+        Self::Ctru(err)
     }
 }
 
 impl From<IoError> for self::Error {
     fn from(err: IoError) -> Self {
-        Self::IoError(err)
+        Self::Io(err)
     }
 }
 
 impl From<TomlDeError> for self::Error {
     fn from(err: TomlDeError) -> Self {
-        Self::TomlDeError(err)
+        Self::TomlDe(err)
     }
 }
 
 impl From<TomlSeError> for self::Error {
     fn from(err: TomlSeError) -> Self {
-        Self::TomlSeError(err)
+        Self::TomlSer(err)
     }
 }
 

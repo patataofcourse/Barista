@@ -83,18 +83,6 @@ impl GameRegion {
     }
 }
 
-pub struct LoaderConfig {
-    rhmpatch_disabler: bool,
-}
-
-impl Into<[u32; 32]> for LoaderConfig {
-    fn into(self) -> [u32; 32] {
-        let mut out = [0; 32];
-        out[0] = self.rhmpatch_disabler as u32;
-        out
-    }
-}
-
 pub fn get_available_games() -> Vec<GameVer> {
     let mut available_games = vec![];
     unsafe {
@@ -177,13 +165,11 @@ pub fn check_for_plgldr() {
 
 pub fn check_for_rhmpatch() -> bool {
     let fs = Fs::init().unwrap();
-    match File::open(
+    File::open(
         &fs.sdmc().unwrap(),
         "/luma/titles/000400000018A400/code.ips",
-    ) {
-        Ok(_) => true,
-        Err(_) => false,
-    }
+    )
+    .is_ok()
 }
 
 pub fn launch(ver: GameVer, is_citra: bool) {

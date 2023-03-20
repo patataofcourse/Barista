@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::format::bcstm::BCSTMFile;
 use std::{
     sync::mpsc::{self, Receiver, Sender},

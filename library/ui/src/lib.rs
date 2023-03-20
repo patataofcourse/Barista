@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use citro2d_sys::{
     C2D_Flush, C2D_TargetClear, C3D_FrameBegin, C3D_RenderTarget, C2D_DEFAULT_MAX_OBJECTS,
@@ -108,15 +108,35 @@ impl BaristaUI {
 
     pub fn downcast_object<T: Object>(&self, screen: Screen, name: &str) -> Option<&T> {
         match screen {
-            Screen::Top => self.top_scene.as_ref()?.get_object(name).unwrap().downcast_ref(),
-            Screen::Bottom => self.bottom_scene.as_ref()?.get_object(name).unwrap().downcast_ref(),
+            Screen::Top => self
+                .top_scene
+                .as_ref()?
+                .get_object(name)
+                .unwrap()
+                .downcast_ref(),
+            Screen::Bottom => self
+                .bottom_scene
+                .as_ref()?
+                .get_object(name)
+                .unwrap()
+                .downcast_ref(),
         }
     }
 
-    pub fn downcast_object_mut <T: Object>(&mut self, screen: Screen, name: &str) -> Option<&mut T> {
+    pub fn downcast_object_mut<T: Object>(&mut self, screen: Screen, name: &str) -> Option<&mut T> {
         match screen {
-            Screen::Top => self.top_scene.as_mut()?.get_object_mut(name).unwrap().downcast_mut(),
-            Screen::Bottom => self.bottom_scene.as_mut()?.get_object_mut(name).unwrap().downcast_mut(),
+            Screen::Top => self
+                .top_scene
+                .as_mut()?
+                .get_object_mut(name)
+                .unwrap()
+                .downcast_mut(),
+            Screen::Bottom => self
+                .bottom_scene
+                .as_mut()?
+                .get_object_mut(name)
+                .unwrap()
+                .downcast_mut(),
         }
     }
 }
@@ -194,7 +214,7 @@ impl Scene {
     }
 }
 
-pub trait Object : mopa::Any {
+pub trait Object: mopa::Any {
     fn draw(&self) -> bool;
 }
 
@@ -228,7 +248,7 @@ impl Object for StaticObject {
 /// An Object with multiple sprites associated, which can be switched between
 pub struct MultiSpriteObj {
     pub x: u16,
-    pub y: u16, 
+    pub y: u16,
     pub scale_x: f32,
     pub scale_y: f32,
     pub rotation: f32,

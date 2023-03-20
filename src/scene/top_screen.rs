@@ -64,8 +64,8 @@ impl Object for Textbox {
         match stem_base_x.total_cmp(&center_x) {
             Ordering::Equal => {
                 stem_point = stem_base_x;
-                stem_outline_l = OUTLINE_WIDTH / -22.5f32.cos();
-                stem_outline_r = OUTLINE_WIDTH / -22.5f32.cos();
+                stem_outline_l = OUTLINE_WIDTH / -(22.5f32.cos());
+                stem_outline_r = OUTLINE_WIDTH / -(22.5f32.cos());
                 stem_outline_px = 0.0;
                 stem_outline_py = -OUTLINE_WIDTH * 2.0f32.sqrt();
             }

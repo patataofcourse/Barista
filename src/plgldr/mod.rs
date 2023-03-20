@@ -74,10 +74,8 @@ pub fn set_params(
         )
     }
     let mut path_bytes = [0u8; 256];
-    let mut c = 0;
-    for byte in path {
+    for (c, byte) in path.iter().enumerate() {
         path_bytes[c] = *byte;
-        c += 1;
     }
 
     let config = unsafe { std::mem::transmute(config) };

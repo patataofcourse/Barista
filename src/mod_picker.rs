@@ -18,7 +18,7 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
     for f in iter {
         let f = f?;
         let path = f.path();
-        if path.as_path().extension() == Some(&OsStr::new("btk")) && f.metadata()?.is_file() {
+        if path.as_path().extension() == Some(OsStr::new("btk")) && f.metadata()?.is_file() {
             v.push(path);
         }
     }
@@ -27,8 +27,11 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
 
 pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String, u16)> {
     let mut out = vec![];
-    for i in page * ENTRIES_PER_PAGE..paths.len().min(page * ENTRIES_PER_PAGE + ENTRIES_PER_PAGE) {
-        let path = &paths[i];
+    for path in paths
+        .iter()
+        .take(paths.len().min(page * ENTRIES_PER_PAGE + ENTRIES_PER_PAGE))
+        .skip(page * ENTRIES_PER_PAGE)
+    {
         let name = path.file_name().unwrap().to_str().unwrap().to_owned();
         let mut out_name = name.clone();
         if name.len() > 30 {
@@ -53,7 +56,7 @@ pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String
     out
 }
 
-pub fn get_mod_name(mods: &Vec<PathBuf>, page: usize, pos: usize) -> String {
+pub fn get_mod_name(mods: &[PathBuf], page: usize, pos: usize) -> String {
     let m = &mods[page * ENTRIES_PER_PAGE + pos];
     m.with_extension("")
         .file_name()
@@ -64,7 +67,7 @@ pub fn get_mod_name(mods: &Vec<PathBuf>, page: usize, pos: usize) -> String {
 }
 
 pub fn is_valid_slot(slot: u16) -> bool {
-    slot <= 0x67 || (slot >= 0x100 && slot <= 0x113)
+    slot <= 0x67 || (0x100..=0x113).contains(&slot)
 }
 
 pub fn num_pages(paths: &Vec<PathBuf>) -> usize {

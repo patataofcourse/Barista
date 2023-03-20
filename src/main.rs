@@ -44,10 +44,7 @@ static mut AUDIO: Option<*const audio::AudioManager> = None;
 fn main() {
     let is_citra = unsafe {
         let mut citra_info = 0i64;
-        match ctru_sys::svcGetSystemInfo(&mut citra_info, 0x20000, 0) {
-            0 => true,
-            _ => false,
-        }
+        matches!(ctru_sys::svcGetSystemInfo(&mut citra_info, 0x20000, 0), 0)
     };
 
     if !is_citra {
@@ -58,23 +55,23 @@ fn main() {
         Ok(_) => {}
         Err(c) => {
             let error = match c {
-                Error::CtruError(c) => match c {
+                Error::Ctru(c) => match c {
                     ctru::Error::Os(c) => format!("System error {:#X}", c),
                     ctru::Error::Libc(c) => format!("libc error:\n{}", c),
-                    ctru::Error::ServiceAlreadyActive => format!("Service already active"),
-                    ctru::Error::OutputAlreadyRedirected => format!("Output already redirected"),
+                    ctru::Error::ServiceAlreadyActive => "Service already active".to_string(),
+                    ctru::Error::OutputAlreadyRedirected => "Output already redirected".to_string(),
                     c => format!("Unknown ctru error\n{}", c),
                 },
-                Error::IoError(c) => {
+                Error::Io(c) => {
                     format!("IO error: {}", c)
                 }
-                Error::TomlDeError(c) => {
+                Error::TomlDe(c) => {
                     format!("TOML deserialize error: {}", c)
                 }
-                Error::TomlSeError(c) => {
+                Error::TomlSer(c) => {
                     format!("TOML serialize error: {}", c)
                 }
-                Error::OtherError(c) => c,
+                Error::Other(c) => c,
             };
             if is_citra {
                 //TODO: proper implementation
@@ -128,7 +125,7 @@ fn run(is_citra: bool) -> error::Result<()> {
 
     // Init menu
     let mut menu = MenuState::default();
-    menu.render(&console, &versions, &vec![], 0, 0, &mut settings);
+    menu.render(&console, &versions, &vec![], 0, 0, &settings);
 
     #[allow(unused)]
     let mut audio_player;

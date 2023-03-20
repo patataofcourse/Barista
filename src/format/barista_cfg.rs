@@ -38,7 +38,7 @@ impl BaristaConfig {
                 if err as u32 == 0xC8804478 {
                     let config = BaristaConfig::default();
                     let mut f = File::create(&fs.sdmc()?, path)?;
-                    f.write(&toml::to_string_pretty(&config)?.as_bytes())?;
+                    f.write_all(toml::to_string_pretty(&config)?.as_bytes())?;
                     Ok(config)
                 } else {
                     Err(ctru::Error::Os(err).into())
@@ -50,7 +50,7 @@ impl BaristaConfig {
     pub fn to_file(&self, path: impl Into<PathBuf>) -> Result<()> {
         let fs = Fs::init()?;
         let mut f = File::create(&fs.sdmc()?, path.into())?;
-        f.write(&toml::to_string_pretty(self)?.as_bytes())?;
+        f.write_all(toml::to_string_pretty(self)?.as_bytes())?;
         Ok(())
     }
 }

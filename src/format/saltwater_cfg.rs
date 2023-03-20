@@ -19,7 +19,7 @@ impl Config {
         let fs = Fs::init()?;
         let mut file = File::open(&fs.sdmc()?, file.into())?;
         let mut magic_buffer = [0u8; 4];
-        file.read(&mut magic_buffer)?;
+        file.read_exact(&mut magic_buffer)?;
         if &magic_buffer != MAGIC {
             Err(io::Error::new(io::ErrorKind::Other, "invalid file"))?;
         }
@@ -44,7 +44,7 @@ impl Config {
         //TODO: non-ASCII
         let fs = Fs::init()?;
         let mut file = File::create(&fs.sdmc()?, file.into())?;
-        file.write(MAGIC)?;
+        file.write_all(MAGIC)?;
         for (index, string) in &self.btks {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;
             (string.len() as u16).write_to(&mut file, ByteOrder::LittleEndian)?;

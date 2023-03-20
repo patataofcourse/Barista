@@ -167,7 +167,7 @@ impl MenuState {
             } else if let SubMenu::SetUp = self.sub_menu {
                 if self.cursor_option_len(versions, &mod_page) - self.cursor <= 3 {
                     self.action =
-                        SubMenu::ACTIONS_SETUP[self.cursor as usize - &mod_page.len()].clone();
+                        SubMenu::ACTIONS_SETUP[self.cursor as usize - mod_page.len()].clone();
                 } else {
                     self.action = MenuAction::ToggleMod;
                 }
@@ -273,6 +273,7 @@ impl MenuState {
                 0 => {
                     settings.original_gates = !settings.original_gates;
                 }
+                1 => {} // so clippy shuts up
                 _ => {}
             },
             MenuAction::MoveCursor => {}
@@ -331,7 +332,7 @@ impl MenuState {
                 println!();
                 println!("Choose a version to run with Saltwater");
                 println!();
-                for vnum in 0..versions.len() {
+                for (vnum, ver) in versions.iter().enumerate() {
                     println!(
                         " [{}] {}",
                         if self.cursor as usize == vnum {
@@ -339,7 +340,7 @@ impl MenuState {
                         } else {
                             " "
                         },
-                        versions[vnum]
+                        ver
                     );
                 }
                 println!(
@@ -354,7 +355,7 @@ impl MenuState {
             SubMenu::SetUp => {
                 println!("Barista - Set up mods");
                 println!();
-                if mods.len() == 0 {
+                if mods.is_empty() {
                     println!(
                         "Put some mods in your /spicerack/mods\nfolder in order to load them!"
                     );
@@ -368,8 +369,7 @@ impl MenuState {
                     println!("DPad Left/Right to change index");
                     println!();
                     println!("Page {} of {}", page + 1, num_pages);
-                    for i in 0..mods.len() {
-                        let elmt = &mods[i];
+                    for (i, elmt) in mods.iter().enumerate() {
                         println!(
                             "- [{}] {} {}",
                             if self.cursor == i as u32 { "*" } else { " " },

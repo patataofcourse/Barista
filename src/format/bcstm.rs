@@ -90,21 +90,21 @@ impl BCSTMFile {
         // ************
 
         let mut magic_buf = [0u8; 4];
-        file.read(&mut magic_buf)?;
+        file.read_exact(&mut magic_buf)?;
         if magic_buf != [b'C', b'S', b'T', b'M'] {
-            Err(Error::OtherError(format!("BCSTM - Not a BCSTM file")))?;
+            Err(Error::Other("BCSTM - Not a BCSTM file".to_string()))?;
         }
 
         let endian = match u16::read_from(&mut file, ByteOrder::LittleEndian)? {
             0xFFFE => ByteOrder::BigEndian,
             0xFEFF => ByteOrder::LittleEndian,
-            _ => Err(Error::OtherError(format!("BCSTM - Invalid BOM")))?,
+            _ => Err(Error::Other("BCSTM - Invalid BOM".to_string()))?,
         };
         u16::read_from(&mut file, endian)?; // Header size - 0x40
 
         let version = u32::read_from(&mut file, endian)?;
         if version != ninty_version!(2, 3, 1) {
-            Err(Error::OtherError(format!(
+            Err(Error::Other(format!(
                 "BCSTM - unsupported revision {:X} // {:X}",
                 ninty_version!(2, 3, 1),
                 version
@@ -124,8 +124,8 @@ impl BCSTMFile {
             let offset = u32::read_from(&mut file, endian)?;
             u32::read_from(&mut file, endian)?; // size
             match id {
-                id if id == BlockType::InfoBlock as u16 => info_offset = Some(offset),
-                id if id == BlockType::DataBlock as u16 => data_offset = Some(offset),
+                id if id == BlockType::Info as u16 => info_offset = Some(offset),
+                id if id == BlockType::Data as u16 => data_offset = Some(offset),
                 _ => {}
             }
         }
@@ -133,16 +133,12 @@ impl BCSTMFile {
         let data_offset = if let Some(c) = data_offset {
             c
         } else {
-            Err(Error::OtherError(
-                "BCSTM: no data_offset section".to_string(),
-            ))?
+            Err(Error::Other("BCSTM: no data_offset section".to_string()))?
         };
         let info_offset = if let Some(c) = info_offset {
             c as u64
         } else {
-            Err(Error::OtherError(
-                "BCSTM: no info_offset section".to_string(),
-            ))?
+            Err(Error::Other("BCSTM: no info_offset section".to_string()))?
         };
 
         // ****************
@@ -156,7 +152,7 @@ impl BCSTMFile {
 
         let encoding = u8::read_from(&mut file, endian)?;
         if encoding != 2 {
-            Err(Error::OtherError(
+            Err(Error::Other(
                 "BCSTM - encoding not supported (only DSP ADPCM supported)".to_string(),
             ))?
         }
@@ -164,7 +160,7 @@ impl BCSTMFile {
         let looping = u8::read_from(&mut file, endian)? != 0;
         let channel_count = u8::read_from(&mut file, endian)? as usize;
         if channel_count > 2 {
-            Err(Error::OtherError(
+            Err(Error::Other(
                 "Unknown BCSTM error - channel_count".to_string(),
             ))?
         }
@@ -261,7 +257,7 @@ impl BCSTMFile {
                 self.channel[i] += 1;
 
                 if self.channel[i] >= 24 {
-                    Err(Error::OtherError("No NDSP channels available".to_string()))?
+                    Err(Error::Other("No NDSP channels available".to_string()))?
                 }
             }
             ACTIVE_NDSP_CHANNELS |= 1 << self.channel[i];
@@ -338,7 +334,7 @@ impl BCSTMFile {
                         self.file.seek(SeekFrom::Start(
                             (self.data_offset
                                 + 0x20
-                                + self.block_size as u32
+                                + self.block_size
                                     * self.channel_count as u32
                                     * self.block_loop_start) as u64,
                         ))?;
@@ -358,7 +354,7 @@ impl BCSTMFile {
                     };
 
                     self.buffer_data[j][i].resize(block_size, 0);
-                    self.file.read(&mut self.buffer_data[j][i])?;
+                    self.file.read_exact(&mut self.buffer_data[j][i])?;
                     assert!(
                         DSP_FlushDataCache(
                             self.buffer_data[j][i].as_ptr() as *const libc::c_void,
@@ -396,7 +392,7 @@ impl BCSTMFile {
 #[repr(u16)]
 #[allow(unused)]
 enum BlockType {
-    InfoBlock = 0x4000,
-    SeekBlock = 0x4001,
-    DataBlock = 0x4002,
+    Info = 0x4000,
+    Seek = 0x4001,
+    Data = 0x4002,
 }
