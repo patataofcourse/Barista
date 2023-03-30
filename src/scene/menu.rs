@@ -233,7 +233,7 @@ impl MenuState {
                         while !mod_picker::is_valid_slot(out) || config.btks.contains_key(&out) {
                             out = match out.wrapping_add_signed(step) {
                                 0x8000..=u16::MAX => 0x113,
-                                0x110..=0x7FFF => 0,
+                                0x114..=0x7FFF => 0,
                                 c => c,
                             }
                         }
