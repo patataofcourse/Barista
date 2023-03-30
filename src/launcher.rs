@@ -7,7 +7,7 @@ use std::{
     fmt::{self, Display},
 };
 
-use ctru_sys::{amExit, amInit, AM_GetTitleInfo, AM_TitleEntry, MEDIATYPE_GAME_CARD, MEDIATYPE_SD};
+use ctru_sys::{amExit, amInit, AM_GetTitleInfo, MEDIATYPE_GAME_CARD, MEDIATYPE_SD};
 
 const TITLE_JP: u64 = 0x0004000000155A00;
 const TITLE_US: u64 = 0x000400000018a400;
@@ -88,16 +88,11 @@ pub fn get_available_games() -> Vec<GameVer> {
     //TODO: ctru-rs AM, whenever they add GetTitleInfo
     unsafe {
         assert!(amInit() == 0);
-        let null: *mut AM_TitleEntry = &mut AM_TitleEntry {
-            titleID: 0,
-            size: 0,
-            version: 0,
-            unk: [0; 6],
-        };
+        let mut null = std::mem::zeroed();
 
         for title in &TITLES {
             let id: *mut u64 = &mut title.id_long();
-            if AM_GetTitleInfo(MEDIATYPE_SD, 1, id, null) == 0 {
+            if AM_GetTitleInfo(MEDIATYPE_SD, 1, id, &mut null) == 0 {
                 match title {
                     GameRegion::JP => {
                         if cfg!(feature = "jp") {
@@ -125,7 +120,7 @@ pub fn get_available_games() -> Vec<GameVer> {
 
         for title in &TITLES {
             let id: *mut u64 = &mut title.id_long();
-            if AM_GetTitleInfo(MEDIATYPE_GAME_CARD, 1, id, null) == 0 {
+            if AM_GetTitleInfo(MEDIATYPE_GAME_CARD, 1, id, &mut null) == 0 {
                 match title {
                     GameRegion::JP => {
                         if cfg!(feature = "jp") {

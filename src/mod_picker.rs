@@ -43,8 +43,6 @@ pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String
             out_name += "...";
         }
 
-        let mut loaded = HashMap::<String, u16>::new();
-
         let num = if let Some(c) = inverted_cfg.get(&name) {
             *c
         } else {

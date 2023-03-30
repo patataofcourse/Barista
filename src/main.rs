@@ -16,6 +16,7 @@ use std::{
 use ui_lib::{BaristaUI, Screen};
 
 mod error;
+
 use self::error::{Error, Result};
 
 #[macro_use]
@@ -111,7 +112,6 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut game_to_load: Option<GameVer> = None;
     launcher::check_for_plgldr();
 
-    //TODO: removing deleted mods from the cfg
     let mods = mod_picker::get_available_mods()?;
 
     // Init Barista config
@@ -119,7 +119,6 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut random = [0u8; 1];
     ps.generate_random_bytes(&mut random)?;
     if !settings.is_new && random == [0u8; 1] {
-        //TODO: nicole easter egg
         scene::top_screen::nicole_easter_egg(&mut ui);
     }
 
@@ -160,6 +159,7 @@ fn run(is_citra: bool) -> error::Result<()> {
                 .unwrap_or_default(),
         );
     }
+    config().clear_deleted_mods(&mods);
 
     let mut page = 0;
 

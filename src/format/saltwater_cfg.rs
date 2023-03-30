@@ -4,7 +4,7 @@ use ctru::services::fs::{File, Fs};
 use std::{
     collections::HashMap,
     io::{self, Read, Write},
-    path::PathBuf,
+    path::PathBuf, ffi::{OsStr},
 };
 
 #[derive(Default)]
@@ -41,19 +41,28 @@ impl Config {
     }
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
-        //TODO: non-ASCII
         let fs = Fs::init()?;
         let mut file = File::create(&fs.sdmc()?, file.into())?;
         file.write_all(MAGIC)?;
         for (index, string) in &self.btks {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;
             (string.len() as u16).write_to(&mut file, ByteOrder::LittleEndian)?;
-            for chr in string.chars() {
-                let chru8 = chr as u8;
-                chru8.write_to(&mut file, ByteOrder::LittleEndian)?;
+            for byte in string.bytes() {
+                byte.write_to(&mut file, ByteOrder::LittleEndian)?;
             }
         }
         0xC000u16.write_to(&mut file, ByteOrder::LittleEndian)?;
         Ok(())
+    }
+
+    pub fn clear_deleted_mods(&mut self, mods: &[PathBuf]) {
+        let mut mods_stripped = vec![];
+        for r#mod in mods {
+            if let Some(str) = r#mod.file_stem() {
+                mods_stripped.push(str);
+            }
+        }
+
+        self.btks = self.btks.clone().into_iter().filter(|(_, v)|mods_stripped.contains(&OsStr::new(&v))).collect();
     }
 }
