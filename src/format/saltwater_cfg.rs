@@ -3,8 +3,9 @@ use bytestream::*;
 use ctru::services::fs::{File, Fs};
 use std::{
     collections::HashMap,
+    ffi::OsStr,
     io::{self, Read, Write},
-    path::PathBuf, ffi::{OsStr},
+    path::PathBuf,
 };
 
 #[derive(Default)]
@@ -63,6 +64,11 @@ impl Config {
             }
         }
 
-        self.btks = self.btks.clone().into_iter().filter(|(_, v)|mods_stripped.contains(&OsStr::new(&v))).collect();
+        self.btks = self
+            .btks
+            .clone()
+            .into_iter()
+            .filter(|(_, v)| mods_stripped.contains(&OsStr::new(&v)))
+            .collect();
     }
 }

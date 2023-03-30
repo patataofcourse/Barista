@@ -12,7 +12,7 @@ pub mod text;
 pub use text::Text;
 
 #[repr(u32)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum Screen {
     Top = 0,
     Bottom = 1,
@@ -149,7 +149,7 @@ pub struct Scene {
 impl Scene {
     pub fn new(ui: &BaristaUI, screen: Screen, background: Option<sprite::Image>) -> Self {
         Self {
-            screen: screen.clone(),
+            screen: screen,
             target: ui.get_target(screen),
             background,
             objects: Vec::new(),
@@ -160,7 +160,10 @@ impl Scene {
         self.screen.clone()
     }
 
-    //TODO: set_screen? doubt it'll be useful though
+    pub fn switch_screen(&mut self, ui: &BaristaUI, screen: Screen) {
+        self.screen = screen;
+        self.target = ui.get_target(screen);
+    }
 
     pub fn draw(&self) -> (bool, Vec<bool>) {
         unsafe {

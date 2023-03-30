@@ -159,7 +159,9 @@ fn run(is_citra: bool) -> error::Result<()> {
                 .unwrap_or_default(),
         );
     }
+    // clear mods not in the current folder, save the cfg file after clearing
     config().clear_deleted_mods(&mods);
+    config().to_file("/spicerack/bin/saltwater.cfg")?;
 
     let mut page = 0;
 

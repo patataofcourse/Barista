@@ -206,6 +206,10 @@ impl MenuState {
         match &self.action {
             MenuAction::Exit | MenuAction::Run | MenuAction::None => return,
             MenuAction::ChangeMenu(c) => {
+                if *c == SubMenu::SetUp {
+                    mod_page = mod_picker::show_page(mods, crate::config(), *page);
+                }
+
                 self.sub_menu = *c;
                 self.cursor = 0;
                 *page = 0;
@@ -371,7 +375,7 @@ impl MenuState {
                     println!();
                     println!("L/R buttons or Prev/Next to change page");
                     println!("DPad Left/Right to change index");
-                    println!("Hold X to change index by 0x10 rather than 1");
+                    println!("Hold X to scroll indexes faster");
                     println!();
                     println!("Page {} of {}", page + 1, num_pages);
                     for (i, elmt) in mods.iter().enumerate() {

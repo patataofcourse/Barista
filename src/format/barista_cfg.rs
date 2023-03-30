@@ -36,6 +36,7 @@ impl BaristaConfig {
             Err(e) => {
                 let ctru::Error::Os(err) = *e.into_inner().unwrap().downcast::<ctru::Error>().unwrap() else {panic!("error not OS error")};
                 if err as u32 == 0xC8804478 {
+                    //file not found, create new cfg
                     let config = BaristaConfig::default();
                     let mut f = File::create(&fs.sdmc()?, path)?;
                     f.write_all(toml::to_string_pretty(&config)?.as_bytes())?;
