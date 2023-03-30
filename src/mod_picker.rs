@@ -27,6 +27,10 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
 
 pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String, u16)> {
     let mut out = vec![];
+
+    let inverted_cfg =
+        HashMap::<_, _>::from_iter(cfg.btks.iter().map(|(k, v)| (v.clone() + ".btk", *k)));
+
     for path in paths
         .iter()
         .take(paths.len().min(page * ENTRIES_PER_PAGE + ENTRIES_PER_PAGE))
@@ -41,11 +45,7 @@ pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String
 
         let mut loaded = HashMap::<String, u16>::new();
 
-        for (k, v) in &cfg.btks {
-            loaded.insert(v.clone() + ".btk", *k);
-        }
-
-        let num = if let Some(c) = loaded.get(&name) {
+        let num = if let Some(c) = inverted_cfg.get(&name) {
             *c
         } else {
             u16::MAX

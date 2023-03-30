@@ -16,7 +16,7 @@ pub struct MenuState {
     pub action: MenuAction,
 }
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq)]
 pub enum SubMenu {
     Main,
     Run,
@@ -27,7 +27,7 @@ pub enum SubMenu {
     Log,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MenuAction {
     // All
     None,
@@ -130,7 +130,11 @@ impl MenuState {
     ) {
         self.action = MenuAction::None;
 
-        let mut mod_page = mod_picker::show_page(mods, crate::config(), *page);
+        let mut mod_page = if self.sub_menu == SubMenu::SetUp {
+            mod_picker::show_page(mods, crate::config(), *page)
+        } else {
+            vec![]
+        };
 
         if hid.keys_down().contains(KeyPad::KEY_START) {
             self.action = MenuAction::Exit;
