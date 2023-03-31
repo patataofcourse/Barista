@@ -11,7 +11,6 @@ bindgen "library/plgldr/include/plgldr.h" \
     --ctypes-prefix "::libc" \
     --no-prepend-enum-name \
     --generate "functions,types,vars" \
-    --blacklist-type "u(8|16|32|64)" \
     -- \
     --target=arm-none-eabi \
     --sysroot=$DEVKITARM/arm-none-eabi \
