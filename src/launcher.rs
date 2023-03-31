@@ -1,5 +1,4 @@
 use crate::plgldr::{self, SaltwaterParams};
-use citro2d_sys::svcExitProcess;
 use ctru::services::fs::{self, File, Fs};
 use libc::c_void;
 use std::{
@@ -7,7 +6,7 @@ use std::{
     fmt::{self, Display},
 };
 
-use ctru_sys::{amExit, amInit, AM_GetTitleInfo, MEDIATYPE_GAME_CARD, MEDIATYPE_SD};
+use ctru_sys::{amExit, amInit, AM_GetTitleInfo, svcExitProcess, MEDIATYPE_GAME_CARD, MEDIATYPE_SD};
 
 const TITLE_JP: u64 = 0x0004000000155A00;
 const TITLE_US: u64 = 0x000400000018a400;
