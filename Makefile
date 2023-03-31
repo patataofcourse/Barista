@@ -68,7 +68,7 @@ else
 export RUSTFLAGS = -L$(DEVKITPRO)/libctru/lib -lctrud
 endif
 
-.PHONY: all clean dist plgldr check doc fmt fix test update
+.PHONY: all clean dist plgldr check doc fmt fix test update re
 .PRECIOUS: $(BUILD)/$(CRATE_NAME).elf 
 
 all: dist
@@ -116,6 +116,8 @@ clean:
 	@rm -rf dist
 	@rm -f romfs/barista.lst
 	@cd library/plgldr && make clean --no-print-directory
+
+re: clean all
 
 ### C libraries ###
 
