@@ -16,7 +16,6 @@ bindgen "$DEVKITPRO/libctru/include/citro2d.h" \
     --blocklist-type "u(8|16|32|64)" \
     --blocklist-type "__builtin_va_list" \
     --blocklist-type "__va_list" \
-    --blocklist-type "C3D_.*" \
     --opaque-type "MiiData" \
     -- \
     --target=arm-none-eabi \

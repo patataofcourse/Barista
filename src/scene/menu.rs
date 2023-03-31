@@ -1,7 +1,7 @@
 // Menu: Let's Get This Done For The First Release Edition
 // Wonder if anything from here will be salvageable
 
-use std::{path::PathBuf};
+use std::path::PathBuf;
 
 use crate::{format::barista_cfg::BaristaConfig, launcher::GameVer, mod_picker};
 use ctru::{
@@ -26,6 +26,9 @@ pub struct HoldController {
 }
 
 impl HoldController {
+    const FIRST_PRESS_TIME: u32 = 15;
+    const LOOP_PRESS_TIME: u32 = 7;
+
     pub fn update(&mut self, keys: KeyPad) {
         if keys.contains(KeyPad::KEY_DUP) {
             if let Some(c) = &mut self.up {
@@ -46,47 +49,52 @@ impl HoldController {
             self.down = None;
         }
         if keys.contains(KeyPad::KEY_DLEFT) {
-            if let Some(c) = &mut self.up {
+            if let Some(c) = &mut self.left {
                 *c += 1;
             } else {
-                self.up = Some(0)
+                self.left = Some(0)
             }
         } else {
-            self.up = None;
+            self.left = None;
         }
         if keys.contains(KeyPad::KEY_DRIGHT) {
-            if let Some(c) = &mut self.up {
+            if let Some(c) = &mut self.right {
                 *c += 1;
             } else {
-                self.up = Some(0)
+                self.right = Some(0)
             }
         } else {
-            self.up = None;
+            self.right = None;
+        }
+        if keys.contains(KeyPad::KEY_L) {
+            log!(General, "{:?}", self);
         }
     }
 
     pub fn should_click(&self, key: KeyPad) -> bool {
+        let check = |t| t == 0 || (t >= Self::FIRST_PRESS_TIME && t % Self::LOOP_PRESS_TIME == 0);
+
         if key == KeyPad::KEY_DUP {
             if let Some(t) = self.up {
-                t == 0 || (t >= 30 && t % 15 == 0)
+                check(t)
             } else {
                 false
             }
         } else if key == KeyPad::KEY_DDOWN {
             if let Some(t) = self.down {
-                t == 0 || (t >= 30 && t % 15 == 0)
+                check(t)
             } else {
                 false
             }
         } else if key == KeyPad::KEY_DLEFT {
             if let Some(t) = self.left {
-                t == 0 || (t >= 30 && t % 15 == 0)
+                check(t)
             } else {
                 false
             }
         } else if key == KeyPad::KEY_DRIGHT {
             if let Some(t) = self.right {
-                t == 0 || (t >= 30 && t % 15 == 0)
+                check(t)
             } else {
                 false
             }

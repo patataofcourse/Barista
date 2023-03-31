@@ -208,9 +208,9 @@ pub const __int_fast16_t_defined: u8 = 1;
 pub const __int_fast32_t_defined: u8 = 1;
 pub const __int_fast64_t_defined: u8 = 1;
 pub const WINT_MIN: u8 = 0;
+pub const __bool_true_false_are_defined: u8 = 1;
 pub const true_: u8 = 1;
 pub const false_: u8 = 0;
-pub const __bool_true_false_are_defined: u8 = 1;
 pub const CUR_PROCESS_HANDLE: u32 = 4294934529;
 pub const ARBITRATION_SIGNAL_ALL: i8 = -1;
 pub const CUR_THREAD_HANDLE: u32 = 4294934528;
@@ -1904,11 +1904,10 @@ pub const DBGTHREAD_PARAMETER_CPU_CREATOR: DebugThreadParameter = 3;
 pub type DebugThreadParameter = ::libc::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct CodeSetInfo {
+pub struct CodeSetHeader {
     pub name: [u8_; 8usize],
-    pub unk1: u16_,
-    pub unk2: u16_,
-    pub unk3: u32_,
+    pub version: u16_,
+    pub padding: [u16_; 3usize],
     pub text_addr: u32_,
     pub text_size: u32_,
     pub ro_addr: u32_,
@@ -1918,7 +1917,7 @@ pub struct CodeSetInfo {
     pub text_size_total: u32_,
     pub ro_size_total: u32_,
     pub rw_size_total: u32_,
-    pub unk4: u32_,
+    pub padding2: u32_,
     pub program_id: u64_,
 }
 #[repr(C)]
@@ -2031,18 +2030,18 @@ extern "C" {
 extern "C" {
     pub fn svcCreateCodeSet(
         out: *mut Handle,
-        info: *const CodeSetInfo,
-        code_ptr: *mut ::libc::c_void,
-        ro_ptr: *mut ::libc::c_void,
-        data_ptr: *mut ::libc::c_void,
+        info: *const CodeSetHeader,
+        textSegmentLma: u32_,
+        roSegmentLma: u32_,
+        dataSegmentLma: u32_,
     ) -> Result;
 }
 extern "C" {
     pub fn svcCreateProcess(
         out: *mut Handle,
         codeset: Handle,
-        arm11kernelcaps: *const u32_,
-        arm11kernelcaps_num: u32_,
+        arm11KernelCaps: *const u32_,
+        numArm11KernelCaps: s32,
     ) -> Result;
 }
 extern "C" {
@@ -2865,11 +2864,11 @@ extern "C" {
     pub fn srvIsPortRegistered(registeredOut: *mut bool, name: *const ::libc::c_char) -> Result;
 }
 pub const ERRF_ERRTYPE_GENERIC: ERRF_ErrType = 0;
-pub const ERRF_ERRTYPE_MEM_CORRUPT: ERRF_ErrType = 1;
+pub const ERRF_ERRTYPE_NAND_DAMAGED: ERRF_ErrType = 1;
 pub const ERRF_ERRTYPE_CARD_REMOVED: ERRF_ErrType = 2;
 pub const ERRF_ERRTYPE_EXCEPTION: ERRF_ErrType = 3;
 pub const ERRF_ERRTYPE_FAILURE: ERRF_ErrType = 4;
-pub const ERRF_ERRTYPE_LOGGED: ERRF_ErrType = 5;
+pub const ERRF_ERRTYPE_LOG_ONLY: ERRF_ErrType = 5;
 pub type ERRF_ErrType = ::libc::c_uint;
 pub const ERRF_EXCEPTION_PREFETCH_ABORT: ERRF_ExceptionType = 0;
 pub const ERRF_EXCEPTION_DATA_ABORT: ERRF_ExceptionType = 1;
@@ -2928,7 +2927,13 @@ extern "C" {
     pub fn ERRF_ThrowResult(failure: Result) -> Result;
 }
 extern "C" {
+    pub fn ERRF_LogResult(failure: Result) -> Result;
+}
+extern "C" {
     pub fn ERRF_ThrowResultWithMessage(failure: Result, message: *const ::libc::c_char) -> Result;
+}
+extern "C" {
+    pub fn ERRF_SetUserString(user_string: *const ::libc::c_char) -> Result;
 }
 extern "C" {
     pub fn ERRF_ExceptionHandler(excep: *mut ERRF_ExceptionInfo, regs: *mut CpuRegisters);
@@ -9754,6 +9759,12 @@ extern "C" {
     pub fn IRU_GetIRLEDRecvState(out: *mut u32_) -> Result;
 }
 extern "C" {
+    pub fn IRU_GetSendFinishedEvent(out: *mut Handle) -> Result;
+}
+extern "C" {
+    pub fn IRU_GetRecvFinishedEvent(out: *mut Handle) -> Result;
+}
+extern "C" {
     pub fn nsInit() -> Result;
 }
 extern "C" {
@@ -11362,6 +11373,9 @@ extern "C" {
     pub fn mcuHwcExit();
 }
 extern "C" {
+    pub fn mcuHwcGetSessionHandle() -> *mut Handle;
+}
+extern "C" {
     pub fn MCUHWC_ReadRegister(reg: u8_, data: *mut ::libc::c_void, size: u32_) -> Result;
 }
 extern "C" {
@@ -11390,6 +11404,59 @@ extern "C" {
 }
 extern "C" {
     pub fn MCUHWC_GetFwVerLow(out: *mut u8_) -> Result;
+}
+pub const CODEC_I2S_LINE_1: CodecI2sLine = 0;
+pub const CODEC_I2S_LINE_2: CodecI2sLine = 1;
+pub type CodecI2sLine = ::libc::c_uint;
+extern "C" {
+    pub fn cdcChkInit() -> Result;
+}
+extern "C" {
+    pub fn cdcChkExit();
+}
+extern "C" {
+    pub fn cdcChkGetSessionHandle() -> *mut Handle;
+}
+extern "C" {
+    pub fn CDCCHK_ReadRegisters1(
+        pageId: u8_,
+        initialRegAddr: u8_,
+        outData: *mut ::libc::c_void,
+        size: size_t,
+    ) -> Result;
+}
+extern "C" {
+    pub fn CDCCHK_ReadRegisters2(
+        pageId: u8_,
+        initialRegAddr: u8_,
+        outData: *mut ::libc::c_void,
+        size: size_t,
+    ) -> Result;
+}
+extern "C" {
+    pub fn CDCCHK_WriteRegisters1(
+        pageId: u8_,
+        initialRegAddr: u8_,
+        data: *const ::libc::c_void,
+        size: size_t,
+    ) -> Result;
+}
+extern "C" {
+    pub fn CDCCHK_WriteRegisters2(
+        pageId: u8_,
+        initialRegAddr: u8_,
+        data: *const ::libc::c_void,
+        size: size_t,
+    ) -> Result;
+}
+extern "C" {
+    pub fn CDCCHK_ReadNtrPmicRegister(outData: *mut u8_, regAddr: u8_) -> Result;
+}
+extern "C" {
+    pub fn CDCCHK_WriteNtrPmicRegister(regAddr: u8_, data: u8_) -> Result;
+}
+extern "C" {
+    pub fn CDCCHK_SetI2sVolume(i2sLine: CodecI2sLine, volume: s8) -> Result;
 }
 pub const GX_TRANSFER_FMT_RGBA8: GX_TRANSFER_FORMAT = 0;
 pub const GX_TRANSFER_FMT_RGB8: GX_TRANSFER_FORMAT = 1;
@@ -12061,13 +12128,25 @@ extern "C" {
     pub fn ndspSetMasterVol(volume: f32);
 }
 extern "C" {
+    pub fn ndspGetMasterVol() -> f32;
+}
+extern "C" {
     pub fn ndspSetOutputMode(mode: ndspOutputMode);
+}
+extern "C" {
+    pub fn ndspGetOutputMode() -> ndspOutputMode;
 }
 extern "C" {
     pub fn ndspSetClippingMode(mode: ndspClippingMode);
 }
 extern "C" {
+    pub fn ndspGetClippingMode() -> ndspClippingMode;
+}
+extern "C" {
     pub fn ndspSetOutputCount(count: ::libc::c_int);
+}
+extern "C" {
+    pub fn ndspGetOutputCount() -> ::libc::c_int;
 }
 extern "C" {
     pub fn ndspSetCapture(capture: *mut ndspWaveBuf);
@@ -12079,19 +12158,37 @@ extern "C" {
     pub fn ndspSurroundSetDepth(depth: u16_);
 }
 extern "C" {
+    pub fn ndspSurroundGetDepth() -> u16_;
+}
+extern "C" {
     pub fn ndspSurroundSetPos(pos: ndspSpeakerPos);
+}
+extern "C" {
+    pub fn ndspSurroundGetPos() -> ndspSpeakerPos;
 }
 extern "C" {
     pub fn ndspSurroundSetRearRatio(ratio: u16_);
 }
 extern "C" {
+    pub fn ndspSurroundGetRearRatio() -> u16_;
+}
+extern "C" {
     pub fn ndspAuxSetEnable(id: ::libc::c_int, enable: bool);
+}
+extern "C" {
+    pub fn ndspAuxIsEnabled(id: ::libc::c_int) -> bool;
 }
 extern "C" {
     pub fn ndspAuxSetFrontBypass(id: ::libc::c_int, bypass: bool);
 }
 extern "C" {
+    pub fn ndspAuxGetFrontBypass(id: ::libc::c_int) -> bool;
+}
+extern "C" {
     pub fn ndspAuxSetVolume(id: ::libc::c_int, volume: f32);
+}
+extern "C" {
+    pub fn ndspAuxGetVolume(id: ::libc::c_int) -> f32;
 }
 extern "C" {
     pub fn ndspAuxSetCallback(
@@ -12144,13 +12241,25 @@ extern "C" {
     pub fn ndspChnSetFormat(id: ::libc::c_int, format: u16_);
 }
 extern "C" {
+    pub fn ndspChnGetFormat(id: ::libc::c_int) -> u16_;
+}
+extern "C" {
     pub fn ndspChnSetInterp(id: ::libc::c_int, type_: ndspInterpType);
+}
+extern "C" {
+    pub fn ndspChnGetInterp(id: ::libc::c_int) -> ndspInterpType;
 }
 extern "C" {
     pub fn ndspChnSetRate(id: ::libc::c_int, rate: f32);
 }
 extern "C" {
+    pub fn ndspChnGetRate(id: ::libc::c_int) -> f32;
+}
+extern "C" {
     pub fn ndspChnSetMix(id: ::libc::c_int, mix: *mut f32);
+}
+extern "C" {
+    pub fn ndspChnGetMix(id: ::libc::c_int, mix: *mut f32);
 }
 extern "C" {
     pub fn ndspChnSetAdpcmCoefs(id: ::libc::c_int, coefs: *mut u16_);
