@@ -70,7 +70,7 @@ checksum = "a1d3d68618a1f2c2d86e0bd2adec82e31960ca11aaeb5f353ff01746a4e08f36"
 [[package]]
 name = "ctru-rs"
 version = "0.7.1"
-source = "git+https://github.com/rust3ds/ctru-rs.git#0b54ffd0b87e3848ce7a3af3f98eca865b6f3f11"
+source = "git+https://github.com/rust3ds/ctru-rs.git#19b7b801c445449e9b99bdcd7c28ab8423406adc"
 dependencies = [
  "bitflags",
  "cfg-if",
@@ -86,7 +86,7 @@ dependencies = [
 [[package]]
 name = "ctru-sys"
 version = "0.4.1"
-source = "git+https://github.com/rust3ds/ctru-rs.git#0b54ffd0b87e3848ce7a3af3f98eca865b6f3f11"
+source = "git+https://github.com/rust3ds/ctru-rs.git#19b7b801c445449e9b99bdcd7c28ab8423406adc"
 dependencies = [
  "libc",
 ]
@@ -100,7 +100,7 @@ checksum = "99227334921fae1a979cf0bfdfcc6b3e5ce376ef57e16fb6fb3ea2ed6095f80c"
 [[package]]
 name = "linker-fix-3ds"
 version = "0.1.0"
-source = "git+https://github.com/rust3ds/rust-linker-fix-3ds.git#3c83c6589fdf9f71186571999145626f53acda24"
+source = "git+https://github.com/rust3ds/rust-linker-fix-3ds.git#09969b570236f795e3f1195b15d63d3de44cc87f"
 dependencies = [
  "ctru-sys",
  "libc",
@@ -114,9 +114,9 @@ checksum = "a785740271256c230f57462d3b83e52f998433a7062fc18f96d5999474a9f915"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.52"
+version = "1.0.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d0e1ae9e836cc3beddd63db0df682593d7e2d3d891ae8c9083d2113e1744224"
+checksum = "e472a104799c74b514a57226160104aa483546de37e839ec50e3c2e41dd87534"
 dependencies = [
  "unicode-ident",
 ]
@@ -143,18 +143,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.158"
+version = "1.0.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "771d4d9c4163ee138805e12c710dd365e4f44be8be0503cb1bb9eb989425d9c9"
+checksum = "3c04e8343c3daeec41f58990b9d77068df31209f2af111e059e9fe9646693065"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.158"
+version = "1.0.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e801c1712f48475582b7696ac71e0ca34ebb30e09338425384269d9717c62cad"
+checksum = "4c614d17805b093df4b147b51339e7e44bf05ef59fba1e45d83500bcfb4d8585"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -163,9 +163,9 @@ dependencies = [
 
 [[package]]
 name = "spin"
-version = "0.9.6"
+version = "0.9.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5d6e0250b93c8427a177b849d144a96d5acc57006149479403d7861ab721e34"
+checksum = "c0959fd6f767df20b231736396e4f602171e00d95205676286e79d4a4eb67bef"
 
 [[package]]
 name = "static_assertions"
@@ -175,9 +175,9 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "syn"
-version = "2.0.3"
+version = "2.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8234ae35e70582bfa0f1fedffa6daa248e41dd045310b19800c4a36382c8f60"
+checksum = "79d9531f94112cfc3e4c8f5f02cb2b58f72c97b7efd85f70203cc6d8efda5927"
 dependencies = [
  "proc-macro2",
  "quote",

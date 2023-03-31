@@ -1,7 +1,7 @@
 // Menu: Let's Get This Done For The First Release Edition
 // Wonder if anything from here will be salvageable
 
-use std::path::PathBuf;
+use std::{path::PathBuf};
 
 use crate::{format::barista_cfg::BaristaConfig, launcher::GameVer, mod_picker};
 use ctru::{
@@ -14,6 +14,86 @@ pub struct MenuState {
     pub sub_menu: SubMenu,
     pub cursor: u32,
     pub action: MenuAction,
+    pub hold_controller: HoldController,
+}
+
+#[derive(Clone, Debug, PartialEq, Default)]
+pub struct HoldController {
+    pub up: Option<u32>,
+    pub down: Option<u32>,
+    pub left: Option<u32>,
+    pub right: Option<u32>,
+}
+
+impl HoldController {
+    pub fn update(&mut self, keys: KeyPad) {
+        if keys.contains(KeyPad::KEY_DUP) {
+            if let Some(c) = &mut self.up {
+                *c += 1;
+            } else {
+                self.up = Some(0)
+            }
+        } else {
+            self.up = None;
+        }
+        if keys.contains(KeyPad::KEY_DDOWN) {
+            if let Some(c) = &mut self.down {
+                *c += 1;
+            } else {
+                self.down = Some(0)
+            }
+        } else {
+            self.down = None;
+        }
+        if keys.contains(KeyPad::KEY_DLEFT) {
+            if let Some(c) = &mut self.up {
+                *c += 1;
+            } else {
+                self.up = Some(0)
+            }
+        } else {
+            self.up = None;
+        }
+        if keys.contains(KeyPad::KEY_DRIGHT) {
+            if let Some(c) = &mut self.up {
+                *c += 1;
+            } else {
+                self.up = Some(0)
+            }
+        } else {
+            self.up = None;
+        }
+    }
+
+    pub fn should_click(&self, key: KeyPad) -> bool {
+        if key == KeyPad::KEY_DUP {
+            if let Some(t) = self.up {
+                t == 0 || (t >= 30 && t % 15 == 0)
+            } else {
+                false
+            }
+        } else if key == KeyPad::KEY_DDOWN {
+            if let Some(t) = self.down {
+                t == 0 || (t >= 30 && t % 15 == 0)
+            } else {
+                false
+            }
+        } else if key == KeyPad::KEY_DLEFT {
+            if let Some(t) = self.left {
+                t == 0 || (t >= 30 && t % 15 == 0)
+            } else {
+                false
+            }
+        } else if key == KeyPad::KEY_DRIGHT {
+            if let Some(t) = self.right {
+                t == 0 || (t >= 30 && t % 15 == 0)
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
 }
 
 #[derive(Clone, Debug, Copy, PartialEq, Eq)]
@@ -59,6 +139,7 @@ impl Default for MenuState {
             sub_menu: SubMenu::Main,
             cursor: 0,
             action: MenuAction::None,
+            hold_controller: HoldController::default(),
         }
     }
 }
@@ -141,14 +222,16 @@ impl MenuState {
             return;
         }
 
-        if hid.keys_down().contains(KeyPad::KEY_DUP) {
+        self.hold_controller.update(hid.keys_held());
+
+        if self.hold_controller.should_click(KeyPad::KEY_DUP) {
             if self.cursor > 0 {
                 self.cursor -= 1;
             } else {
                 self.cursor = self.cursor_option_len(versions, &mod_page) - 1;
             }
             self.action = MenuAction::MoveCursor
-        } else if hid.keys_down().contains(KeyPad::KEY_DDOWN) {
+        } else if self.hold_controller.should_click(KeyPad::KEY_DDOWN) {
             if self.cursor < self.cursor_option_len(versions, &mod_page) - 1 {
                 self.cursor += 1;
             } else {
@@ -188,13 +271,13 @@ impl MenuState {
                 self.action = MenuAction::ChangePage(false)
             } else if hid.keys_down().contains(KeyPad::KEY_R) {
                 self.action = MenuAction::ChangePage(true)
-            } else if hid.keys_down().contains(KeyPad::KEY_DLEFT) {
+            } else if self.hold_controller.should_click(KeyPad::KEY_DLEFT) {
                 if hid.keys_held().contains(KeyPad::KEY_X) {
                     self.action = MenuAction::ChangeIndex(false, true)
                 } else {
                     self.action = MenuAction::ChangeIndex(false, false)
                 }
-            } else if hid.keys_down().contains(KeyPad::KEY_DRIGHT) {
+            } else if self.hold_controller.should_click(KeyPad::KEY_DRIGHT) {
                 if hid.keys_held().contains(KeyPad::KEY_X) {
                     self.action = MenuAction::ChangeIndex(true, true)
                 } else {
