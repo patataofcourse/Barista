@@ -225,6 +225,7 @@ impl MenuState {
                 } else if *c && *page < mod_picker::num_pages(mods) - 1 {
                     *page += 1;
                 }
+                mod_page = mod_picker::show_page(mods, crate::config(), *page);
             }
             //TODO: properly order stuff in new gate mode (both ChangeIndex and ToggleMod)
             MenuAction::ChangeIndex(i, fast) => {

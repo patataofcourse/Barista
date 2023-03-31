@@ -118,7 +118,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut settings = format::barista_cfg::BaristaConfig::from_file("/spicerack/cfg.toml")?;
     let mut random = [0u8; 1];
     ps.generate_random_bytes(&mut random)?;
-    if !settings.is_new && random == [0u8; 1] {
+    if !settings.is_new && random == [35u8; 1] {
         scene::top_screen::nicole_easter_egg(&mut ui);
     }
 
