@@ -49,12 +49,11 @@ fn main() {
     };
 
     if !is_citra {
-        panic::set_hook(Box::new(panic_hook));
+        //panic::set_hook(Box::new(panic_hook));
     } else {
         //panic::set_hook(Box::new(citra_panic_hook))
     }
 
-    panic!("{}", "a");
     match run(is_citra) {
         Ok(_) => {}
         Err(c) => {
