@@ -4,7 +4,7 @@ extern crate barista_ui as ui_lib;
 
 use ctru::{
     console::Console,
-    services::{apt::Apt, hid::Hid, ps::Ps, gfx::Gfx},
+    services::{apt::Apt, gfx::Gfx, hid::Hid, ps::Ps},
 };
 use error::error_applet;
 use std::{
@@ -13,7 +13,6 @@ use std::{
     time::Duration,
 };
 use ui_lib::{BaristaUI, Screen};
-use backtrace::Backtrace;
 
 mod error;
 
@@ -49,7 +48,7 @@ fn main() {
     };
 
     if !is_citra {
-        //panic::set_hook(Box::new(panic_hook));
+        panic::set_hook(Box::new(panic_hook));
     } else {
         //panic::set_hook(Box::new(citra_panic_hook))
     }
@@ -234,8 +233,12 @@ fn audio<'a>() -> &'a audio::AudioManager {
 
 fn panic_hook(info: &PanicInfo) {
     let location_info = if let Some(c) = info.location() {
-        let file = c.file();
-        format!(" at {}:{}:{}", if let Some((_,c)) = file.split_once("Documents") {c} else {file}, c.line(), c.column())
+        format!(
+            " at {}:{}:{}",
+            error::no_doxx(c.file()),
+            c.line(),
+            c.column()
+        )
     } else {
         String::new()
     };
@@ -252,16 +255,14 @@ fn panic_hook(info: &PanicInfo) {
     process::exit(1);
 }
 
-fn debug_s(str: &str) -> ctru_sys::Result {
-    unsafe {
-        ctru_sys::svcOutputDebugString(str.as_ptr(), str.bytes().len() as i32)
-    }
-}
-
 fn citra_panic_hook(info: &PanicInfo) {
-    let trace = Backtrace::new();
     let location_info = if let Some(c) = info.location() {
-        format!(" at {}:{}:{}", c.file(), c.line(), c.column())
+        format!(
+            " at {}:{}:{}",
+            error::no_doxx(c.file()),
+            c.line(),
+            c.column()
+        )
     } else {
         String::new()
     };
@@ -273,7 +274,7 @@ fn citra_panic_hook(info: &PanicInfo) {
     } else {
         format!("panic{}\0", location_info)
     };
-    println!("{}",msg);
+    println!("{}", msg);
 
     process::exit(1);
 }

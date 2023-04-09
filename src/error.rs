@@ -73,3 +73,17 @@ pub fn error_applet(msg: String) {
         aptExit();
     }
 }
+
+pub fn no_doxx(filename: &str) -> &str {
+    if let Some((_, c)) = filename.split_once("Documents") {
+        c
+    } else if let Some((_, c)) = filename.split_once(".rustup") {
+        c
+    } else {
+        filename
+    }
+}
+
+pub fn debug_s(str: &str) -> ctru_sys::Result {
+    unsafe { ctru_sys::svcOutputDebugString(str.as_ptr(), str.bytes().len() as i32) }
+}
