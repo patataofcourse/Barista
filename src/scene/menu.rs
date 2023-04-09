@@ -316,7 +316,16 @@ impl MenuState {
                 } else if *c && *page < mod_picker::num_pages(mods) - 1 {
                     *page += 1;
                 }
+                let old_len = mod_page.len() as u32;
                 mod_page = mod_picker::show_page(mods, crate::config(), *page);
+                log!(General, "{} {} {}", old_len, mod_page.len(), self.cursor);
+
+                // Make sure the cursor is in-bounds
+                if self.cursor < old_len {
+                    self.cursor = self.cursor.clamp(0, mod_page.len() as u32 -1);
+                } else {
+                    self.cursor = self.cursor.wrapping_add(mod_page.len() as u32).wrapping_sub(old_len);
+                }
             }
             //TODO: properly order stuff in new gate mode (both ChangeIndex and ToggleMod)
             MenuAction::ChangeIndex(i, fast) => {
@@ -465,6 +474,7 @@ impl MenuState {
                     println!("Choose what mods to load with Saltwater");
                     println!("Disabled mods show index --- instead");
                     println!();
+                    println!("Press A to enable or disable mods");
                     println!("L/R buttons or Prev/Next to change page");
                     println!("DPad Left/Right to change index");
                     println!("Hold X to scroll indexes faster");
