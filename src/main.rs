@@ -234,7 +234,8 @@ fn audio<'a>() -> &'a audio::AudioManager {
 
 fn panic_hook(info: &PanicInfo) {
     let location_info = if let Some(c) = info.location() {
-        format!(" at {}:{}:{}", c.file(), c.line(), c.column())
+        let file = c.file();
+        format!(" at {}:{}:{}", if let Some((_,c)) = file.split_once("Documents") {c} else {file}, c.line(), c.column())
     } else {
         String::new()
     };
