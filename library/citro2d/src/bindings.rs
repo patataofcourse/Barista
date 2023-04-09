@@ -154,9 +154,9 @@ impl<T> ::core::cmp::PartialEq for __BindgenUnionField<T> {
 }
 impl<T> ::core::cmp::Eq for __BindgenUnionField<T> {}
 pub const _NEWLIB_VERSION_H__: u8 = 1;
-pub const _NEWLIB_VERSION: &[u8; 6usize] = b"4.2.0\0";
+pub const _NEWLIB_VERSION: &[u8; 6usize] = b"4.3.0\0";
 pub const __NEWLIB__: u8 = 4;
-pub const __NEWLIB_MINOR__: u8 = 2;
+pub const __NEWLIB_MINOR__: u8 = 3;
 pub const __NEWLIB_PATCHLEVEL__: u8 = 0;
 pub const _DEFAULT_SOURCE: u8 = 1;
 pub const _POSIX_SOURCE: u8 = 1;
@@ -174,6 +174,11 @@ pub const __XSI_VISIBLE: u8 = 0;
 pub const __SSP_FORTIFY_LEVEL: u8 = 0;
 pub const _POSIX_MONOTONIC_CLOCK: u32 = 200112;
 pub const _POSIX_TIMERS: u8 = 1;
+pub const _POSIX_THREADS: u8 = 1;
+pub const _POSIX_SEMAPHORES: u8 = 1;
+pub const _POSIX_BARRIERS: u32 = 200112;
+pub const _POSIX_READER_WRITER_LOCKS: u32 = 200112;
+pub const _UNIX98_THREAD_MUTEX_ATTRIBUTES: u8 = 1;
 pub const __have_longlong64: u8 = 1;
 pub const __have_long32: u8 = 1;
 pub const ___int8_t_defined: u8 = 1;
@@ -249,20 +254,20 @@ pub const OS_FCRAM_VADDR: u32 = 805306368;
 pub const OS_FCRAM_PADDR: u32 = 536870912;
 pub const OS_FCRAM_SIZE: u32 = 268435456;
 pub const __NEWLIB_H__: u8 = 1;
+pub const _ATEXIT_DYNAMIC_ALLOC: u8 = 1;
+pub const _FSEEK_OPTIMIZATION: u8 = 1;
+pub const _FVWRITE_IN_STREAMIO: u8 = 1;
+pub const _HAVE_CC_INHIBIT_LOOP_TO_LIBCALL: u8 = 1;
+pub const _HAVE_INITFINI_ARRAY: u8 = 1;
+pub const _HAVE_LONG_DOUBLE: u8 = 1;
+pub const _LDBL_EQ_DBL: u8 = 1;
+pub const _MB_CAPABLE: u8 = 1;
+pub const _MB_LEN_MAX: u8 = 8;
+pub const _REENT_CHECK_VERIFY: u8 = 1;
+pub const _UNBUF_STREAM_OPT: u8 = 1;
 pub const _WANT_IO_C99_FORMATS: u8 = 1;
 pub const _WANT_IO_LONG_LONG: u8 = 1;
 pub const _WANT_IO_POS_ARGS: u8 = 1;
-pub const _REENT_CHECK_VERIFY: u8 = 1;
-pub const _MB_CAPABLE: u8 = 1;
-pub const _MB_LEN_MAX: u8 = 8;
-pub const HAVE_INITFINI_ARRAY: u8 = 1;
-pub const _ATEXIT_DYNAMIC_ALLOC: u8 = 1;
-pub const _HAVE_LONG_DOUBLE: u8 = 1;
-pub const _HAVE_CC_INHIBIT_LOOP_TO_LIBCALL: u8 = 1;
-pub const _LDBL_EQ_DBL: u8 = 1;
-pub const _FVWRITE_IN_STREAMIO: u8 = 1;
-pub const _FSEEK_OPTIMIZATION: u8 = 1;
-pub const _UNBUF_STREAM_OPT: u8 = 1;
 pub const _WANT_USE_GDTOA: u8 = 1;
 pub const __OBSOLETE_MATH_DEFAULT: u8 = 0;
 pub const __OBSOLETE_MATH: u8 = 0;
@@ -286,7 +291,6 @@ pub const CONSOLE_FG_CUSTOM: u16 = 512;
 pub const CONSOLE_BG_CUSTOM: u16 = 1024;
 pub const __GNUCLIKE_ASM: u8 = 3;
 pub const __GNUCLIKE___TYPEOF: u8 = 1;
-pub const __GNUCLIKE___OFFSETOF: u8 = 1;
 pub const __GNUCLIKE___SECTION: u8 = 1;
 pub const __GNUCLIKE_CTOR_SECTION_HANDLING: u8 = 1;
 pub const __GNUCLIKE_BUILTIN_CONSTANT_P: u8 = 1;
@@ -324,6 +328,10 @@ pub const PTHREAD_INHERIT_SCHED: u8 = 1;
 pub const PTHREAD_EXPLICIT_SCHED: u8 = 2;
 pub const PTHREAD_CREATE_DETACHED: u8 = 0;
 pub const PTHREAD_CREATE_JOINABLE: u8 = 1;
+pub const PTHREAD_MUTEX_NORMAL: u8 = 0;
+pub const PTHREAD_MUTEX_RECURSIVE: u8 = 1;
+pub const PTHREAD_MUTEX_ERRORCHECK: u8 = 2;
+pub const PTHREAD_MUTEX_DEFAULT: u8 = 3;
 pub const CSND_NUM_CHANNELS: u8 = 32;
 pub const FRIEND_SCREEN_NAME_SIZE: u8 = 11;
 pub const FRIEND_COMMENT_SIZE: u8 = 33;
@@ -359,7 +367,6 @@ pub const _RAND48_ADD: u8 = 11;
 pub const _REENT_EMERGENCY_SIZE: u8 = 25;
 pub const _REENT_ASCTIME_SIZE: u8 = 26;
 pub const _REENT_SIGNAL_SIZE: u8 = 24;
-pub const _N_LISTS: u8 = 30;
 pub const _CLOCKS_PER_SEC_: u8 = 100;
 pub const CLOCKS_PER_SEC: u8 = 100;
 pub const CLK_TCK: u8 = 100;
@@ -3052,18 +3059,7 @@ pub struct __lock_t {
     pub counter: u32,
 }
 pub type _LOCK_RECURSIVE_T = __lock_t;
-extern "C" {
-    pub fn __libc_lock_init(lock: *mut _LOCK_T);
-}
-extern "C" {
-    pub fn __libc_lock_init_recursive(lock: *mut _LOCK_RECURSIVE_T);
-}
-extern "C" {
-    pub fn __libc_lock_close(lock: *mut _LOCK_T);
-}
-extern "C" {
-    pub fn __libc_lock_close_recursive(lock: *mut _LOCK_RECURSIVE_T);
-}
+pub type _COND_T = u32;
 extern "C" {
     pub fn __libc_lock_acquire(lock: *mut _LOCK_T);
 }
@@ -3081,6 +3077,26 @@ extern "C" {
 }
 extern "C" {
     pub fn __libc_lock_try_acquire_recursive(lock: *mut _LOCK_RECURSIVE_T) -> ::libc::c_int;
+}
+extern "C" {
+    pub fn __libc_cond_signal(cond: *mut _COND_T) -> ::libc::c_int;
+}
+extern "C" {
+    pub fn __libc_cond_broadcast(cond: *mut _COND_T) -> ::libc::c_int;
+}
+extern "C" {
+    pub fn __libc_cond_wait(
+        cond: *mut _COND_T,
+        lock: *mut _LOCK_T,
+        timeout_ns: u64,
+    ) -> ::libc::c_int;
+}
+extern "C" {
+    pub fn __libc_cond_wait_recursive(
+        cond: *mut _COND_T,
+        lock: *mut _LOCK_RECURSIVE_T,
+        timeout_ns: u64,
+    ) -> ::libc::c_int;
 }
 pub type LightLock = _LOCK_T;
 pub type RecursiveLock = _LOCK_RECURSIVE_T;
@@ -3544,6 +3560,7 @@ pub type _iconv_t = *mut ::libc::c_void;
 pub type __clock_t = ::libc::c_ulong;
 pub type __time_t = __int_least64_t;
 pub type __clockid_t = ::libc::c_ulong;
+pub type __daddr_t = ::libc::c_long;
 pub type __timer_t = ::libc::c_ulong;
 pub type __sa_family_t = __uint8_t;
 pub type __socklen_t = __uint32_t;
@@ -3565,6 +3582,12 @@ pub struct timeval {
 pub struct timespec {
     pub tv_sec: time_t,
     pub tv_nsec: ::libc::c_long,
+}
+extern "C" {
+    pub fn timespec2nsec(ts: *const timespec) -> __uint64_t;
+}
+extern "C" {
+    pub fn abstimespec2nsec(clock_id: __clockid_t, ts: *const timespec) -> __uint64_t;
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3612,7 +3635,7 @@ pub type ulong = ::libc::c_ulong;
 pub type blkcnt_t = __blkcnt_t;
 pub type blksize_t = __blksize_t;
 pub type clock_t = ::libc::c_ulong;
-pub type daddr_t = ::libc::c_long;
+pub type daddr_t = __daddr_t;
 pub type caddr_t = *mut ::libc::c_char;
 pub type fsblkcnt_t = __fsblkcnt_t;
 pub type fsfilcnt_t = __fsfilcnt_t;
@@ -3636,40 +3659,115 @@ pub type sbintime_t = __int64_t;
 pub struct sched_param {
     pub sched_priority: ::libc::c_int,
 }
-pub type pthread_t = __uint32_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct __pthread_t {
+    _unused: [u8; 0],
+}
+pub type pthread_t = *mut __pthread_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct pthread_attr_t {
-    pub is_initialized: ::libc::c_int,
     pub stackaddr: *mut ::libc::c_void,
     pub stacksize: ::libc::c_int,
-    pub contentionscope: ::libc::c_int,
-    pub inheritsched: ::libc::c_int,
-    pub schedpolicy: ::libc::c_int,
     pub schedparam: sched_param,
     pub detachstate: ::libc::c_int,
 }
-pub type pthread_mutex_t = __uint32_t;
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct pthread_mutex_t {
+    pub type_: ::libc::c_int,
+    pub __bindgen_anon_1: pthread_mutex_t__bindgen_ty_1,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union pthread_mutex_t__bindgen_ty_1 {
+    pub normal: _LOCK_T,
+    pub recursive: _LOCK_RECURSIVE_T,
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct pthread_mutexattr_t {
-    pub is_initialized: ::libc::c_int,
-    pub recursive: ::libc::c_int,
+    pub type_: ::libc::c_int,
 }
-pub type pthread_cond_t = __uint32_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct pthread_cond_t {
+    pub clock_id: clockid_t,
+    pub cond: _COND_T,
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct pthread_condattr_t {
-    pub is_initialized: ::libc::c_int,
-    pub clock: clock_t,
+    pub clock_id: clockid_t,
 }
 pub type pthread_key_t = __uint32_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct pthread_once_t {
-    pub is_initialized: ::libc::c_int,
-    pub init_executed: ::libc::c_int,
+    pub status: ::libc::c_int,
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct pthread_barrier_t {
+    pub lock: _LOCK_T,
+    pub cond: _COND_T,
+    pub reload: ::libc::c_uint,
+    pub counter: ::libc::c_uint,
+    pub cycle: ::libc::c_uint,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct pthread_barrierattr_t {}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct pthread_rwlock_t {
+    pub lock: _LOCK_T,
+    pub cond_r: _COND_T,
+    pub cond_w: _COND_T,
+    pub _bitfield_align_1: [u32; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 4usize]>,
+}
+impl pthread_rwlock_t {
+    #[inline]
+    pub fn cnt_r(&self) -> u32 {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 30u8) as u32) }
+    }
+    #[inline]
+    pub fn set_cnt_r(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 30u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn cnt_w(&self) -> u32 {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(30usize, 2u8) as u32) }
+    }
+    #[inline]
+    pub fn set_cnt_w(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(30usize, 2u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(cnt_r: u32, cnt_w: u32) -> __BindgenBitfieldUnit<[u8; 4usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 4usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 30u8, {
+            let cnt_r: u32 = unsafe { ::core::mem::transmute(cnt_r) };
+            cnt_r as u64
+        });
+        __bindgen_bitfield_unit.set(30usize, 2u8, {
+            let cnt_w: u32 = unsafe { ::core::mem::transmute(cnt_w) };
+            cnt_w as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct pthread_rwlockattr_t {}
 pub const DECOMPRESS_DUMMY: decompressType = 0;
 pub const DECOMPRESS_LZSS: decompressType = 16;
 pub const DECOMPRESS_LZ10: decompressType = 16;
@@ -5293,7 +5391,17 @@ extern "C" {
     pub fn aptSetChainloader(programID: u64_, mediatype: u8_);
 }
 extern "C" {
+    pub fn aptSetChainloaderToCaller();
+}
+extern "C" {
     pub fn aptSetChainloaderToSelf();
+}
+extern "C" {
+    pub fn aptSetChainloaderArgs(
+        deliverArg: *const ::libc::c_void,
+        deliverArgSize: size_t,
+        hmac: *const ::libc::c_void,
+    );
 }
 extern "C" {
     pub fn APT_GetLockHandle(flags: u16_, lockHandle: *mut Handle) -> Result;
@@ -5493,9 +5601,9 @@ extern "C" {
 }
 extern "C" {
     pub fn APT_ReceiveDeliverArg(
-        param: *const ::libc::c_void,
+        param: *mut ::libc::c_void,
         paramSize: size_t,
-        hmac: *const ::libc::c_void,
+        hmac: *mut ::libc::c_void,
         sender: *mut u64_,
         received: *mut bool,
     ) -> Result;
@@ -10273,12 +10381,18 @@ pub struct __sFILE {
     pub _flags2: ::libc::c_int,
 }
 pub type __FILE = __sFILE;
+extern "C" {
+    pub static mut __sf: [__FILE; 3usize];
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _glue {
     pub _next: *mut _glue,
     pub _niobs: ::libc::c_int,
     pub _iobs: *mut __FILE,
+}
+extern "C" {
+    pub static mut __sglue: _glue;
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -10296,9 +10410,7 @@ pub struct _reent {
     pub _stderr: *mut __FILE,
     pub _inc: ::libc::c_int,
     pub _emergency: [::libc::c_char; 25usize],
-    pub _unspecified_locale_info: ::libc::c_int,
     pub _locale: *mut __locale_t,
-    pub __sdidinit: ::libc::c_int,
     pub __cleanup: ::core::option::Option<unsafe extern "C" fn(arg1: *mut _reent)>,
     pub _result: *mut _Bigint,
     pub _result_k: ::libc::c_int,
@@ -10307,23 +10419,17 @@ pub struct _reent {
     pub _cvtlen: ::libc::c_int,
     pub _cvtbuf: *mut ::libc::c_char,
     pub _new: _reent__bindgen_ty_1,
-    pub _atexit: *mut _atexit,
-    pub _atexit0: _atexit,
     pub _sig_func: *mut ::core::option::Option<unsafe extern "C" fn(arg1: ::libc::c_int)>,
-    pub __sglue: _glue,
-    pub __sf: [__FILE; 3usize],
     pub deviceData: *mut ::libc::c_void,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union _reent__bindgen_ty_1 {
     pub _reent: _reent__bindgen_ty_1__bindgen_ty_1,
-    pub _unused: _reent__bindgen_ty_1__bindgen_ty_2,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct _reent__bindgen_ty_1__bindgen_ty_1 {
-    pub _unused_rand: ::libc::c_uint,
     pub _strtok_last: *mut ::libc::c_char,
     pub _asctime_buf: [::libc::c_char; 26usize],
     pub _localtime_buf: __tm,
@@ -10343,23 +10449,32 @@ pub struct _reent__bindgen_ty_1__bindgen_ty_1 {
     pub _wcsrtombs_state: _mbstate_t,
     pub _h_errno: ::libc::c_int,
 }
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct _reent__bindgen_ty_1__bindgen_ty_2 {
-    pub _nextf: [*mut ::libc::c_uchar; 30usize],
-    pub _nmalloc: [::libc::c_uint; 30usize],
-}
 extern "C" {
     pub static mut _impure_ptr: *mut _reent;
 }
 extern "C" {
-    pub static _global_impure_ptr: *mut _reent;
+    pub static mut _impure_data: _reent;
+}
+extern "C" {
+    pub static mut __atexit: *mut _atexit;
+}
+extern "C" {
+    pub static mut __atexit0: _atexit;
+}
+extern "C" {
+    pub static mut __stdio_exit_handler: ::core::option::Option<unsafe extern "C" fn()>;
 }
 extern "C" {
     pub fn _reclaim_reent(arg1: *mut _reent);
 }
 extern "C" {
-    pub fn __getreent() -> *mut _reent;
+    pub fn _fwalk_sglue(
+        arg1: *mut _reent,
+        arg2: ::core::option::Option<
+            unsafe extern "C" fn(arg1: *mut _reent, arg2: *mut __FILE) -> ::libc::c_int,
+        >,
+        arg3: *mut _glue,
+    ) -> ::libc::c_int;
 }
 pub type locale_t = *mut __locale_t;
 #[repr(C)]
@@ -10455,6 +10570,8 @@ pub struct sigevent {
     pub sigev_notify: ::libc::c_int,
     pub sigev_signo: ::libc::c_int,
     pub sigev_value: sigval,
+    pub sigev_notify_function: ::core::option::Option<unsafe extern "C" fn(arg1: sigval)>,
+    pub sigev_notify_attributes: *mut pthread_attr_t,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]

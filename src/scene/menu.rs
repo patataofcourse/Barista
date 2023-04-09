@@ -30,7 +30,7 @@ impl HoldController {
     const LOOP_PRESS_TIME: u32 = 7;
 
     pub fn update(&mut self, keys: KeyPad) {
-        if keys.contains(KeyPad::KEY_DUP) {
+        if keys.contains(KeyPad::DUP) {
             if let Some(c) = &mut self.up {
                 *c += 1;
             } else {
@@ -39,7 +39,7 @@ impl HoldController {
         } else {
             self.up = None;
         }
-        if keys.contains(KeyPad::KEY_DDOWN) {
+        if keys.contains(KeyPad::DDOWN) {
             if let Some(c) = &mut self.down {
                 *c += 1;
             } else {
@@ -48,7 +48,7 @@ impl HoldController {
         } else {
             self.down = None;
         }
-        if keys.contains(KeyPad::KEY_DLEFT) {
+        if keys.contains(KeyPad::DLEFT) {
             if let Some(c) = &mut self.left {
                 *c += 1;
             } else {
@@ -57,7 +57,7 @@ impl HoldController {
         } else {
             self.left = None;
         }
-        if keys.contains(KeyPad::KEY_DRIGHT) {
+        if keys.contains(KeyPad::DRIGHT) {
             if let Some(c) = &mut self.right {
                 *c += 1;
             } else {
@@ -66,7 +66,7 @@ impl HoldController {
         } else {
             self.right = None;
         }
-        if keys.contains(KeyPad::KEY_L) {
+        if keys.contains(KeyPad::L) {
             log!(General, "{:?}", self);
         }
     }
@@ -74,25 +74,25 @@ impl HoldController {
     pub fn should_click(&self, key: KeyPad) -> bool {
         let check = |t| t == 0 || (t >= Self::FIRST_PRESS_TIME && t % Self::LOOP_PRESS_TIME == 0);
 
-        if key == KeyPad::KEY_DUP {
+        if key == KeyPad::DUP {
             if let Some(t) = self.up {
                 check(t)
             } else {
                 false
             }
-        } else if key == KeyPad::KEY_DDOWN {
+        } else if key == KeyPad::DDOWN {
             if let Some(t) = self.down {
                 check(t)
             } else {
                 false
             }
-        } else if key == KeyPad::KEY_DLEFT {
+        } else if key == KeyPad::DLEFT {
             if let Some(t) = self.left {
                 check(t)
             } else {
                 false
             }
-        } else if key == KeyPad::KEY_DRIGHT {
+        } else if key == KeyPad::DRIGHT {
             if let Some(t) = self.right {
                 check(t)
             } else {
@@ -225,34 +225,34 @@ impl MenuState {
             vec![]
         };
 
-        if hid.keys_down().contains(KeyPad::KEY_START) {
+        if hid.keys_down().contains(KeyPad::START) {
             self.action = MenuAction::Exit;
             return;
         }
 
         self.hold_controller.update(hid.keys_held());
 
-        if self.hold_controller.should_click(KeyPad::KEY_DUP) {
+        if self.hold_controller.should_click(KeyPad::DUP) {
             if self.cursor > 0 {
                 self.cursor -= 1;
             } else {
                 self.cursor = self.cursor_option_len(versions, &mod_page) - 1;
             }
             self.action = MenuAction::MoveCursor
-        } else if self.hold_controller.should_click(KeyPad::KEY_DDOWN) {
+        } else if self.hold_controller.should_click(KeyPad::DDOWN) {
             if self.cursor < self.cursor_option_len(versions, &mod_page) - 1 {
                 self.cursor += 1;
             } else {
                 self.cursor = 0;
             }
             self.action = MenuAction::MoveCursor
-        } else if hid.keys_down().contains(KeyPad::KEY_B) {
+        } else if hid.keys_down().contains(KeyPad::B) {
             if let SubMenu::Main = self.sub_menu {
                 self.action = MenuAction::Exit;
             } else {
                 self.action = self.actions()[self.actions().len() - 1].clone();
             }
-        } else if hid.keys_down().contains(KeyPad::KEY_A) {
+        } else if hid.keys_down().contains(KeyPad::A) {
             if let SubMenu::Run = self.sub_menu {
                 if self.cursor == self.cursor_option_len(versions, &mod_page) - 1 {
                     self.action = MenuAction::ChangeMenu(SubMenu::Main)
@@ -271,22 +271,22 @@ impl MenuState {
             }
         }
         #[cfg(debug_assertions)]
-        if hid.keys_down().contains(KeyPad::KEY_SELECT) {
+        if hid.keys_down().contains(KeyPad::SELECT) {
             self.action = MenuAction::ChangeMenu(SubMenu::Log)
         }
         if let SubMenu::SetUp = &self.sub_menu {
-            if hid.keys_down().contains(KeyPad::KEY_L) {
+            if hid.keys_down().contains(KeyPad::L) {
                 self.action = MenuAction::ChangePage(false)
-            } else if hid.keys_down().contains(KeyPad::KEY_R) {
+            } else if hid.keys_down().contains(KeyPad::R) {
                 self.action = MenuAction::ChangePage(true)
-            } else if self.hold_controller.should_click(KeyPad::KEY_DLEFT) {
-                if hid.keys_held().contains(KeyPad::KEY_X) {
+            } else if self.hold_controller.should_click(KeyPad::DLEFT) {
+                if hid.keys_held().contains(KeyPad::X) {
                     self.action = MenuAction::ChangeIndex(false, true)
                 } else {
                     self.action = MenuAction::ChangeIndex(false, false)
                 }
-            } else if self.hold_controller.should_click(KeyPad::KEY_DRIGHT) {
-                if hid.keys_held().contains(KeyPad::KEY_X) {
+            } else if self.hold_controller.should_click(KeyPad::DRIGHT) {
+                if hid.keys_held().contains(KeyPad::X) {
                     self.action = MenuAction::ChangeIndex(true, true)
                 } else {
                     self.action = MenuAction::ChangeIndex(true, false)

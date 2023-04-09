@@ -5,13 +5,13 @@ use std::{collections::HashMap, ffi::OsStr, path::PathBuf};
 pub const ENTRIES_PER_PAGE: usize = 13;
 
 pub fn get_available_mods() -> Result<Vec<PathBuf>> {
-    let fs = Fs::init()?;
+    let mut fs = Fs::init()?;
     let mut v = vec![];
-    let sdmc = fs.sdmc()?;
+    let mut sdmc = fs.sdmc()?;
     let iter = match fs::read_dir(&sdmc, "/spicerack/mods") {
         Ok(c) => c,
         Err(_) => {
-            fs::create_dir_all(&sdmc, "/spicerack/mods")?;
+            fs::create_dir_all(&mut sdmc, "/spicerack/mods")?;
             fs::read_dir(&sdmc, "/spicerack/mods")?
         }
     };

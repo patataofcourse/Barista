@@ -1,11 +1,10 @@
-#![feature(allocator_api, int_roundings)]
+#![feature(allocator_api, int_roundings, panic_backtrace_config)]
 
 extern crate barista_ui as ui_lib;
 
 use ctru::{
     console::Console,
-    gfx::Gfx,
-    services::{apt::Apt, hid::Hid, ps::Ps},
+    services::{apt::Apt, hid::Hid, ps::Ps, gfx::Gfx},
 };
 use error::error_applet;
 use std::{
@@ -14,6 +13,7 @@ use std::{
     time::Duration,
 };
 use ui_lib::{BaristaUI, Screen};
+use backtrace::Backtrace;
 
 mod error;
 
@@ -50,8 +50,11 @@ fn main() {
 
     if !is_citra {
         panic::set_hook(Box::new(panic_hook));
+    } else {
+        //panic::set_hook(Box::new(citra_panic_hook))
     }
 
+    panic!("{}", "a");
     match run(is_citra) {
         Ok(_) => {}
         Err(c) => {
@@ -91,7 +94,7 @@ fn main() {
 
 fn run(is_citra: bool) -> error::Result<()> {
     let apt = Apt::init()?;
-    let hid = Hid::init()?;
+    let mut hid = Hid::init()?;
     let gfx = Gfx::init()?;
     let ps = Ps::new()?;
     let console = Console::init(gfx.bottom_screen.borrow_mut());
@@ -245,6 +248,32 @@ fn panic_hook(info: &PanicInfo) {
         format!("panic{}\0", location_info)
     };
     error_applet(msg);
+
+    process::exit(1);
+}
+
+fn debug_s(str: &str) -> ctru_sys::Result {
+    unsafe {
+        ctru_sys::svcOutputDebugString(str.as_ptr(), str.bytes().len() as i32)
+    }
+}
+
+fn citra_panic_hook(info: &PanicInfo) {
+    let trace = Backtrace::new();
+    let location_info = if let Some(c) = info.location() {
+        format!(" at {}:{}:{}", c.file(), c.line(), c.column())
+    } else {
+        String::new()
+    };
+
+    let msg = if let Some(c) = info.payload().downcast_ref::<&str>() {
+        format!("panic: {:?}{}\0", c, location_info)
+    } else if let Some(c) = info.payload().downcast_ref::<String>() {
+        format!("panic: {:?}{}\0", c, location_info)
+    } else {
+        format!("panic{}\0", location_info)
+    };
+    println!("{}",msg);
 
     process::exit(1);
 }

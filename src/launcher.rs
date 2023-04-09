@@ -159,7 +159,7 @@ pub fn check_for_plgldr() {
 }
 
 pub fn check_for_rhmpatch() -> bool {
-    let fs = Fs::init().unwrap();
+    let mut fs = Fs::init().unwrap();
     File::open(
         &fs.sdmc().unwrap(),
         "/luma/titles/000400000018A400/code.ips",
@@ -174,9 +174,9 @@ pub fn launch(ver: GameVer, is_citra: bool) {
     // disable rhmpatch if it exists
     if check_for_rhmpatch() {
         params.reenable_rhmpatch = true;
-        let fs = Fs::init().unwrap();
+        let mut fs = Fs::init().unwrap();
         fs::rename(
-            &fs.sdmc().unwrap(),
+            &mut fs.sdmc().unwrap(),
             "/luma/titles/000400000018A400/code.ips",
             "/luma/titles/000400000018A400/code.old.ips",
         )

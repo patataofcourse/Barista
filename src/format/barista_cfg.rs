@@ -25,7 +25,7 @@ impl Default for BaristaConfig {
 
 impl BaristaConfig {
     pub fn from_file(path: impl Into<PathBuf>) -> Result<Self> {
-        let fs = Fs::init()?;
+        let mut fs = Fs::init()?;
         let path = path.into();
         match File::open(&fs.sdmc()?, path.clone()) {
             Ok(mut file) => {
@@ -38,7 +38,7 @@ impl BaristaConfig {
                 if err as u32 == 0xC8804478 {
                     //file not found, create new cfg
                     let config = BaristaConfig::default();
-                    let mut f = File::create(&fs.sdmc()?, path)?;
+                    let mut f = File::create(&mut fs.sdmc()?, path)?;
                     f.write_all(toml::to_string_pretty(&config)?.as_bytes())?;
                     Ok(config)
                 } else {
@@ -49,8 +49,8 @@ impl BaristaConfig {
     }
 
     pub fn to_file(&self, path: impl Into<PathBuf>) -> Result<()> {
-        let fs = Fs::init()?;
-        let mut f = File::create(&fs.sdmc()?, path.into())?;
+        let mut fs = Fs::init()?;
+        let mut f = File::create(&mut fs.sdmc()?, path.into())?;
         f.write_all(toml::to_string_pretty(self)?.as_bytes())?;
         Ok(())
     }
