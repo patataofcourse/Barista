@@ -27,7 +27,7 @@ pub struct HoldController {
 
 impl HoldController {
     const FIRST_PRESS_TIME: u32 = 15;
-    const LOOP_PRESS_TIME: u32 = 7;
+    const LOOP_PRESS_TIME: u32 = 4;
 
     pub fn update(&mut self, keys: KeyPad) {
         if keys.contains(KeyPad::DUP) {
