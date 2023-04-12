@@ -24,6 +24,7 @@ mod log;
 #[cfg(feature = "audio")]
 mod audio;
 
+mod constants;
 mod format;
 mod launcher;
 mod mod_picker;
