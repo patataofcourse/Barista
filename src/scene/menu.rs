@@ -4,7 +4,10 @@
 use std::path::PathBuf;
 
 use crate::{
-    constants::{SLOT_NAMES_GATE, SLOT_NAMES_INTERNAL, SLOT_NAMES_INTERNAL_GATE, SLOT_NAMES_DEFAULT, SLOT_NAMES_NORETCON},
+    constants::{
+        SLOT_NAMES_DEFAULT, SLOT_NAMES_GATE, SLOT_NAMES_INTERNAL, SLOT_NAMES_INTERNAL_GATE,
+        SLOT_NAMES_NORETCON,
+    },
     format::barista_cfg::{BaristaConfig, SlotTitleMode},
     launcher::GameVer,
     mod_picker,
@@ -114,6 +117,7 @@ pub enum SubMenu {
     Main,
     Run,
     Options,
+    #[cfg(feature = "audio")]
     Music,
     SetUp(bool),
     #[cfg(debug_assertions)]
@@ -158,9 +162,10 @@ impl Default for MenuState {
 }
 
 impl SubMenu {
-    const ACTIONS_MAIN: [MenuAction; 5] = [
+    const ACTIONS_MAIN: &[MenuAction] = &[
         MenuAction::ChangeMenu(SubMenu::Run),
         MenuAction::ChangeMenu(SubMenu::SetUp(false)),
+        #[cfg(feature = "audio")]
         MenuAction::ChangeMenu(SubMenu::Music),
         MenuAction::ChangeMenu(SubMenu::Options),
         MenuAction::Exit,
@@ -176,8 +181,6 @@ impl SubMenu {
         MenuAction::ToggleAudio,
         MenuAction::ChangeMenu(SubMenu::Main),
     ];
-    #[cfg(not(feature = "audio"))]
-    const ACTIONS_MUSIC: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
     const ACTIONS_OPTIONS: [MenuAction; 3] = [
         MenuAction::ToggleSetting(0),
         MenuAction::ToggleSetting(1),
@@ -186,9 +189,10 @@ impl SubMenu {
 
     pub fn actions(&self) -> &[MenuAction] {
         match &self {
-            SubMenu::Main => &Self::ACTIONS_MAIN,
+            SubMenu::Main => Self::ACTIONS_MAIN,
             SubMenu::Run => &Self::ACTIONS_RUN,
             SubMenu::SetUp(_) => &Self::ACTIONS_SETUP,
+            #[cfg(feature = "audio")]
             SubMenu::Music => &Self::ACTIONS_MUSIC,
             SubMenu::Options => &Self::ACTIONS_OPTIONS,
             #[cfg(debug_assertions)]
@@ -450,11 +454,26 @@ impl MenuState {
                     " [{}] Set up mods",
                     if self.cursor == 1 { "*" } else { " " }
                 );
+                #[cfg(feature = "audio")]
                 println!(" [{}] Music", if self.cursor == 2 { "*" } else { " " });
-                println!(" [{}] Settings", if self.cursor == 3 { "*" } else { " " });
+
+                let cursor_increase = if cfg!(feature = "audio") { 1 } else { 0 };
+
+                println!(
+                    " [{}] Settings",
+                    if self.cursor == 2 + cursor_increase {
+                        "*"
+                    } else {
+                        " "
+                    }
+                );
                 println!(
                     " [{}] Exit Barista",
-                    if self.cursor == 4 { "*" } else { " " }
+                    if self.cursor == 3 + cursor_increase {
+                        "*"
+                    } else {
+                        " "
+                    }
                 );
             }
             SubMenu::Run => {
@@ -545,10 +564,10 @@ impl MenuState {
                                         SlotTitleMode::Internal => &SLOT_NAMES_INTERNAL,
                                         SlotTitleMode::Megamix => SLOT_NAMES_DEFAULT,
                                         SlotTitleMode::Original => SLOT_NAMES_NORETCON,
-                                        SlotTitleMode::Infernal => &["unimplemented uwu"; 0x68]
+                                        SlotTitleMode::Infernal => &["unimplemented uwu"; 0x68],
                                     }
-                                        .get(elmt.1 as usize)
-                                        .unwrap_or(&"slot not found")
+                                    .get(elmt.1 as usize)
+                                    .unwrap_or(&"slot not found")
                             }
                         );
                     }
@@ -580,31 +599,22 @@ impl MenuState {
                     );
                 }
             }
+            #[cfg(feature = "audio")]
             SubMenu::Music => {
                 println!("Barista - Music");
                 println!();
-                let pos;
-                #[cfg(feature = "audio")]
-                {
-                    pos = 1;
-                    println!("Current status: very broken");
-                    println!();
-                    println!(
-                        " [{}] {}",
-                        if self.cursor == 0 { "*" } else { " " },
-                        if crate::audio().is_playing() {
-                            "Disable"
-                        } else {
-                            "Enable"
-                        }
-                    );
-                }
-                #[cfg(not(feature = "audio"))]
-                {
-                    pos = 0;
-                    println!("TO BE IMPLEMENTED\n");
-                }
-                println!(" [{}] Back", if self.cursor == pos { "*" } else { " " })
+                println!("Current status: very broken");
+                println!();
+                println!(
+                    " [{}] {}",
+                    if self.cursor == 0 { "*" } else { " " },
+                    if crate::audio().is_playing() {
+                        "Disable"
+                    } else {
+                        "Enable"
+                    }
+                );
+                println!(" [{}] Back", if self.cursor == 1 { "*" } else { " " })
             }
             SubMenu::Options => {
                 println!("Barista - Settings");
