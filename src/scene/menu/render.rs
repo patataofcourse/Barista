@@ -152,7 +152,7 @@ impl MenuState {
                                     + if settings.slot_titles == SlotTitleMode::Infernal && elmt.1 == 0x58 {
                                         letters = generate_random_letters::<10>()?;
                                         &letters
-                                    } else{
+                                    } else {
                                             *match settings.slot_titles {
                                             SlotTitleMode::Internal => SLOT_NAMES_INTERNAL,
                                             SlotTitleMode::Megamix => SLOT_NAMES_DEFAULT,
@@ -244,15 +244,21 @@ impl MenuState {
 pub fn generate_random_letters<const I: usize>() -> crate::Result<String> {
     let ps = Ps::new()?;
     let mut bytes = [0; I];
+    let mut loop_counter = 0;
     'a: loop {
+        loop_counter+=1;
+        if loop_counter == 0x10 {
+            return Ok("GJI·O&(GN%·=ÊGFMA%D)FJGB^PKGË"[..I].to_string())
+        }
         ps.generate_random_bytes(&mut bytes)?;
         for b in bytes {
             //TODO: any other?
-            if b < 0x20 {
+            if !(0x20..=0x7f).contains(&b) {
                 continue 'a;
             }
         }
         break;
     }
+    log!(General, "{:X?}", bytes);
     Ok(String::from_utf8(bytes.to_vec()).unwrap())
 }

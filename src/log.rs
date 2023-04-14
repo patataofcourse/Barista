@@ -24,10 +24,13 @@ pub static mut LOG: String = String::new();
 #[cfg(debug_assertions)]
 macro_rules! log {
     ($type:ident, $lit:literal $(, $i:expr)* $(,)?) => {
-        use $crate::log::{Log::*, LOG};
-        let out = format!("<{}> {}\n", $type.to_string(), format!($lit, $($i,)?));
+        let out = {
+            use $crate::log::Log::*;
+            format!("<{}> {}\n", $type.to_string(), format!($lit, $($i,)?))
+        };
 
         unsafe {
+            use $crate::log::LOG;
             LOG += &out;
         }
     };

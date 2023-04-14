@@ -164,6 +164,7 @@ impl MenuState {
                         m.1 = out;
                     }
                 } else {
+                    // Don't update the screen
                     return Ok(());
                 }
             }
