@@ -179,3 +179,28 @@ pub const SLOT_NAMES_INTERNAL_GATE: [&str; 0x14] = [
     "rvlSwordPractice",
     "ctrChickenPractice",
 ];
+
+// Infernal mode
+// In case we ever go back to that, here's a nano-style line cutoff: "\x1b[30;47m>\x1b[37;40m"
+pub const SLOT_NAMES_INFERNAL_GATE: [&str; 0x14] = [
+    "agbHitmegeton (expensive)",
+    "agbHitmegeton (pepper)",
+    "agbHitmegeton (true)",
+    "agbHitmegeton (the end is n",
+    "Drum Lessons (expensive)",
+    "Drum Lessons (pepper)",
+    "Drum Lessons (true)",
+    "Drum Lessons (the end is ne",
+    "Pretentious nonsense (expen",
+    "Pretentious nonsense (peppe",
+    "Pretentious nonsense (true)",
+    "Pretentious nonsense (the e",
+    "chiken (expensive)",
+    "chiken (pepper)",
+    "chiken (true)",
+    "chiken (the end is never th",
+    "agbHitmegeton (assets)",
+    "Drum Lessons (assets)",
+    "Pretentious nonsense (asset",
+    "chiken (assets)",
+];
