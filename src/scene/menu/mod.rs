@@ -64,9 +64,6 @@ impl HoldController {
         } else {
             self.right = None;
         }
-        if keys.contains(KeyPad::L) {
-            log!(General, "{:?}", self);
-        }
     }
 
     pub fn should_click(&self, key: KeyPad) -> bool {

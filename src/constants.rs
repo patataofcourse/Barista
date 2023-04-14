@@ -107,7 +107,112 @@ pub const SLOT_NAMES_DEFAULT: [&str; 0x68] = [
 ];
 
 // Original mode
-pub const SLOT_NAMES_NORETCON: &[&str] = &["Clappy Trio 0", "Sneaky Spirits 0"];
+pub const SLOT_NAMES_NORETCON: [&str; 0x68] = [
+    "Clappy Trio (Prequel)",
+    "Sneaky Spirits (Prequel)",
+    "Rhythm Tweezers (Prequel)",
+    "Glee Club (Prequel)",
+    "Rhythm Rally (Prequel)",
+    "Fillbots (Prequel)",
+    "Shoot-'em-up (Prequel)",
+    "Air Rally (Prequel)",
+    "Micro-Row (Prequel)",
+    "Flipper Flop (Prequel)",
+    "Figure Fighter (Prequel)",
+    "Fruit Basket (Prequel)",
+    "First Contact (Prequel)",
+    "Catchy Tune (Prequel)",
+    "Lum-BEAR-jack (Prequel)",
+    "Spaceball",
+    "Clappy Trio",
+    "Sneaky Spirits",
+    "Rhythm Tweezers",
+    "Bouncy Road",
+    "Marching Orders",
+    "Night Walk",
+    "Quiz Show",
+    "Bunny Hop",
+    "Rat Race",
+    "Power Calligraphy",
+    "Space Dance",
+    "Tap Trial",
+    "Ninja Bodyguard",
+    "Airboarder",
+    "Lockstep",
+    "Blue Birds",
+    "Dazzles",
+    "Freeze Frame",
+    "Glee Club",
+    "Frog Hop",
+    "Fan Club",
+    "Dog Ninja",
+    "Rhythm Rally",
+    "Fillbots",
+    "Shoot-'em-up",
+    "Big Rock Finish",
+    "Munchy Monk",
+    "Built to Scale",
+    "Air Rally",
+    "Exhibition Match",
+    "Flock Step",
+    "Cheer Readers",
+    "Double Date",
+    "Catch of the Day",
+    "Micro-Row",
+    "Fork Lifter",
+    "Hole in One",
+    "Flipper Flop",
+    "Ringside",
+    "Working Dough",
+    "Figure Fighter",
+    "Love Rap",
+    "Bossa Nova",
+    "Screwbot Factory",
+    "Launch Party",
+    "Board Meeting",
+    "Samurai Slice",
+    "See-Saw",
+    "Packing Pests",
+    "Monkey Watch",
+    "Blue Bear",
+    "Animal Acrobat",
+    "Tongue Lashing",
+    "Super Samurai Slice",
+    "Fruit Basket",
+    "Second Contact",
+    "Pajama Party",
+    "Catchy Tune",
+    "Sumo Brothers",
+    "Tangotronic 3000",
+    "Kitties!",
+    "Lum-BEAR-jack",
+    "Snappy Trio",
+    "Cosmic Dance",
+    "Tap Trial 2",
+    "Jumpin' Jazz",
+    "Fan Club 2",
+    "Cosmic Rhythm Rally",
+    "Hole in One 2",
+    "Working Dough 2",
+    "Figure Fighter 2",
+    "Jungle Gymnast",
+    "Super Samurai Slice 2",
+    "Karate Man (Prequel)",
+    "Karate Man Returns",
+    "Karate Man Kicks",
+    "Karate Man Combos",
+    "Karate Man Senior",
+    "Lush Remix",
+    "Final Remix",
+    "Honeybee Remix",
+    "Machine Remix",
+    "Citrus Remix",
+    "Donut Remix",
+    "Barbershop Remix",
+    "Songbird Remix",
+    "Left-Hand Remix",
+    "Right-Hand Remix",
+];
 
 // For both Megamix and original mode
 pub const SLOT_NAMES_GATE: [&str; 0x14] = [
@@ -132,9 +237,6 @@ pub const SLOT_NAMES_GATE: [&str; 0x14] = [
     "Clap Trap (practice)",
     "Charging Chicken (practice)",
 ];
-
-// Internal mode
-pub const SLOT_NAMES_INTERNAL_SIMPLE: &[&str] = &["Clappy Trio (S)", "Sneaky Spirits (S)"];
 
 // Debug mode internal names
 pub const SLOT_NAMES_INTERNAL: [&str; 0x68] = [
@@ -269,8 +371,8 @@ pub const SLOT_NAMES_INTERNAL_GATE: [&str; 0x14] = [
 
 // Infernal mode
 // In case we ever go back to that, here's a nano-style line cutoff: "\x1b[30;47m>\x1b[37;40m"
-pub const SLOT_NAMES_INFERNAL: &[&str] = &[
-
+pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = [
+    "unimplemented uwu"; 0x68
 ];
 
 pub const SLOT_NAMES_INFERNAL_GATE: [&str; 0x14] = [

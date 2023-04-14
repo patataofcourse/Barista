@@ -126,7 +126,7 @@ fn run(is_citra: bool) -> error::Result<()> {
 
     // Init menu
     let mut menu = MenuState::default();
-    menu.render(&console, &versions, &vec![], 0, 0, &settings);
+    menu.render(&console, &versions, &vec![], 0, 0, &settings)?;
 
     #[allow(unused)]
     let mut audio_player;
@@ -175,7 +175,7 @@ fn run(is_citra: bool) -> error::Result<()> {
 
         ui.render();
 
-        menu.run(&hid, &console, &versions, &mods, &mut page, &mut settings);
+        menu.run(&hid, &console, &versions, &mods, &mut page, &mut settings)?;
 
         match &menu.action {
             MenuAction::Exit => break,

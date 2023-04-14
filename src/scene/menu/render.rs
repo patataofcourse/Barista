@@ -3,10 +3,11 @@ use ctru::{console::Console, services::ps::Ps};
 use crate::{
     constants::{
         SLOT_NAMES_DEFAULT, SLOT_NAMES_GATE, SLOT_NAMES_INFERNAL_GATE, SLOT_NAMES_INTERNAL,
-        SLOT_NAMES_INTERNAL_GATE, SLOT_NAMES_NORETCON,
+        SLOT_NAMES_INTERNAL_GATE, SLOT_NAMES_NORETCON, SLOT_NAMES_INFERNAL,
     },
     format::barista_cfg::{BaristaConfig, SlotTitleMode},
     launcher::GameVer,
+    Result
 };
 
 use super::{MenuState, SubMenu};
@@ -20,7 +21,7 @@ impl MenuState {
         page: usize,
         num_pages: usize,
         settings: &BaristaConfig,
-    ) {
+    ) -> Result<()> {
         console.clear();
         match &self.sub_menu {
             SubMenu::Main => {
@@ -102,10 +103,10 @@ impl MenuState {
                     println!("Choose what mods to load with Saltwater");
                     println!("Disabled mods show index --- instead");
                     println!();
-                    println!("Press A to enable or disable mods");
-                    println!("L/R buttons or Prev/Next to change page");
+                    println!("A to enable/disable mods");
                     println!("DPad Left/Right to change index");
                     println!("Hold X to scroll indexes faster");
+                    println!("L/R change page, Y shows slot names");
                     println!();
                     println!("Page {} of {}", page + 1, num_pages);
                     for (i, elmt) in mods.iter().enumerate() {
@@ -146,22 +147,27 @@ impl MenuState {
                                     .get((elmt.1 - 0x100) as usize)
                                     .unwrap_or(&"slot not found")
                             } else {
+                                let letters;
                                 String::from("->")
-                                    + *match settings.slot_titles {
-                                        // TODO: remove &s when they're all done
-                                        SlotTitleMode::Internal => &SLOT_NAMES_INTERNAL,
-                                        SlotTitleMode::Megamix => &SLOT_NAMES_DEFAULT,
-                                        SlotTitleMode::Original => SLOT_NAMES_NORETCON,
-                                        SlotTitleMode::Infernal => &["unimplemented uwu"; 0x68],
+                                    + if settings.slot_titles == SlotTitleMode::Infernal && elmt.1 == 0x58 {
+                                        letters = generate_random_letters::<10>()?;
+                                        &letters
+                                    } else{
+                                            *match settings.slot_titles {
+                                            SlotTitleMode::Internal => SLOT_NAMES_INTERNAL,
+                                            SlotTitleMode::Megamix => SLOT_NAMES_DEFAULT,
+                                            SlotTitleMode::Original => SLOT_NAMES_NORETCON,
+                                            SlotTitleMode::Infernal => SLOT_NAMES_INFERNAL,
+                                        }
+                                        .get(elmt.1 as usize)
+                                        .unwrap_or(&"slot not found")
                                     }
-                                    .get(elmt.1 as usize)
-                                    .unwrap_or(&"slot not found")
                             }
                         );
                     }
                     println!();
                     println!(
-                        "- [{}] Prev",
+                        "- [{}] Previous page",
                         if self.cursor == self.cursor_option_len(versions, mods) - 3 {
                             "*"
                         } else {
@@ -169,7 +175,7 @@ impl MenuState {
                         }
                     );
                     println!(
-                        "- [{}] Next",
+                        "- [{}] Next page",
                         if self.cursor == self.cursor_option_len(versions, mods) - 2 {
                             "*"
                         } else {
@@ -230,11 +236,12 @@ impl MenuState {
                 println!("{}", unsafe { &crate::log::LOG });
             }
         }
+        Ok(())
     }
 }
 
 //TODO: this is pretty ineffective
-pub fn generate_random_letters<const I: usize> () -> crate::Result<String> {
+pub fn generate_random_letters<const I: usize>() -> crate::Result<String> {
     let ps = Ps::new()?;
     let mut bytes = [0; I];
     'a: loop {

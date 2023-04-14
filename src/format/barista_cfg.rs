@@ -16,7 +16,7 @@ pub struct BaristaConfig {
     pub slot_titles: SlotTitleMode,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq, Eq)]
 pub enum SlotTitleMode {
     Megamix,
     Original,

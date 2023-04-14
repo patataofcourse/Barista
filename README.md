@@ -1,7 +1,7 @@
 # Barista
 A launcher for Rhythm Heaven Megamix mods.
 
-Currently seems to break with newer nightlies. Latest known working is `nightly-2023-02-01`, there might be newer working nightlies, though.
+Currently seems to break with newer nightlies. Latest known working is `nightly-2023-02-14`, there might be newer working nightlies, though.
 
 ## Credits
 - Coding by patataofcourse

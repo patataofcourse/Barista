@@ -6,6 +6,7 @@ use crate::{
     format::barista_cfg::{BaristaConfig, SlotTitleMode},
     launcher::GameVer,
     mod_picker,
+    Result,
 };
 
 use super::{MenuAction, MenuState, SubMenu};
@@ -19,7 +20,7 @@ impl MenuState {
         mods: &Vec<PathBuf>,
         page: &mut usize,
         settings: &mut BaristaConfig,
-    ) {
+    ) -> Result<()> {
         self.action = MenuAction::None;
 
         let mut mod_page = if let SubMenu::SetUp(_) = self.sub_menu {
@@ -30,7 +31,7 @@ impl MenuState {
 
         if hid.keys_down().contains(KeyPad::START) {
             self.action = MenuAction::Exit;
-            return;
+            return Ok(());
         }
 
         self.hold_controller.update(hid.keys_held());
@@ -102,7 +103,7 @@ impl MenuState {
         }
 
         match &self.action {
-            MenuAction::Exit | MenuAction::Run | MenuAction::None => return,
+            MenuAction::Exit | MenuAction::Run | MenuAction::None => return Ok(()),
             MenuAction::ChangeMenu(c) => {
                 if let SubMenu::SetUp(_) = *c {
                     mod_page = mod_picker::show_page(mods, crate::config(), *page);
@@ -125,7 +126,6 @@ impl MenuState {
                 }
                 let old_len = mod_page.len() as u32;
                 mod_page = mod_picker::show_page(mods, crate::config(), *page);
-                log!(General, "{} {} {}", old_len, mod_page.len(), self.cursor);
 
                 // Make sure the cursor is in-bounds
                 if self.cursor < old_len {
@@ -164,7 +164,7 @@ impl MenuState {
                         m.1 = out;
                     }
                 } else {
-                    return;
+                    return Ok(());
                 }
             }
             MenuAction::ToggleMod => {
