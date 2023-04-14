@@ -150,7 +150,7 @@ impl MenuState {
                                     + *match settings.slot_titles {
                                         // TODO: remove &s when they're all done
                                         SlotTitleMode::Internal => &SLOT_NAMES_INTERNAL,
-                                        SlotTitleMode::Megamix => SLOT_NAMES_DEFAULT,
+                                        SlotTitleMode::Megamix => &SLOT_NAMES_DEFAULT,
                                         SlotTitleMode::Original => SLOT_NAMES_NORETCON,
                                         SlotTitleMode::Infernal => &["unimplemented uwu"; 0x68],
                                     }
