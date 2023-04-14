@@ -12,6 +12,16 @@ pub struct BaristaConfig {
     #[serde(skip, default = "bool::default")]
     pub is_new: bool,
     pub original_gates: bool,
+    #[serde(default)]
+    pub slot_titles: SlotTitleMode,
+}
+
+#[derive(Serialize, Deserialize)]
+pub enum SlotTitleMode {
+    Megamix,
+    Original,
+    Internal,
+    Infernal,
 }
 
 impl Default for BaristaConfig {
@@ -19,7 +29,14 @@ impl Default for BaristaConfig {
         Self {
             is_new: true,
             original_gates: false,
+            slot_titles: SlotTitleMode::Megamix,
         }
+    }
+}
+
+impl Default for SlotTitleMode {
+    fn default() -> Self {
+        Self::Megamix
     }
 }
 

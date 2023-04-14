@@ -3,7 +3,12 @@
 
 use std::path::PathBuf;
 
-use crate::{format::barista_cfg::BaristaConfig, launcher::GameVer, mod_picker};
+use crate::{
+    constants::{SLOT_NAMES_GATE, SLOT_NAMES_INTERNAL, SLOT_NAMES_INTERNAL_GATE, SLOT_NAMES_DEFAULT, SLOT_NAMES_NORETCON},
+    format::barista_cfg::{BaristaConfig, SlotTitleMode},
+    launcher::GameVer,
+    mod_picker,
+};
 use ctru::{
     console::Console,
     services::hid::{Hid, KeyPad},
@@ -110,7 +115,7 @@ pub enum SubMenu {
     Run,
     Options,
     Music,
-    SetUp,
+    SetUp(bool),
     #[cfg(debug_assertions)]
     Log,
 }
@@ -121,7 +126,7 @@ pub enum MenuAction {
     None,
     ChangeMenu(SubMenu),
     Exit,
-    MoveCursor,
+    UpdateScreen,
 
     // Run
     Run,
@@ -155,7 +160,7 @@ impl Default for MenuState {
 impl SubMenu {
     const ACTIONS_MAIN: [MenuAction; 5] = [
         MenuAction::ChangeMenu(SubMenu::Run),
-        MenuAction::ChangeMenu(SubMenu::SetUp),
+        MenuAction::ChangeMenu(SubMenu::SetUp(false)),
         MenuAction::ChangeMenu(SubMenu::Music),
         MenuAction::ChangeMenu(SubMenu::Options),
         MenuAction::Exit,
@@ -173,14 +178,17 @@ impl SubMenu {
     ];
     #[cfg(not(feature = "audio"))]
     const ACTIONS_MUSIC: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
-    const ACTIONS_OPTIONS: [MenuAction; 2] =
-        [MenuAction::ToggleSetting(0), MenuAction::SaveSettings];
+    const ACTIONS_OPTIONS: [MenuAction; 3] = [
+        MenuAction::ToggleSetting(0),
+        MenuAction::ToggleSetting(1),
+        MenuAction::SaveSettings,
+    ];
 
     pub fn actions(&self) -> &[MenuAction] {
         match &self {
             SubMenu::Main => &Self::ACTIONS_MAIN,
             SubMenu::Run => &Self::ACTIONS_RUN,
-            SubMenu::SetUp => &Self::ACTIONS_SETUP,
+            SubMenu::SetUp(_) => &Self::ACTIONS_SETUP,
             SubMenu::Music => &Self::ACTIONS_MUSIC,
             SubMenu::Options => &Self::ACTIONS_OPTIONS,
             #[cfg(debug_assertions)]
@@ -192,7 +200,7 @@ impl SubMenu {
         (self.actions().len()
             + if let SubMenu::Run = self {
                 versions.len()
-            } else if let SubMenu::SetUp = self {
+            } else if let SubMenu::SetUp(_) = self {
                 mods.len()
             } else {
                 0
@@ -219,7 +227,7 @@ impl MenuState {
     ) {
         self.action = MenuAction::None;
 
-        let mut mod_page = if self.sub_menu == SubMenu::SetUp {
+        let mut mod_page = if let SubMenu::SetUp(_) = self.sub_menu {
             mod_picker::show_page(mods, crate::config(), *page)
         } else {
             vec![]
@@ -238,14 +246,14 @@ impl MenuState {
             } else {
                 self.cursor = self.cursor_option_len(versions, &mod_page) - 1;
             }
-            self.action = MenuAction::MoveCursor
+            self.action = MenuAction::UpdateScreen
         } else if self.hold_controller.should_click(KeyPad::DDOWN) {
             if self.cursor < self.cursor_option_len(versions, &mod_page) - 1 {
                 self.cursor += 1;
             } else {
                 self.cursor = 0;
             }
-            self.action = MenuAction::MoveCursor
+            self.action = MenuAction::UpdateScreen
         } else if hid.keys_down().contains(KeyPad::B) {
             if let SubMenu::Main = self.sub_menu {
                 self.action = MenuAction::Exit;
@@ -259,7 +267,7 @@ impl MenuState {
                 } else {
                     self.action = MenuAction::Run
                 }
-            } else if let SubMenu::SetUp = self.sub_menu {
+            } else if let SubMenu::SetUp(_) = self.sub_menu {
                 if self.cursor_option_len(versions, &mod_page) - self.cursor <= 3 {
                     self.action =
                         SubMenu::ACTIONS_SETUP[self.cursor as usize - mod_page.len()].clone();
@@ -274,7 +282,11 @@ impl MenuState {
         if hid.keys_down().contains(KeyPad::SELECT) {
             self.action = MenuAction::ChangeMenu(SubMenu::Log)
         }
-        if let SubMenu::SetUp = &self.sub_menu {
+        if let SubMenu::SetUp(c) = &mut self.sub_menu {
+            if hid.keys_down().contains(KeyPad::Y) {
+                *c = !*c;
+                self.action = MenuAction::UpdateScreen
+            }
             if hid.keys_down().contains(KeyPad::L) {
                 self.action = MenuAction::ChangePage(false)
             } else if hid.keys_down().contains(KeyPad::R) {
@@ -297,7 +309,7 @@ impl MenuState {
         match &self.action {
             MenuAction::Exit | MenuAction::Run | MenuAction::None => return,
             MenuAction::ChangeMenu(c) => {
-                if *c == SubMenu::SetUp {
+                if let SubMenu::SetUp(_) = *c {
                     mod_page = mod_picker::show_page(mods, crate::config(), *page);
                 }
 
@@ -322,9 +334,12 @@ impl MenuState {
 
                 // Make sure the cursor is in-bounds
                 if self.cursor < old_len {
-                    self.cursor = self.cursor.clamp(0, mod_page.len() as u32 -1);
+                    self.cursor = self.cursor.clamp(0, mod_page.len() as u32 - 1);
                 } else {
-                    self.cursor = self.cursor.wrapping_add(mod_page.len() as u32).wrapping_sub(old_len);
+                    self.cursor = self
+                        .cursor
+                        .wrapping_add(mod_page.len() as u32)
+                        .wrapping_sub(old_len);
                 }
             }
             //TODO: properly order stuff in new gate mode (both ChangeIndex and ToggleMod)
@@ -382,10 +397,16 @@ impl MenuState {
                 0 => {
                     settings.original_gates = !settings.original_gates;
                 }
-                1 => {} // so clippy shuts up
+                1 => {
+                    settings.slot_titles = match settings.slot_titles {
+                        SlotTitleMode::Megamix => SlotTitleMode::Original,
+                        SlotTitleMode::Original => SlotTitleMode::Internal,
+                        SlotTitleMode::Internal | SlotTitleMode::Infernal => SlotTitleMode::Megamix,
+                    }
+                }
                 _ => {}
             },
-            MenuAction::MoveCursor => {}
+            MenuAction::UpdateScreen => {}
             #[cfg(feature = "audio")]
             MenuAction::ToggleAudio => {}
         }
@@ -461,7 +482,7 @@ impl MenuState {
                     }
                 );
             }
-            SubMenu::SetUp => {
+            SubMenu::SetUp(c) => {
                 println!("Barista - Set up mods");
                 println!();
                 if mods.is_empty() {
@@ -503,7 +524,32 @@ impl MenuState {
                                         format!("{:03X}", c)
                                     },
                             },
-                            elmt.0
+                            // TODO: slot mode
+                            if !*c || elmt.1 == u16::MAX {
+                                elmt.0.clone()
+                            } else if elmt.1 >= 0x100 {
+                                String::from("->")
+                                    + *match settings.slot_titles {
+                                        SlotTitleMode::Internal => SLOT_NAMES_INTERNAL_GATE,
+                                        SlotTitleMode::Megamix | SlotTitleMode::Original => {
+                                            SLOT_NAMES_GATE
+                                        }
+                                        SlotTitleMode::Infernal => ["unimplemented uwu"; 0x14],
+                                    }
+                                    .get((elmt.1 - 0x100) as usize)
+                                    .unwrap_or(&"slot not found")
+                            } else {
+                                String::from("->")
+                                    + *match settings.slot_titles {
+                                        // TODO: remove &s when they're all done
+                                        SlotTitleMode::Internal => &SLOT_NAMES_INTERNAL,
+                                        SlotTitleMode::Megamix => SLOT_NAMES_DEFAULT,
+                                        SlotTitleMode::Original => SLOT_NAMES_NORETCON,
+                                        SlotTitleMode::Infernal => &["unimplemented uwu"; 0x68]
+                                    }
+                                        .get(elmt.1 as usize)
+                                        .unwrap_or(&"slot not found")
+                            }
                         );
                     }
                     println!();
@@ -564,12 +610,22 @@ impl MenuState {
                 println!("Barista - Settings");
                 println!();
                 println!(
-                    " [{}] ({}) Use 0x100 format for gates",
+                    " [{}] Use 0x100 format for gates: {}",
                     if self.cursor == 0 { "*" } else { " " },
-                    if settings.original_gates { "x" } else { " " }
+                    if settings.original_gates { "on" } else { "off" }
+                );
+                println!(
+                    " [{}] Slot title mode: {}",
+                    if self.cursor == 1 { "*" } else { " " },
+                    match settings.slot_titles {
+                        SlotTitleMode::Megamix => "Megamix",
+                        SlotTitleMode::Original => "Original",
+                        SlotTitleMode::Internal => "Internal",
+                        SlotTitleMode::Infernal => "Infernal...?",
+                    }
                 );
                 println!();
-                println!(" [{}] Back", if self.cursor == 1 { "*" } else { " " })
+                println!(" [{}] Back", if self.cursor == 2 { "*" } else { " " })
             }
             #[cfg(debug_assertions)]
             SubMenu::Log => {

@@ -199,7 +199,7 @@ fn run(is_citra: bool) -> error::Result<()> {
             }
             MenuAction::ChangeMenu(_)
             | MenuAction::None
-            | MenuAction::MoveCursor
+            | MenuAction::UpdateScreen
             | MenuAction::ChangePage(_)
             | MenuAction::ChangeIndex(..)
             | MenuAction::ToggleMod
