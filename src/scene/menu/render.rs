@@ -1,4 +1,4 @@
-use ctru::console::Console;
+use ctru::{console::Console, services::ps::Ps};
 
 use crate::{
     constants::{
@@ -231,4 +231,21 @@ impl MenuState {
             }
         }
     }
+}
+
+//TODO: this is pretty ineffective
+pub fn generate_random_letters<const I: usize> () -> crate::Result<String> {
+    let ps = Ps::new()?;
+    let mut bytes = [0; I];
+    'a: loop {
+        ps.generate_random_bytes(&mut bytes)?;
+        for b in bytes {
+            //TODO: any other?
+            if b < 0x20 {
+                continue 'a;
+            }
+        }
+        break;
+    }
+    Ok(String::from_utf8(bytes.to_vec()).unwrap())
 }
