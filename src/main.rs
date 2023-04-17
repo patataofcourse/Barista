@@ -51,7 +51,7 @@ fn main() {
     if !is_citra {
         panic::set_hook(Box::new(panic_hook));
     } else {
-        //panic::set_hook(Box::new(citra_panic_hook))
+        panic::set_hook(Box::new(citra_panic_hook))
     }
 
     match run(is_citra) {
@@ -276,6 +276,9 @@ fn citra_panic_hook(info: &PanicInfo) {
         format!("panic{}\0", location_info)
     };
     println!("{}", msg);
+
+    println!("\nExiting in 20 seconds...");
+    std::thread::sleep(Duration::from_secs(20));
 
     process::exit(1);
 }
