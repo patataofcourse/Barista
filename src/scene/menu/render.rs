@@ -64,6 +64,7 @@ impl MenuState {
                         " "
                     }
                 );
+                #[debug_assertions]
                 println!("\x1b[29;0HBarista debug commit {}", env!("GIT_HASH"));
             }
             SubMenu::Run => {
