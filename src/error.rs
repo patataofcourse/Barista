@@ -62,7 +62,7 @@ pub fn error_applet(msg: String) {
     unsafe {
         use ctru_sys::{
             aptExit, errorConf, errorDisp, errorInit, errorText, CFG_LANGUAGE_EN,
-            ERROR_TEXT_WORD_WRAP,
+            ERROR_TEXT_WORD_WRAP
         };
         let mut error_conf: errorConf = errorConf::default();
         errorInit(&mut error_conf, ERROR_TEXT_WORD_WRAP, CFG_LANGUAGE_EN);
