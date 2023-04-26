@@ -137,7 +137,7 @@ test: dist
 	@$(CITRA) $(DIST)/barista.3dsx
 
 check:
-	@$(CARGO) check $(CARGOFLAGS)
+	@$(CARGO) clippy $(CARGOFLAGS)
 
 update:
 	@cargo update
