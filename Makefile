@@ -134,7 +134,7 @@ fmt:
 	@cargo fmt --all
 
 test: dist
-	@$(CITRA) $(DIST)/barista.3dsx
+	@$(CITRA) $(DIST)/$(CRATE_NAME).3dsx
 
 check:
 	@$(CARGO) clippy $(CARGOFLAGS)
