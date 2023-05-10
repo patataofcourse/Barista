@@ -28,7 +28,7 @@ impl HoldController {
     const LOOP_PRESS_TIME: u32 = 4;
 
     pub fn update(&mut self, keys: KeyPad) {
-        if keys.contains(KeyPad::DUP) {
+        if keys.contains(KeyPad::DPAD_UP) {
             if let Some(c) = &mut self.up {
                 *c += 1;
             } else {
@@ -37,7 +37,7 @@ impl HoldController {
         } else {
             self.up = None;
         }
-        if keys.contains(KeyPad::DDOWN) {
+        if keys.contains(KeyPad::DPAD_DOWN) {
             if let Some(c) = &mut self.down {
                 *c += 1;
             } else {
@@ -46,7 +46,7 @@ impl HoldController {
         } else {
             self.down = None;
         }
-        if keys.contains(KeyPad::DLEFT) {
+        if keys.contains(KeyPad::DPAD_LEFT) {
             if let Some(c) = &mut self.left {
                 *c += 1;
             } else {
@@ -55,7 +55,7 @@ impl HoldController {
         } else {
             self.left = None;
         }
-        if keys.contains(KeyPad::DRIGHT) {
+        if keys.contains(KeyPad::DPAD_RIGHT) {
             if let Some(c) = &mut self.right {
                 *c += 1;
             } else {
@@ -69,25 +69,25 @@ impl HoldController {
     pub fn should_click(&self, key: KeyPad) -> bool {
         let check = |t| t == 0 || (t >= Self::FIRST_PRESS_TIME && t % Self::LOOP_PRESS_TIME == 0);
 
-        if key == KeyPad::DUP {
+        if key == KeyPad::DPAD_UP {
             if let Some(t) = self.up {
                 check(t)
             } else {
                 false
             }
-        } else if key == KeyPad::DDOWN {
+        } else if key == KeyPad::DPAD_DOWN {
             if let Some(t) = self.down {
                 check(t)
             } else {
                 false
             }
-        } else if key == KeyPad::DLEFT {
+        } else if key == KeyPad::DPAD_LEFT {
             if let Some(t) = self.left {
                 check(t)
             } else {
                 false
             }
-        } else if key == KeyPad::DRIGHT {
+        } else if key == KeyPad::DPAD_RIGHT {
             if let Some(t) = self.right {
                 check(t)
             } else {

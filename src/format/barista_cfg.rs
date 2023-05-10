@@ -42,7 +42,7 @@ impl Default for SlotTitleMode {
 
 impl BaristaConfig {
     pub fn from_file(path: impl Into<PathBuf>) -> Result<Self> {
-        let mut fs = Fs::init()?;
+        let mut fs = Fs::new()?;
         let path = path.into();
         match File::open(&fs.sdmc()?, path.clone()) {
             Ok(mut file) => {
@@ -66,7 +66,7 @@ impl BaristaConfig {
     }
 
     pub fn to_file(&self, path: impl Into<PathBuf>) -> Result<()> {
-        let mut fs = Fs::init()?;
+        let mut fs = Fs::new()?;
         let mut f = File::create(&mut fs.sdmc()?, path.into())?;
         f.write_all(toml::to_string_pretty(self)?.as_bytes())?;
         Ok(())

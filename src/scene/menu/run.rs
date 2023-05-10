@@ -36,14 +36,14 @@ impl MenuState {
 
         self.hold_controller.update(hid.keys_held());
 
-        if self.hold_controller.should_click(KeyPad::DUP) {
+        if self.hold_controller.should_click(KeyPad::DPAD_UP) {
             if self.cursor > 0 {
                 self.cursor -= 1;
             } else {
                 self.cursor = self.cursor_option_len(versions, &mod_page) - 1;
             }
             self.action = MenuAction::UpdateScreen
-        } else if self.hold_controller.should_click(KeyPad::DDOWN) {
+        } else if self.hold_controller.should_click(KeyPad::DPAD_DOWN) {
             if self.cursor < self.cursor_option_len(versions, &mod_page) - 1 {
                 self.cursor += 1;
             } else {
@@ -87,13 +87,13 @@ impl MenuState {
                 self.action = MenuAction::ChangePage(false)
             } else if hid.keys_down().contains(KeyPad::R) {
                 self.action = MenuAction::ChangePage(true)
-            } else if self.hold_controller.should_click(KeyPad::DLEFT) {
+            } else if self.hold_controller.should_click(KeyPad::DPAD_LEFT) {
                 if hid.keys_held().contains(KeyPad::X) {
                     self.action = MenuAction::ChangeIndex(false, true)
                 } else {
                     self.action = MenuAction::ChangeIndex(false, false)
                 }
-            } else if self.hold_controller.should_click(KeyPad::DRIGHT) {
+            } else if self.hold_controller.should_click(KeyPad::DPAD_RIGHT) {
                 if hid.keys_held().contains(KeyPad::X) {
                     self.action = MenuAction::ChangeIndex(true, true)
                 } else {

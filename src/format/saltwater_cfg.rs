@@ -17,7 +17,7 @@ const MAGIC: &[u8; 4] = b"SCF\x02";
 
 impl Config {
     pub fn from_file(file: impl Into<PathBuf>) -> Result<Self> {
-        let mut fs = Fs::init()?;
+        let mut fs = Fs::new()?;
         let mut file = File::open(&fs.sdmc()?, file.into())?;
         let mut magic_buffer = [0u8; 4];
         file.read_exact(&mut magic_buffer)?;
@@ -42,7 +42,7 @@ impl Config {
     }
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
-        let mut fs = Fs::init()?;
+        let mut fs = Fs::new()?;
         let mut file = File::create(&mut fs.sdmc()?, file.into())?;
         file.write_all(MAGIC)?;
         for (index, string) in &self.btks {

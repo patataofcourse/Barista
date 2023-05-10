@@ -78,8 +78,8 @@ fn main() {
             };
             if is_citra {
                 //TODO: proper implementation
-                let gfx = Gfx::init().unwrap();
-                let _ = ctru::console::Console::init(gfx.bottom_screen.borrow_mut());
+                let gfx = Gfx::new().unwrap();
+                let _ = ctru::console::Console::new(gfx.bottom_screen.borrow_mut());
                 println!("Error: {}\n\nExiting in 20 seconds...", error);
                 std::thread::sleep(Duration::from_secs(20));
             } else {
@@ -92,11 +92,11 @@ fn main() {
 }
 
 fn run(is_citra: bool) -> error::Result<()> {
-    let apt = Apt::init()?;
-    let mut hid = Hid::init()?;
-    let gfx = Gfx::init()?;
+    let apt = Apt::new()?;
+    let mut hid = Hid::new()?;
+    let gfx = Gfx::new()?;
     let ps = Ps::new()?;
-    let console = Console::init(gfx.bottom_screen.borrow_mut());
+    let console = Console::new(gfx.bottom_screen.borrow_mut());
     unsafe {
         assert!(ctru_sys::romfsMountSelf("romfs\0".as_ptr()) == 0);
     }
