@@ -371,9 +371,7 @@ pub const SLOT_NAMES_INTERNAL_GATE: [&str; 0x14] = [
 
 // Infernal mode
 // In case we ever go back to that, here's a nano-style line cutoff: "\x1b[30;47m>\x1b[37;40m"
-pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = [
-    "unimplemented uwu"; 0x68
-];
+pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = ["unimplemented uwu"; 0x68];
 
 pub const SLOT_NAMES_INFERNAL_GATE: [&str; 0x14] = [
     "agbHitmegeton (expensive)",

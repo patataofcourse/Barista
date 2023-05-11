@@ -1,4 +1,4 @@
-use crate::plgldr::{self, SaltwaterParams};
+use crate::{plgldr::{self, SaltwaterParams}, format::barista_cfg::BaristaConfig};
 use ctru::services::fs::{self, File, Fs};
 use libc::c_void;
 use std::{
@@ -169,7 +169,7 @@ pub fn check_for_rhmpatch() -> bool {
     .is_ok()
 }
 
-pub fn launch(ver: GameVer, is_citra: bool) {
+pub fn launch(ver: GameVer, is_citra: bool, settings: &BaristaConfig) {
     plgldr::init().unwrap();
     let mut params = SaltwaterParams::default();
 
@@ -190,6 +190,8 @@ pub fn launch(ver: GameVer, is_citra: bool) {
         params.disable_plgldr = true;
         plgldr::set_state(true).unwrap();
     }
+
+    params.apply_settings(settings);
 
     plgldr::set_params(
         true,
@@ -222,11 +224,7 @@ pub fn launch(ver: GameVer, is_citra: bool) {
         } else {
             ctru_sys::aptSetChainloader(
                 ver.region.id_long(),
-                if ver.is_digital {
-                    ctru_sys::MEDIATYPE_SD
-                } else {
-                    ctru_sys::MEDIATYPE_GAME_CARD
-                } as u8,
+                mediatype,
             );
         }
     }

@@ -5,8 +5,7 @@ use ctru::{console::Console, services::hid::KeyPad, services::Hid};
 use crate::{
     format::barista_cfg::{BaristaConfig, SlotTitleMode},
     launcher::GameVer,
-    mod_picker,
-    Result,
+    mod_picker, Result,
 };
 
 use super::{MenuAction, MenuState, SubMenu};
@@ -192,9 +191,7 @@ impl MenuState {
                 }
             }
             MenuAction::ToggleSetting(c) => match c {
-                0 => {
-                    settings.original_gates = !settings.original_gates;
-                }
+                0 => settings.original_gates = !settings.original_gates,
                 1 => {
                     settings.slot_titles = match settings.slot_titles {
                         SlotTitleMode::Megamix => SlotTitleMode::Original,
@@ -202,6 +199,7 @@ impl MenuState {
                         SlotTitleMode::Internal | SlotTitleMode::Infernal => SlotTitleMode::Megamix,
                     }
                 }
+                2 => settings.btk_loaded_msg = !settings.btk_loaded_msg,
                 _ => {}
             },
             MenuAction::UpdateScreen => {}

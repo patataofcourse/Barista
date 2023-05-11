@@ -217,7 +217,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     drop(hid);
 
     if let Some(c) = game_to_load {
-        launcher::launch(c, is_citra)
+        launcher::launch(c, is_citra, &settings)
     }
 
     Ok(())

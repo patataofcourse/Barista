@@ -2,12 +2,12 @@ use ctru::{console::Console, services::ps::Ps};
 
 use crate::{
     constants::{
-        SLOT_NAMES_DEFAULT, SLOT_NAMES_GATE, SLOT_NAMES_INFERNAL_GATE, SLOT_NAMES_INTERNAL,
-        SLOT_NAMES_INTERNAL_GATE, SLOT_NAMES_NORETCON, SLOT_NAMES_INFERNAL,
+        SLOT_NAMES_DEFAULT, SLOT_NAMES_GATE, SLOT_NAMES_INFERNAL, SLOT_NAMES_INFERNAL_GATE,
+        SLOT_NAMES_INTERNAL, SLOT_NAMES_INTERNAL_GATE, SLOT_NAMES_NORETCON,
     },
     format::barista_cfg::{BaristaConfig, SlotTitleMode},
     launcher::GameVer,
-    Result
+    Result,
 };
 
 use super::{MenuState, SubMenu};
@@ -151,11 +151,13 @@ impl MenuState {
                             } else {
                                 let letters;
                                 String::from("->")
-                                    + if settings.slot_titles == SlotTitleMode::Infernal && elmt.1 == 0x58 {
+                                    + if settings.slot_titles == SlotTitleMode::Infernal
+                                        && elmt.1 == 0x58
+                                    {
                                         letters = generate_random_letters::<10>()?;
                                         &letters
                                     } else {
-                                            *match settings.slot_titles {
+                                        *match settings.slot_titles {
                                             SlotTitleMode::Internal => SLOT_NAMES_INTERNAL,
                                             SlotTitleMode::Megamix => SLOT_NAMES_DEFAULT,
                                             SlotTitleMode::Original => SLOT_NAMES_NORETCON,
@@ -230,8 +232,13 @@ impl MenuState {
                         SlotTitleMode::Infernal => "Infernal...?",
                     }
                 );
+                println!(
+                    " [{}] Display mod loaded msg: {}",
+                    if self.cursor == 2 { "*" } else { " " },
+                    if settings.btk_loaded_msg { "on" } else { "off" }
+                );
                 println!();
-                println!(" [{}] Back", if self.cursor == 2 { "*" } else { " " })
+                println!(" [{}] Back", if self.cursor == 3 { "*" } else { " " })
             }
             #[cfg(debug_assertions)]
             SubMenu::Log => {
@@ -248,9 +255,9 @@ pub fn generate_random_letters<const I: usize>() -> crate::Result<String> {
     let mut bytes = [0; I];
     let mut loop_counter = 0;
     'a: loop {
-        loop_counter+=1;
+        loop_counter += 1;
         if loop_counter == 0x10 {
-            return Ok("GJI·O&(GN%·=ÊGFMA%D)FJGB^PKGË"[..I].to_string())
+            return Ok("GJI·O&(GN%·=ÊGFMA%D)FJGB^PKGË"[..I].to_string());
         }
         ps.generate_random_bytes(&mut bytes)?;
         for b in bytes {

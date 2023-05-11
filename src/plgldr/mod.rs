@@ -1,5 +1,10 @@
 #![allow(dead_code)]
 
+use std::{ffi::CString};
+use static_assertions::const_assert;
+
+use crate::format::barista_cfg::BaristaConfig;
+
 #[allow(warnings)]
 mod bindings;
 
@@ -8,8 +13,11 @@ pub struct SaltwaterParams {
     pub barista: u16,
     pub reenable_rhmpatch: bool,
     pub disable_plgldr: bool,
-    pub null: [u32; 31],
+    pub loaded_msg: bool,
+    pub null: [u8; 0x7B],
 }
+
+const_assert!(std::mem::size_of::<SaltwaterParams>() == 0x80);
 
 impl Default for SaltwaterParams {
     fn default() -> Self {
@@ -17,12 +25,17 @@ impl Default for SaltwaterParams {
             barista: 0xD06,
             reenable_rhmpatch: false,
             disable_plgldr: false,
-            null: [0; 31],
+            loaded_msg: true,
+            null: [0;0x7B],
         }
     }
 }
 
-use std::ffi::CString;
+impl SaltwaterParams {
+    pub fn apply_settings(&mut self, settings: &BaristaConfig) {
+        self.loaded_msg = settings.btk_loaded_msg;
+    }
+}
 
 pub fn init() -> Result<(), i32> {
     let result = unsafe { bindings::plgLdrInit() };

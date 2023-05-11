@@ -7,6 +7,10 @@ use crate::Result;
 use ctru::services::fs::{File, Fs};
 use serde::{Deserialize, Serialize};
 
+pub fn r#true() -> bool {
+    true
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct BaristaConfig {
     #[serde(skip, default = "bool::default")]
@@ -14,6 +18,8 @@ pub struct BaristaConfig {
     pub original_gates: bool,
     #[serde(default)]
     pub slot_titles: SlotTitleMode,
+    #[serde(default = "r#true")]
+    pub btk_loaded_msg: bool,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
@@ -30,6 +36,7 @@ impl Default for BaristaConfig {
             is_new: true,
             original_gates: false,
             slot_titles: SlotTitleMode::Megamix,
+            btk_loaded_msg: true,
         }
     }
 }

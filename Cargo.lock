@@ -44,6 +44,7 @@ dependencies = [
  "ctru-sys",
  "libc",
  "serde",
+ "static_assertions",
  "toml",
 ]
 
