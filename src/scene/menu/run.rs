@@ -200,6 +200,7 @@ impl MenuState {
                     }
                 }
                 2 => settings.btk_loaded_msg = !settings.btk_loaded_msg,
+                3 => settings.extra_rows = !settings.extra_rows,
                 _ => {}
             },
             MenuAction::UpdateScreen => {}

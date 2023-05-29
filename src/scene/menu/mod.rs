@@ -168,10 +168,11 @@ impl SubMenu {
         MenuAction::ToggleAudio,
         MenuAction::ChangeMenu(SubMenu::Main),
     ];
-    const ACTIONS_OPTIONS: [MenuAction; 4] = [
+    const ACTIONS_OPTIONS: [MenuAction; 5] = [
         MenuAction::ToggleSetting(0),
         MenuAction::ToggleSetting(1),
         MenuAction::ToggleSetting(2),
+        MenuAction::ToggleSetting(3),
         MenuAction::SaveSettings,
     ];
 

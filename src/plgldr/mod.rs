@@ -14,7 +14,8 @@ pub struct SaltwaterParams {
     pub reenable_rhmpatch: bool,
     pub disable_plgldr: bool,
     pub loaded_msg: bool,
-    pub null: [u8; 0x7B],
+    pub extra_rows: bool,
+    pub null: [u8; 0x7A],
 }
 
 const_assert!(std::mem::size_of::<SaltwaterParams>() == 0x80);
@@ -26,7 +27,8 @@ impl Default for SaltwaterParams {
             reenable_rhmpatch: false,
             disable_plgldr: false,
             loaded_msg: true,
-            null: [0;0x7B],
+            extra_rows: false,
+            null: [0;0x7A],
         }
     }
 }
@@ -34,6 +36,7 @@ impl Default for SaltwaterParams {
 impl SaltwaterParams {
     pub fn apply_settings(&mut self, settings: &BaristaConfig) {
         self.loaded_msg = settings.btk_loaded_msg;
+        self.extra_rows = settings.extra_rows;
     }
 }
 

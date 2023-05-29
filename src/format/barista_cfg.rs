@@ -20,6 +20,8 @@ pub struct BaristaConfig {
     pub slot_titles: SlotTitleMode,
     #[serde(default = "r#true")]
     pub btk_loaded_msg: bool,
+    #[serde(default)]
+    pub extra_rows: bool,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
@@ -37,6 +39,7 @@ impl Default for BaristaConfig {
             original_gates: false,
             slot_titles: SlotTitleMode::Megamix,
             btk_loaded_msg: true,
+            extra_rows: false,
         }
     }
 }
