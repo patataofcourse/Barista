@@ -11,7 +11,7 @@ NM 			:= $(DEVKITARM)/bin/arm-none-eabi-nm
 SMDHTOOL 	:= $(DEVKITPRO)/tools/bin/smdhtool
 3DSXTOOL	:= $(DEVKITPRO)/tools/bin/3dsxtool
 BANNERTOOL 	:= $(DEVKITPRO)/tools/bin/bannertool
-CITRA		:= $(shell which citra-qt 2> /dev/null || true)
+CITRA		:= $(shell which citra 2> /dev/null || shell which citra-qt 2> /dev/null || true)
 
 CARGOFLAGS  := --color=always
 
