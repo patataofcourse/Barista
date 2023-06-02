@@ -237,11 +237,10 @@ impl MenuState {
                     if self.cursor == 2 { "*" } else { " " },
                     if settings.btk_loaded_msg { "on" } else { "off" }
                 );
-                println!();
                 println!(
                     " [{}] Enable extra rows (US only): {}",
                     if self.cursor == 3 { "*" } else { " " },
-                    if settings.btk_loaded_msg { "on" } else { "off" }
+                    if settings.extra_rows { "on" } else { "off" }
                 );
                 println!();
                 println!(" [{}] Back", if self.cursor == 4 { "*" } else { " " })
