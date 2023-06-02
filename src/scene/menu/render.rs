@@ -238,7 +238,7 @@ impl MenuState {
                     if settings.btk_loaded_msg { "on" } else { "off" }
                 );
                 println!(
-                    " [{}] Enable extra rows (US only): {}",
+                    " [{}] Enable extra rows: {}",
                     if self.cursor == 3 { "*" } else { " " },
                     if settings.extra_rows { "on" } else { "off" }
                 );
