@@ -63,7 +63,9 @@ impl MenuState {
                     self.action = MenuAction::Run
                 }
             } else if let SubMenu::SetUp(_) = self.sub_menu {
-                if self.cursor_option_len(versions, &mod_page) - self.cursor <= 3 {
+                if mods.is_empty() {
+                    self.action = SubMenu::ACTIONS_SETUP.last().unwrap().clone();
+                } else if self.cursor_option_len(versions, &mod_page) - self.cursor <= 3 {
                     self.action =
                         SubMenu::ACTIONS_SETUP[self.cursor as usize - mod_page.len()].clone();
                 } else {
