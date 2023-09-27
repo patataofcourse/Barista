@@ -149,7 +149,7 @@ impl Default for MenuState {
 }
 
 impl SubMenu {
-    const ACTIONS_MAIN: &[MenuAction] = &[
+    const ACTIONS_MAIN: &'static [MenuAction] = &[
         MenuAction::ChangeMenu(SubMenu::Run),
         MenuAction::ChangeMenu(SubMenu::SetUp(false)),
         #[cfg(feature = "audio")]

@@ -43,7 +43,7 @@ impl Config {
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
         let mut fs = Fs::new()?;
-        let mut file = File::create(&mut fs.sdmc()?, file.into())?;
+        let mut file = File::create(&fs.sdmc()?, file.into())?;
         file.write_all(MAGIC)?;
         for (index, string) in &self.btks {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;

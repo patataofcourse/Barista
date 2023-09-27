@@ -1,6 +1,9 @@
 use std::path::PathBuf;
 
-use ctru::{console::Console, services::hid::KeyPad, services::Hid};
+use ctru::{
+    console::Console,
+    services::hid::{Hid, KeyPad},
+};
 
 use crate::{
     format::barista_cfg::{BaristaConfig, SlotTitleMode},

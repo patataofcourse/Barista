@@ -1,4 +1,7 @@
-use crate::{plgldr::{self, SaltwaterParams}, format::barista_cfg::BaristaConfig};
+use crate::{
+    format::barista_cfg::BaristaConfig,
+    plgldr::{self, SaltwaterParams},
+};
 use ctru::services::fs::{self, File, Fs};
 use libc::c_void;
 use std::{
@@ -178,7 +181,7 @@ pub fn launch(ver: GameVer, is_citra: bool, settings: &BaristaConfig) {
         params.reenable_rhmpatch = true;
         let mut fs = Fs::new().unwrap();
         fs::rename(
-            &mut fs.sdmc().unwrap(),
+            &fs.sdmc().unwrap(),
             "/luma/titles/000400000018A400/code.ips",
             "/luma/titles/000400000018A400/code.old.ips",
         )
@@ -222,10 +225,7 @@ pub fn launch(ver: GameVer, is_citra: bool, settings: &BaristaConfig) {
             );
             svcExitProcess();
         } else {
-            ctru_sys::aptSetChainloader(
-                ver.region.id_long(),
-                mediatype,
-            );
+            ctru_sys::aptSetChainloader(ver.region.id_long(), mediatype);
         }
     }
 }

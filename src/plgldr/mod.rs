@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use std::{ffi::CString};
 use static_assertions::const_assert;
+use std::ffi::CString;
 
 use crate::format::barista_cfg::BaristaConfig;
 
@@ -28,7 +28,7 @@ impl Default for SaltwaterParams {
             disable_plgldr: false,
             loaded_msg: true,
             extra_rows: false,
-            null: [0;0x7A],
+            null: [0; 0x7A],
         }
     }
 }

@@ -61,11 +61,15 @@ impl BaristaConfig {
                 Ok(toml::from_str(&string)?)
             }
             Err(e) => {
-                let ctru::Error::Os(err) = *e.into_inner().unwrap().downcast::<ctru::Error>().unwrap() else {panic!("error not OS error")};
+                let ctru::Error::Os(err) =
+                    *e.into_inner().unwrap().downcast::<ctru::Error>().unwrap()
+                else {
+                    panic!("error not OS error")
+                };
                 if err as u32 == 0xC8804478 {
                     //file not found, create new cfg
                     let config = BaristaConfig::default();
-                    let mut f = File::create(&mut fs.sdmc()?, path)?;
+                    let mut f = File::create(&fs.sdmc()?, path)?;
                     f.write_all(toml::to_string_pretty(&config)?.as_bytes())?;
                     Ok(config)
                 } else {
@@ -77,7 +81,7 @@ impl BaristaConfig {
 
     pub fn to_file(&self, path: impl Into<PathBuf>) -> Result<()> {
         let mut fs = Fs::new()?;
-        let mut f = File::create(&mut fs.sdmc()?, path.into())?;
+        let mut f = File::create(&fs.sdmc()?, path.into())?;
         f.write_all(toml::to_string_pretty(self)?.as_bytes())?;
         Ok(())
     }

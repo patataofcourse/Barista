@@ -257,6 +257,12 @@ fn panic_hook(info: &PanicInfo) {
 }
 
 fn citra_panic_hook(info: &PanicInfo) {
+    let mut backtrace = backtrace::Backtrace::new();
+    backtrace.resolve();
+    println!(
+        "{:?}",
+        backtrace.frames().iter().map(|c| c.symbol_address()).collect::<Vec<_>>()
+    );
     let location_info = if let Some(c) = info.location() {
         format!(
             " at {}:{}:{}",
