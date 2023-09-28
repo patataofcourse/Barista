@@ -1,10 +1,9 @@
 use std::{
     io::{Read, Write},
-    path::PathBuf,
+    path::PathBuf, fs::File,
 };
 
 use crate::Result;
-use ctru::services::fs::{File, Fs};
 use serde::{Deserialize, Serialize};
 
 pub fn r#true() -> bool {
@@ -52,9 +51,8 @@ impl Default for SlotTitleMode {
 
 impl BaristaConfig {
     pub fn from_file(path: impl Into<PathBuf>) -> Result<Self> {
-        let mut fs = Fs::new()?;
         let path = path.into();
-        match File::open(&fs.sdmc()?, path.clone()) {
+        match File::open(&path) {
             Ok(mut file) => {
                 let mut string = String::new();
                 file.read_to_string(&mut string)?;
@@ -69,7 +67,7 @@ impl BaristaConfig {
                 if err as u32 == 0xC8804478 {
                     //file not found, create new cfg
                     let config = BaristaConfig::default();
-                    let mut f = File::create(&fs.sdmc()?, path)?;
+                    let mut f = File::create(path)?;
                     f.write_all(toml::to_string_pretty(&config)?.as_bytes())?;
                     Ok(config)
                 } else {
@@ -80,8 +78,7 @@ impl BaristaConfig {
     }
 
     pub fn to_file(&self, path: impl Into<PathBuf>) -> Result<()> {
-        let mut fs = Fs::new()?;
-        let mut f = File::create(&fs.sdmc()?, path.into())?;
+        let mut f = File::create(path.into())?;
         f.write_all(toml::to_string_pretty(self)?.as_bytes())?;
         Ok(())
     }

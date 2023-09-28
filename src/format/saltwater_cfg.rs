@@ -1,11 +1,10 @@
 use crate::Result;
 use bytestream::*;
-use ctru::services::fs::{File, Fs};
 use std::{
     collections::HashMap,
     ffi::OsStr,
     io::{self, Read, Write},
-    path::PathBuf,
+    path::PathBuf, fs::File,
 };
 
 #[derive(Default)]
@@ -17,8 +16,7 @@ const MAGIC: &[u8; 4] = b"SCF\x02";
 
 impl Config {
     pub fn from_file(file: impl Into<PathBuf>) -> Result<Self> {
-        let mut fs = Fs::new()?;
-        let mut file = File::open(&fs.sdmc()?, file.into())?;
+        let mut file = File::open(file.into())?;
         let mut magic_buffer = [0u8; 4];
         file.read_exact(&mut magic_buffer)?;
         if &magic_buffer != MAGIC {
@@ -42,8 +40,7 @@ impl Config {
     }
 
     pub fn to_file(&self, file: impl Into<PathBuf>) -> Result<()> {
-        let mut fs = Fs::new()?;
-        let mut file = File::create(&fs.sdmc()?, file.into())?;
+        let mut file = File::create(file.into())?;
         file.write_all(MAGIC)?;
         for (index, string) in &self.btks {
             index.write_to(&mut file, ByteOrder::LittleEndian)?;

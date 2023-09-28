@@ -1,18 +1,15 @@
 use crate::{error::Result, format::saltwater_cfg::Config};
-use ctru::services::fs::{self, Fs};
-use std::{collections::HashMap, ffi::OsStr, path::PathBuf};
+use std::{collections::HashMap, ffi::OsStr, path::PathBuf, fs};
 
 pub const ENTRIES_PER_PAGE: usize = 13;
 
 pub fn get_available_mods() -> Result<Vec<PathBuf>> {
-    let mut fs = Fs::new()?;
     let mut v = vec![];
-    let sdmc = fs.sdmc()?;
-    let iter = match fs::read_dir(&sdmc, "/spicerack/mods") {
+    let iter = match fs::read_dir("sdmc:/spicerack/mods") {
         Ok(c) => c,
         Err(_) => {
-            fs::create_dir_all(&sdmc, "/spicerack/mods")?;
-            fs::read_dir(&sdmc, "/spicerack/mods")?
+            fs::create_dir_all("sdmc:/spicerack/mods")?;
+            fs::read_dir("/spicerack/mods")?
         }
     };
     for f in iter {

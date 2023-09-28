@@ -2,11 +2,10 @@ use crate::{
     format::barista_cfg::BaristaConfig,
     plgldr::{self, SaltwaterParams},
 };
-use ctru::services::fs::{self, File, Fs};
 use libc::c_void;
 use std::{
     ffi::CString,
-    fmt::{self, Display},
+    fmt::{self, Display}, fs::{File, self},
 };
 
 use ctru_sys::{
@@ -164,10 +163,8 @@ pub fn check_for_plgldr() {
 }
 
 pub fn check_for_rhmpatch() -> bool {
-    let mut fs = Fs::new().unwrap();
     File::open(
-        &fs.sdmc().unwrap(),
-        "/luma/titles/000400000018A400/code.ips",
+        "sdmc:/luma/titles/000400000018A400/code.ips",
     )
     .is_ok()
 }
@@ -179,11 +176,9 @@ pub fn launch(ver: GameVer, is_citra: bool, settings: &BaristaConfig) {
     // disable rhmpatch if it exists
     if check_for_rhmpatch() {
         params.reenable_rhmpatch = true;
-        let mut fs = Fs::new().unwrap();
         fs::rename(
-            &fs.sdmc().unwrap(),
-            "/luma/titles/000400000018A400/code.ips",
-            "/luma/titles/000400000018A400/code.old.ips",
+            "sdmc:/luma/titles/000400000018A400/code.ips",
+            "sdmc:/luma/titles/000400000018A400/code.old.ips",
         )
         .unwrap()
     }

@@ -117,7 +117,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mods = mod_picker::get_available_mods()?;
 
     // Init Barista config
-    let mut settings = format::barista_cfg::BaristaConfig::from_file("/spicerack/cfg.toml")?;
+    let mut settings = format::barista_cfg::BaristaConfig::from_file("sdmc:/spicerack/cfg.toml")?;
     let mut random = [0u8; 1];
     ps.generate_random_bytes(&mut random)?;
     if !settings.is_new && random == [35u8; 1] {
@@ -157,13 +157,13 @@ fn run(is_citra: bool) -> error::Result<()> {
     // Init Saltwater config
     unsafe {
         CONFIG = Some(
-            format::saltwater_cfg::Config::from_file("/spicerack/bin/saltwater.cfg")
+            format::saltwater_cfg::Config::from_file("sdmc:/spicerack/bin/saltwater.cfg")
                 .unwrap_or_default(),
         );
     }
     // clear mods not in the current folder, save the cfg file after clearing
     config().clear_deleted_mods(&mods);
-    config().to_file("/spicerack/bin/saltwater.cfg")?;
+    config().to_file("sdmc:/spicerack/bin/saltwater.cfg")?;
 
     let mut page = 0;
 
@@ -192,10 +192,10 @@ fn run(is_citra: bool) -> error::Result<()> {
                 }
             }
             MenuAction::SaveConfig => {
-                config().to_file("/spicerack/bin/saltwater.cfg")?;
+                config().to_file("sdmc:/spicerack/bin/saltwater.cfg")?;
             }
             MenuAction::SaveSettings => {
-                settings.to_file("/spicerack/cfg.toml")?;
+                settings.to_file("sdmc:/spicerack/cfg.toml")?;
             }
             MenuAction::ChangeMenu(_)
             | MenuAction::None
