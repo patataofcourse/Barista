@@ -59,19 +59,14 @@ impl BaristaConfig {
                 Ok(toml::from_str(&string)?)
             }
             Err(e) => {
-                let ctru::Error::Os(err) =
-                    *e.into_inner().unwrap().downcast::<ctru::Error>().unwrap()
-                else {
-                    panic!("error not OS error")
-                };
-                if err as u32 == 0xC8804478 {
+                if e.kind() == std::io::ErrorKind::NotFound {
                     //file not found, create new cfg
                     let config = BaristaConfig::default();
                     let mut f = File::create(path)?;
                     f.write_all(toml::to_string_pretty(&config)?.as_bytes())?;
                     Ok(config)
                 } else {
-                    Err(ctru::Error::Os(err).into())
+                    Err(e)?
                 }
             }
         }
