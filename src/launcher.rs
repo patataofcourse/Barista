@@ -5,7 +5,8 @@ use crate::{
 use libc::c_void;
 use std::{
     ffi::CString,
-    fmt::{self, Display}, fs::{File, self},
+    fmt::{self, Display},
+    fs::{self, File},
 };
 
 use ctru_sys::{
@@ -163,10 +164,7 @@ pub fn check_for_plgldr() {
 }
 
 pub fn check_for_rhmpatch() -> bool {
-    File::open(
-        "sdmc:/luma/titles/000400000018A400/code.ips",
-    )
-    .is_ok()
+    File::open("sdmc:/luma/titles/000400000018A400/code.ips").is_ok()
 }
 
 pub fn launch(ver: GameVer, is_citra: bool, settings: &BaristaConfig) {

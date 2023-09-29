@@ -3,8 +3,9 @@ use bytestream::*;
 use std::{
     collections::HashMap,
     ffi::OsStr,
+    fs::File,
     io::{self, Read, Write},
-    path::PathBuf, fs::File,
+    path::PathBuf,
 };
 
 #[derive(Default)]

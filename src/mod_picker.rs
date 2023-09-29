@@ -1,5 +1,5 @@
 use crate::{error::Result, format::saltwater_cfg::Config};
-use std::{collections::HashMap, ffi::OsStr, path::PathBuf, fs};
+use std::{collections::HashMap, ffi::OsStr, fs, path::PathBuf};
 
 pub const ENTRIES_PER_PAGE: usize = 13;
 

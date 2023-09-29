@@ -14,7 +14,7 @@ impl Text {
     pub fn new(text: String, x: u16, y: u16, size: u8) -> Self {
         let mut text_s;
         unsafe {
-            let buf = citro2d_sys::C2D_TextBufNew(text.len() as u32);
+            let buf = citro2d_sys::C2D_TextBufNew(text.len());
             assert!(buf != ptr::null_mut());
             text_s = mem::zeroed();
             let test_res = citro2d_sys::C2D_TextParse(&mut text_s, buf, (text + "\0").as_ptr());
@@ -34,7 +34,7 @@ impl Text {
     pub fn change_text(&mut self, text: String) {
         unsafe {
             citro2d_sys::C2D_TextBufClear(self.inner.buf);
-            citro2d_sys::C2D_TextBufResize(self.inner.buf, text.len() as u32);
+            citro2d_sys::C2D_TextBufResize(self.inner.buf, text.len());
             assert!(self.inner.buf != ptr::null_mut());
             let text_res =
                 citro2d_sys::C2D_TextParse(&mut self.inner, self.inner.buf, (text + "\0").as_ptr());

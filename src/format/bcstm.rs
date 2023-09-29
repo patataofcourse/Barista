@@ -1,9 +1,10 @@
 use crate::{Error, Result};
 use bytestream::{ByteOrder, StreamReader};
+use ctru::linear::LinearAllocator;
 use ctru_sys::{
-    linearAlloc, linearFree, ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat, ndspChnSetMix,
-    ndspChnSetPaused, ndspChnSetRate, ndspChnWaveBufAdd, ndspChnWaveBufClear, ndspWaveBuf,
-    DSP_FlushDataCache, NDSP_FORMAT_ADPCM, NDSP_WBUF_DONE,
+    ndspAdpcmData, ndspChnSetAdpcmCoefs, ndspChnSetFormat, ndspChnSetMix, ndspChnSetPaused,
+    ndspChnSetRate, ndspChnWaveBufAdd, ndspChnWaveBufClear, ndspWaveBuf, DSP_FlushDataCache,
+    NDSP_FORMAT_ADPCM, NDSP_WBUF_DONE,
 };
 use std::{
     alloc::{AllocError, Allocator, Layout},
@@ -21,24 +22,6 @@ macro_rules! ninty_version {
     ($major:literal, $minor:literal, $patch:literal) => {
         ($major << 24) + ($minor << 16) + ($patch << 8)
     };
-}
-
-#[derive(Clone)]
-pub struct LinearAllocator;
-
-unsafe impl Allocator for LinearAllocator {
-    fn allocate(&self, layout: Layout) -> std::result::Result<NonNull<[u8]>, AllocError> {
-        let out = unsafe { linearAlloc(layout.size()) };
-        match unsafe { (out as *mut u8).as_ref() } {
-            Some(_) => unsafe {
-                Ok(slice::from_raw_parts_mut(out as *mut u8, layout.size()).into())
-            },
-            None => Err(AllocError),
-        }
-    }
-    unsafe fn deallocate(&self, ptr: NonNull<u8>, _: Layout) {
-        linearFree(ptr.as_ptr() as *mut libc::c_void);
-    }
 }
 
 pub struct BCSTMFile {

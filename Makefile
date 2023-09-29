@@ -18,7 +18,7 @@ CARGOFLAGS  := --color=always
 ifeq ($(CARGO3DS),0)
 
 CARGO 		:= cargo
-CARGOFLAGS  += --target=armv6k-nintendo-3ds
+#CARGOFLAGS  += --target=armv6k-nintendo-3ds
 
 # build STD if it doesn't exist
 ifeq ($(wildcard $(STD)),)

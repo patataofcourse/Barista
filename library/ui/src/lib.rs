@@ -35,7 +35,7 @@ impl BaristaUI {
 
     pub fn init() -> Self {
         unsafe {
-            citro2d_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
+            citro2d_sys::C3D_Init(C3D_DEFAULT_CMDBUF_SIZE as usize);
             citro2d_sys::C2D_Init(C2D_DEFAULT_MAX_OBJECTS.into());
             citro2d_sys::C2D_Prepare();
             BaristaUI {

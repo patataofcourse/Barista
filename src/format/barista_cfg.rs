@@ -1,6 +1,7 @@
 use std::{
+    fs::File,
     io::{Read, Write},
-    path::PathBuf, fs::File,
+    path::PathBuf,
 };
 
 use crate::Result;

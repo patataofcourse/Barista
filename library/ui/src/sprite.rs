@@ -58,7 +58,7 @@ impl SpriteSheet {
     pub fn get_sprite(&self, index: u32) -> Option<Image> {
         let image: C2D_Image;
         unsafe {
-            image = citro2d_sys::C2D_SpriteSheetGetImage(self.val, index);
+            image = citro2d_sys::C2D_SpriteSheetGetImage(self.val, index as usize);
         }
         if image.subtex.is_null() {
             None
