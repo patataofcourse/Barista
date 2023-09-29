@@ -7,13 +7,10 @@ use ctru_sys::{
     NDSP_FORMAT_ADPCM, NDSP_WBUF_DONE,
 };
 use std::{
-    alloc::{AllocError, Allocator, Layout},
     fs::File,
     io::{Read, Seek, SeekFrom},
     mem::{self, MaybeUninit},
-    path::PathBuf,
-    ptr::NonNull,
-    slice,
+    path::PathBuf
 };
 
 static mut ACTIVE_NDSP_CHANNELS: u32 = 0;

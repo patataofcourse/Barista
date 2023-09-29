@@ -4,7 +4,7 @@ extern crate barista_ui as ui_lib;
 
 use ctru::{
     console::Console,
-    services::{apt::Apt, gfx::Gfx, hid::Hid, ps::Ps},
+    services::{apt::Apt, gfx::Gfx, hid::Hid, ps::Ps, romfs::RomFS, ndsp::{Ndsp, self}},
 };
 use error::error_applet;
 use std::{
@@ -96,10 +96,8 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut hid = Hid::new()?;
     let gfx = Gfx::new()?;
     let ps = Ps::new()?;
+    let _romfs = RomFS::new()?;
     let console = Console::new(gfx.bottom_screen.borrow_mut());
-    unsafe {
-        assert!(ctru_sys::romfsMountSelf("romfs\0".as_ptr()) == 0);
-    }
 
     log!(General, "test");
 
@@ -132,17 +130,19 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut audio_player;
 
     #[allow(unused)]
+    let mut _ndsp;
+
+    #[allow(unused)]
     #[cfg(not(feature = "audio"))]
     {
         audio_player = ();
+        ndsp = ();
     }
 
     #[cfg(feature = "audio")]
     {
-        unsafe {
-            assert!(ctru_sys::ndspInit() == 0);
-            ctru_sys::ndspSetOutputMode(ctru_sys::NDSP_OUTPUT_STEREO);
-        }
+        _ndsp = Ndsp::new()?;
+        _ndsp.set_output_mode(ndsp::OutputMode::Stereo);
 
         // Music test
         audio_player = audio::AudioManager::new();
@@ -207,14 +207,11 @@ fn run(is_citra: bool) -> error::Result<()> {
         }
     }
 
-    unsafe {
-        assert!(ctru_sys::romfsUnmount("romfs\0".as_ptr()) == 0);
-        ctru_sys::ndspExit();
-    }
-
     drop(console);
     drop(gfx);
     drop(hid);
+    drop(_romfs);
+    drop(_ndsp);
 
     if let Some(c) = game_to_load {
         launcher::launch(c, is_citra, &settings)
