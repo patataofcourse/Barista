@@ -4,7 +4,14 @@ extern crate barista_ui as ui_lib;
 
 use ctru::{
     console::Console,
-    services::{apt::Apt, gfx::Gfx, hid::Hid, ps::Ps, romfs::RomFS, ndsp::{Ndsp, self}},
+    services::{
+        apt::Apt,
+        gfx::Gfx,
+        hid::Hid,
+        ndsp::{self, Ndsp},
+        ps::Ps,
+        romfs::RomFS,
+    },
 };
 use error::error_applet;
 use std::{
@@ -136,7 +143,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     #[cfg(not(feature = "audio"))]
     {
         audio_player = ();
-        ndsp = ();
+        _ndsp = ();
     }
 
     #[cfg(feature = "audio")]
@@ -211,6 +218,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     drop(gfx);
     drop(hid);
     drop(_romfs);
+    #[allow(dropping_copy_types)]
     drop(_ndsp);
 
     if let Some(c) = game_to_load {
