@@ -68,7 +68,7 @@ else
 export RUSTFLAGS = -L$(DEVKITPRO)/libctru/lib -lctrud
 endif
 
-.PHONY: all clean dist plgldr check doc fmt fix test update re
+.PHONY: all clean dist plgldr check doc fmt fix test update re force
 .PRECIOUS: $(BUILD)/$(CRATE_NAME).elf 
 
 all: dist
@@ -118,6 +118,11 @@ clean:
 	@cd library/plgldr && make clean --no-print-directory
 
 re: clean all
+
+# Like make re, but only forces rebuild of the binary
+force:
+	@rm -rf target/armv6k-nintendo-3ds/debug/build/barista-*
+	@make all
 
 ### C libraries ###
 
