@@ -1,5 +1,3 @@
-use static_assertions::const_assert;
-
 // Megamix mode
 pub const SLOT_NAMES_DEFAULT: [&str; 0x68] = [
     "Clappy Trio",
@@ -458,17 +456,17 @@ pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = [
     "unimplemented uwu", //TODO: Jumpin' Jazz
     "unimplemented uwu", //TODO: Fan Club 2
     "Wrist exterminator",
-    "omg she transitioned good fo-",
+    "omg she transitioned good f-",
     "           .",
     "Figure Ex-Farter",
     "unimplemented uwu", //TODO: Jungle Gymnast
-    "<garbled text goes here>", //TODO: does it function?
+    "<garbled text goes here>",
     "the bad one",
     "the good one",
     "another one",
     "the last one",
     "the kaizo one",
-    "A light-emitting diode is a s",
+    "A light-emitting diode is a-",
     "ur mom",
     "trans rights!",
     "at least no shitty trumpets",

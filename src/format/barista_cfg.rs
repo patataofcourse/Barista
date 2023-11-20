@@ -63,6 +63,7 @@ impl BaristaConfig {
                 if e.kind() == std::io::ErrorKind::NotFound {
                     //file not found, create new cfg
                     let config = BaristaConfig::default();
+                    std::fs::create_dir_all(path.parent().unwrap())?;
                     let mut f = File::create(path)?;
                     f.write_all(toml::to_string_pretty(&config)?.as_bytes())?;
                     Ok(config)
