@@ -424,7 +424,7 @@ pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = [
     "OOOO",
     "A W for you",
     "Women want me",
-    "Handful of peas!",
+    "rvlShugyo",
     "Fork to eat",
     "rvlBaseball",
     "unimplemented uwu", //TODO: Return of Flipper Flop
