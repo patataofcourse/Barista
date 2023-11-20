@@ -1,3 +1,5 @@
+use static_assertions::const_assert;
+
 // Megamix mode
 pub const SLOT_NAMES_DEFAULT: [&str; 0x68] = [
     "Clappy Trio",
@@ -371,7 +373,112 @@ pub const SLOT_NAMES_INTERNAL_GATE: [&str; 0x14] = [
 
 // Infernal mode
 // In case we ever go back to that, here's a nano-style line cutoff: "\x1b[30;47m>\x1b[37;40m"
-pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = ["unimplemented uwu"; 0x68];
+pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = [
+    "burn it (fire emoji)",
+    "agbAimu",
+    "THE MEMES",
+    "unimplemented uwu", //TODO: Glee Club 0
+    "Ping-pong Any%",
+    "unimplemented uwu", //TODO: Fillbots 0
+    "ntrAnime",
+    "unimplemented uwu", //TODO: Air Rally 0
+    "unimplemented uwu", //TODO: Micro-Row 0
+    "unimplemented uwu", //TODO: Flipper Flop 0
+    "Fartless Figure",
+    "unimplemented uwu", //TODO: Fruit Basket 0
+    "unimplemented uwu", //TODO: First Contact
+    "BDGBbEb",
+    "the gay one :)",
+    "agbShibafu",
+    "rvlTebyoushi",
+    "rvlWhiteGuys",
+    "| | | |||| | |",
+    "Not Bunny Hop",
+    "agbHandCrap",
+    "agb4BeatKeep",
+    "rvlGomaA",
+    "Actual Bunny Hop", //TODO: Bunny Hop
+    "unimplemented uwu", //TODO: Rat Race
+    "rvlShuji",
+    "agbTRex",
+    "rvlTap (no not that one)",
+    "salsa walsa :3",
+    "unimplemented uwu", //TODO: Airboarder (ntrFushigijan?)
+    "Lockstep",
+    "World War I",
+    "part of ntrAdultMan",
+    "Flipper Snapper",
+    "ntrMoody",
+    "unimplemented uwu", //TODO: Frog Hop
+    "unimplemented uwu", //TODO: Fan Club
+    "unimplemented uwu", //TODO: Dog Ninja
+    "ntrRemix8",
+    "unimplemented uwu", //TODO: Return of Fillbots
+    "Karate Man Kicks! 2",
+    "ntrBathRoman",
+    "ntrFlea",
+    "Polyrhythm Wii",
+    "unimplemented uwu", //TODO: Return of Air Rally
+    "unimplemented uwu", //TODO: Exhibition Match
+    "Flockstep",
+    "OOOO",
+    "A W for you",
+    "Women want me",
+    "Handful of peas!",
+    "Fork to eat",
+    "rvlBaseball",
+    "unimplemented uwu", //TODO: Return of Flipper Flop
+    "THE MEMES 2",
+    "OSHA nightmare",
+    "Figure Farter",
+    "for sure",
+    "rvlSex",
+    "(lenny face)",
+    "unimplemented uwu", //TODO: Launch Party
+    "rvlRotationS",
+    "Samurai Slice", //TODO: boring
+    "unimplemented uwu", //TODO: See-Saw
+    "remix10-v2-final.png",
+    "Clockstep",
+    "If I were green I would die",
+    "unimplemented uwu", //TODO: Animal Acrobat
+    "ctrTutorial",
+    "Samurai SIice", //TODO: ok i get the joke now but still kinda boring
+    "unimplemented uwu", //TODO: Return of Fruit Basket
+    "unimplemented uwu", //TODO: Second Contact
+    "Love Lab",
+    "Luigi's Mansion (2001)",
+    "ctrBread",
+    "ctrSocial",
+    "^OwO^",
+    "theyre even gayer now :3",
+    "agbTebyoushiDexy",
+    "better space dance",
+    "AAAAA YES YES YES YES YES Y",
+    "unimplemented uwu", //TODO: Jumpin' Jazz
+    "unimplemented uwu", //TODO: Fan Club 2
+    "Wrist exterminator",
+    "omg she transitioned good fo-",
+    "           .",
+    "Figure Ex-Farter",
+    "unimplemented uwu", //TODO: Jungle Gymnast
+    "<garbled text goes here>", //TODO: does it function?
+    "the bad one",
+    "the good one",
+    "another one",
+    "the last one",
+    "the kaizo one",
+    "A light-emitting diode is a s",
+    "ur mom",
+    "trans rights!",
+    "at least no shitty trumpets",
+    "1st Remix 1",
+    "oh yeah that one",
+    "Taylor Swift - Red (2012)",
+    "Endful Remix",
+    "remix 10",
+    "remix 10 (again)",
+];
 
 pub const SLOT_NAMES_INFERNAL_GATE: [&str; 0x14] = [
     "agbHitmegeton (expensive)",
