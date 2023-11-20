@@ -57,8 +57,16 @@ impl MenuState {
                     }
                 );
                 println!(
-                    " [{}] Exit Barista",
+                    " [{}] Credits",
                     if self.cursor == 3 + cursor_increase {
+                        "*"
+                    } else {
+                        " "
+                    }
+                );
+                println!(
+                    " [{}] Exit Barista",
+                    if self.cursor == 4 + cursor_increase {
                         "*"
                     } else {
                         " "
@@ -244,6 +252,36 @@ impl MenuState {
                 );
                 println!();
                 println!(" [{}] Back", if self.cursor == 4 { "*" } else { " " })
+            }
+            SubMenu::Credits => {
+                println!("Barista + Saltwater - Credits:");
+                println!();
+                println!("Project lead:");
+                println!("    patataofcourse");
+                println!();
+                println!("Art:");
+                println!("    MilaTheArtsy");
+                println!();
+                println!("Programming, RE & research:");
+                println!("    patataofcourse");
+                println!("    0xAdk");
+                println!("    EstexNT");
+                println!();
+                println!("Alpha testing:");
+                println!("    Kievit");
+                println!("    Nate Candles");
+                println!("    somethingAccurate");
+                println!("    TheAlternateDoctor");
+                println!("    Tox (tox2564)");
+                println!("    Zeo (thatzeogal)");
+                println!();
+                println!("Special thanks to:");
+                println!("    PabloMK7 & Nanquitas");
+                println!("    The CTPG-7 Team");
+                println!("    The Rust 3DS project");
+                println!("    The RHModding community");
+                println!();
+                println!("Press B to return to the main menu");
             }
             #[cfg(debug_assertions)]
             SubMenu::Log => {

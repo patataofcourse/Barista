@@ -107,6 +107,7 @@ pub enum SubMenu {
     #[cfg(feature = "audio")]
     Music,
     SetUp(bool),
+    Credits,
     #[cfg(debug_assertions)]
     Log,
 }
@@ -155,6 +156,7 @@ impl SubMenu {
         #[cfg(feature = "audio")]
         MenuAction::ChangeMenu(SubMenu::Music),
         MenuAction::ChangeMenu(SubMenu::Options),
+        MenuAction::ChangeMenu(SubMenu::Credits),
         MenuAction::Exit,
     ];
     const ACTIONS_RUN: [MenuAction; 1] = [MenuAction::ChangeMenu(SubMenu::Main)];
@@ -184,6 +186,7 @@ impl SubMenu {
             #[cfg(feature = "audio")]
             SubMenu::Music => &Self::ACTIONS_MUSIC,
             SubMenu::Options => &Self::ACTIONS_OPTIONS,
+            SubMenu::Credits => &[MenuAction::ChangeMenu(SubMenu::Main)],
             #[cfg(debug_assertions)]
             SubMenu::Log => &[MenuAction::ChangeMenu(SubMenu::Main)],
         }
