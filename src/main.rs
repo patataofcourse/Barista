@@ -49,6 +49,12 @@ static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 #[cfg(feature = "audio")]
 static mut AUDIO: Option<*const audio::AudioManager> = None;
 
+const FONT: ctru_sys::ConsoleFont = ctru_sys::ConsoleFont {
+    gfx: include_bytes!("../data/font.bin") as *const u8 as *mut u8,
+    asciiOffset: 0,
+    numChars: 256,
+};
+
 fn main() {
     let is_citra = unsafe {
         let mut citra_info = 0i64;
@@ -104,7 +110,12 @@ fn run(is_citra: bool) -> error::Result<()> {
     let gfx = Gfx::new()?;
     let ps = Ps::new()?;
     let _romfs = RomFS::new()?;
-    let console = Console::new(gfx.bottom_screen.borrow_mut());
+    let mut console = Console::new(gfx.bottom_screen.borrow_mut());
+
+
+    // shitty workaround
+    let mut font = FONT;
+    console.set_font(&mut font);
 
     log!(General, "test");
 

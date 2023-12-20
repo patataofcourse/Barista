@@ -17,6 +17,11 @@ toml = "0.5"
 backtrace = "0.3"
 static_assertions = "1.1.0"
 
+#TODO: remove when setting console font is merged
+[patch."https://github.com/rust3ds/ctru-rs"]
+ctru-sys = { git = "https://github.com/patataofcourse/ctru-rs.git" }
+ctru-rs = { git = "https://github.com/patataofcourse/ctru-rs.git" }
+
 [features]
 default = []
 jp = []         # Enables SpiceRack with Japanese Megamix (Tickflow doesn't work)
