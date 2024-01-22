@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use static_assertions::const_assert;
-use std::ffi::CString;
+use std::{ffi::CString, ptr::addr_of_mut};
 
 use crate::format::barista_cfg::BaristaConfig;
 
@@ -103,7 +103,7 @@ pub fn set_params(
             path: path_bytes,
             config,
         };
-        bindings::PLGLDR__SetPluginLoadParameters(&mut PARAMS)
+        bindings::PLGLDR__SetPluginLoadParameters(addr_of_mut!(PARAMS))
     };
     match result {
         0 => Ok(()),

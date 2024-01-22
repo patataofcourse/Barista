@@ -8,7 +8,6 @@ use ctru::{
         apt::Apt,
         gfx::Gfx,
         hid::Hid,
-        ndsp::{self, Ndsp},
         ps::Ps,
         romfs::RomFS,
     },
@@ -24,6 +23,9 @@ use ui_lib::{BaristaUI, Screen};
 mod error;
 
 use self::error::{Error, Result};
+
+#[cfg(feature = "audio")]
+use ctru::services::ndsp::{self, Ndsp};
 
 #[macro_use]
 mod log;
@@ -46,6 +48,7 @@ mod plgldr;
 
 static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 
+//TODO: just use a mutex please
 #[cfg(feature = "audio")]
 static mut AUDIO: Option<*const audio::AudioManager> = None;
 
@@ -131,7 +134,7 @@ fn run(is_citra: bool) -> error::Result<()> {
 
     // Init menu
     let mut menu = MenuState::default();
-    menu.render(&console, &versions, &vec![], 0, 0, &settings)?;
+    menu.render(&console, &versions, &[], 0, 0, &settings)?;
 
     #[allow(unused)]
     let mut audio_player;

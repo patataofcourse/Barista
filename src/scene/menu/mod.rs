@@ -192,7 +192,7 @@ impl SubMenu {
         }
     }
 
-    pub fn cursor_option_len(&self, versions: &Vec<GameVer>, mods: &Vec<(String, u16)>) -> u32 {
+    pub fn cursor_option_len(&self, versions: &[GameVer], mods: &[(String, u16)]) -> u32 {
         (self.actions().len()
             + if let SubMenu::Run = self {
                 versions.len()
@@ -208,7 +208,7 @@ impl MenuState {
     pub fn actions(&self) -> &[MenuAction] {
         self.sub_menu.actions()
     }
-    pub fn cursor_option_len(&self, versions: &Vec<GameVer>, mods: &Vec<(String, u16)>) -> u32 {
+    pub fn cursor_option_len(&self, versions: &[GameVer], mods: &[(String, u16)]) -> u32 {
         self.sub_menu.cursor_option_len(versions, mods)
     }
 }

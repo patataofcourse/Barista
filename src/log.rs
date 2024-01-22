@@ -17,6 +17,7 @@ impl ToString for Log {
     }
 }
 
+//TODO: use a mutex probably
 #[cfg(debug_assertions)]
 pub static mut LOG: String = String::new();
 

@@ -16,8 +16,8 @@ impl MenuState {
     pub fn render(
         &mut self,
         console: &Console,
-        versions: &Vec<GameVer>,
-        mods: &Vec<(String, u16)>,
+        versions: &[GameVer],
+        mods: &[(String, u16)],
         page: usize,
         num_pages: usize,
         settings: &BaristaConfig,

@@ -18,8 +18,8 @@ impl MenuState {
         &mut self,
         hid: &Hid,
         console: &Console,
-        versions: &Vec<GameVer>,
-        mods: &Vec<PathBuf>,
+        versions: &[GameVer],
+        mods: &[PathBuf],
         page: &mut usize,
         settings: &mut BaristaConfig,
     ) -> Result<()> {

@@ -22,7 +22,7 @@ pub fn get_available_mods() -> Result<Vec<PathBuf>> {
     Ok(v)
 }
 
-pub fn show_page(paths: &Vec<PathBuf>, cfg: &Config, page: usize) -> Vec<(String, u16)> {
+pub fn show_page(paths: &[PathBuf], cfg: &Config, page: usize) -> Vec<(String, u16)> {
     let mut out = vec![];
 
     let inverted_cfg =
@@ -65,6 +65,6 @@ pub fn is_valid_slot(slot: u16) -> bool {
     slot <= 0x67 || (0x100..=0x113).contains(&slot)
 }
 
-pub fn num_pages(paths: &Vec<PathBuf>) -> usize {
+pub fn num_pages(paths: &[PathBuf]) -> usize {
     paths.len().div_ceil(ENTRIES_PER_PAGE)
 }
