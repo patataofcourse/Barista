@@ -54,13 +54,17 @@ endif
 BUILD		:= target/armv6k-nintendo-3ds/$(PROFILE)
 DIST		:= dist/barista_$(PROFILE)
 ROMFS 		:= romfs
-RSF			:= app.rsf
+META		:= meta
+
+RSF			:= $(META)/app.rsf
+PROG_ICON	:= $(META)/icon.png
+BANNER_IMG	:= $(META)/banner.png
+BANNER_SND  := $(META)/banner.wav
 
 CRATE_NAME 	:= barista
 PROG_NAME 	:= Barista
 PROG_DESC 	:= A launcher for Rhythm Heaven Megamix mods
 PROG_AUTHOR := patataofcourse, RHModding
-PROG_ICON 	:= icon.png
 
 ifeq ($(DEBUG),0)
 export RUSTFLAGS = -L$(DEVKITPRO)/libctru/lib -lctru
@@ -92,9 +96,9 @@ endif
 	@cp $(PROG_ICON) $(DIST)/$(notdir $(PROG_ICON))
 
 %.cia: %.elf
-	@bannertool makesmdh -s $(PROG_NAME) -l $(PROG_NAME) -p $(PROG_AUTHOR) -i icon.png -o $(dir $@)icon.icn -r regionfree -f nosavebackups,visible
-	@bannertool makebanner -i banner.png -a banner.wav -o $(dir $@)banner.bnr
-	@makerom -f cia -o $@ -exefslogo -elf $(basename $@).elf -rsf app.rsf -ver 0 -icon $(dir $@)icon.icn -banner $(dir $@)banner.bnr
+	@bannertool makesmdh -s $(PROG_NAME) -l $(PROG_NAME) -p $(PROG_AUTHOR) -i $(PROG_ICON) -o $(dir $@)icon.icn -r regionfree -f nosavebackups,visible
+	@bannertool makebanner -i $(BANNER_IMG) -a $(BANNER_SND) -o $(dir $@)banner.bnr
+	@makerom -f cia -o $@ -exefslogo -elf $(basename $@).elf -rsf $(RSF) -ver 0 -icon $(dir $@)icon.icn -banner $(dir $@)banner.bnr
 
 %.elf: plgldr
 	@$(CARGO) build $(CARGOFLAGS)

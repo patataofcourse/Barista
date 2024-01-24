@@ -140,7 +140,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     #[cfg(not(feature = "audio"))]
     {
         audio_player = ();
-        _ndsp = ();
+        ndsp = ();
     }
 
     #[cfg(feature = "audio")]
