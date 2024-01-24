@@ -395,7 +395,7 @@ pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = [
     "agbHandCrap",
     "agb4BeatKeep",
     "rvlGomaA",
-    "Actual Bunny Hop", //TODO: Bunny Hop
+    "Actual Bunny Hop",  //TODO: Bunny Hop
     "unimplemented uwu", //TODO: Rat Race
     "rvlShuji",
     "agbTRex",
@@ -434,14 +434,14 @@ pub const SLOT_NAMES_INFERNAL: [&str; 0x68] = [
     "(lenny face)",
     "unimplemented uwu", //TODO: Launch Party
     "rvlRotationS",
-    "Samurai Slice", //TODO: boring
+    "Samurai Slice",     //TODO: boring
     "unimplemented uwu", //TODO: See-Saw
     "remix10-v2-final.png",
     "Clockstep",
     "If I were green I would die",
     "unimplemented uwu", //TODO: Animal Acrobat
     "ctrTutorial",
-    "Samurai SIice", //TODO: ok i get the joke now but still kinda boring
+    "Samurai SIice",     //TODO: ok i get the joke now but still kinda boring
     "unimplemented uwu", //TODO: Return of Fruit Basket
     "unimplemented uwu", //TODO: Second Contact
     "Love Lab",

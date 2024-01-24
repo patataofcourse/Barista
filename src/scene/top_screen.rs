@@ -1,7 +1,7 @@
 use std::{cmp::Ordering, collections::HashMap, iter::FromIterator};
 use ui_lib::{
     sprite::{Image, SpriteSheet},
-    BaristaUI, Object, Scene, Screen, StaticObject,
+    BaristaUI, Object, Scene, Screen, StaticObject, Text,
 };
 
 pub struct BaristaSprites {
@@ -215,7 +215,7 @@ pub fn top_screen_scene(ui: &BaristaUI, screen: Screen) -> Scene {
     );
 
     // Text
-    let text = ui_lib::text::Text::new(
+    let text = Text::new(
         "Welcome! We're still under\nconstruction, sorry for the mess!".to_string(),
         20,
         20,
@@ -238,9 +238,24 @@ pub fn top_screen_scene(ui: &BaristaUI, screen: Screen) -> Scene {
     scene
 }
 
+//TODO: this probably needs some sort of closure functionality to access individual objects rather than... this
 pub fn nicole_easter_egg(ui: &mut BaristaUI) {
     let barista_sprites: &mut BaristaSprites = ui
         .downcast_object_mut(Screen::Top, "barista")
         .expect("Top screen scene is not barista::scene::top_screen");
     barista_sprites.switch("nicole");
+
+    let text: &mut Text = ui
+        .downcast_object_mut(Screen::Top, "text")
+        .expect("Top screen scene is not barista::scene::top_screen");
+    text.change_text("Hey there! I'm covering for\na friend, don't mind me.".to_string());
+    let width = text.width();
+    let height = text.height();
+
+    let textbox: &mut Textbox = ui
+        .downcast_object_mut(Screen::Top, "textbox")
+        .expect("Top screen scene is not barista::scene::top_screen");
+    textbox.width = width;
+    textbox.height = height;
+    textbox.speaker = (200, true);
 }

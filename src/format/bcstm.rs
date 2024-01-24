@@ -10,7 +10,7 @@ use std::{
     fs::File,
     io::{Read, Seek, SeekFrom},
     mem::{self, MaybeUninit},
-    path::PathBuf
+    path::PathBuf,
 };
 
 static mut ACTIVE_NDSP_CHANNELS: u32 = 0;

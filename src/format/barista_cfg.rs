@@ -37,7 +37,7 @@ impl Default for BaristaConfig {
         Self {
             is_new: true,
             original_gates: false,
-            slot_titles: SlotTitleMode::Megamix,
+            slot_titles: Default::default(),
             btk_loaded_msg: true,
             extra_rows: false,
         }

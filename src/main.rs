@@ -4,13 +4,7 @@ extern crate barista_ui as ui_lib;
 
 use ctru::{
     console::Console,
-    services::{
-        apt::Apt,
-        gfx::Gfx,
-        hid::Hid,
-        ps::Ps,
-        romfs::RomFS,
-    },
+    services::{apt::Apt, gfx::Gfx, hid::Hid, ps::Ps, romfs::RomFS},
 };
 use error::error_applet;
 use std::{
@@ -128,7 +122,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut settings = format::barista_cfg::BaristaConfig::from_file("sdmc:/spicerack/cfg.toml")?;
     let mut random = [0u8; 1];
     ps.generate_random_bytes(&mut random)?;
-    if !settings.is_new && random == [35u8; 1] {
+    if !settings.is_new && random == [0x69u8; 1] {
         scene::top_screen::nicole_easter_egg(&mut ui);
     }
 
