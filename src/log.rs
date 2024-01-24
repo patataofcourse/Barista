@@ -1,3 +1,7 @@
+use std::sync::Mutex;
+
+use lazy_static::lazy_static;
+
 #[cfg(debug_assertions)]
 #[allow(unused)]
 pub enum Log {
@@ -17,9 +21,10 @@ impl ToString for Log {
     }
 }
 
-//TODO: use a mutex probably
 #[cfg(debug_assertions)]
-pub static mut LOG: String = String::new();
+lazy_static! {
+    pub static ref LOG: Mutex<String> = Mutex::new(String::new());
+}
 
 #[macro_export]
 #[cfg(debug_assertions)]
@@ -30,10 +35,8 @@ macro_rules! log {
             format!("<{}> {}\n", $type.to_string(), format!($lit, $($i,)?))
         };
 
-        unsafe {
-            use $crate::log::LOG;
-            LOG += &out;
-        }
+        let mut log = $crate::log::LOG.lock().unwrap();
+        *log += &out;
     };
 }
 

@@ -285,7 +285,7 @@ impl MenuState {
             }
             #[cfg(debug_assertions)]
             SubMenu::Log => {
-                println!("{}", unsafe { &crate::log::LOG });
+                println!("{}", crate::log::LOG.lock().unwrap());
             }
         }
         Ok(())

@@ -1,5 +1,6 @@
 use ctru::error::Error as CtruError;
 use std::{
+    ffi::CString,
     fmt::{self, Display, Result as FmtResult},
     io::Error as IoError,
 };
@@ -59,31 +60,19 @@ impl From<TomlSeError> for self::Error {
 }
 
 pub fn error_applet(msg: String) {
+    use ctru_sys::{
+        aptExit, errorConf, errorDisp, errorInit, errorText, CFG_LANGUAGE_EN, ERROR_TEXT_WORD_WRAP,
+    };
+
+    let msg = CString::new(msg).unwrap();
+
     unsafe {
-        use ctru_sys::{
-            aptExit, errorConf, errorDisp, errorInit, errorText, CFG_LANGUAGE_EN,
-            ERROR_TEXT_WORD_WRAP,
-        };
         let mut error_conf: errorConf = errorConf::default();
         errorInit(&mut error_conf, ERROR_TEXT_WORD_WRAP, CFG_LANGUAGE_EN);
-        errorText(&mut error_conf, msg.as_ptr() as *const ::libc::c_char);
+        errorText(&mut error_conf, msg.as_ptr());
 
         // Display the error
         errorDisp(&mut error_conf);
         aptExit();
     }
-}
-
-pub fn no_doxx(filename: &str) -> &str {
-    if let Some((_, c)) = filename.split_once("Documents") {
-        c
-    } else if let Some((_, c)) = filename.split_once(".rustup") {
-        c
-    } else {
-        filename
-    }
-}
-
-pub fn debug_s(str: &str) -> ctru_sys::Result {
-    unsafe { ctru_sys::svcOutputDebugString(str.as_ptr(), str.bytes().len() as i32) }
 }

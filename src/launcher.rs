@@ -159,7 +159,7 @@ pub fn check_for_plgldr() {
     plgldr::exit();
     match result {
         Ok(_) => (),
-        Err(_) => panic!("Luma3DS plugin loader is not installed"), //TODO: proper error screen, install it..?
+        Err(_) => panic!("Saltwater/Barista require Luma3DS v13.0+"), //TODO: proper error screen, install it..?
     }
 }
 

@@ -40,6 +40,7 @@ use self::{
 /// Bindings + safe abstraction for plgldr.c
 mod plgldr;
 
+//TODO: mutex or reduce all these things to one global state struct
 static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
 
 //TODO: just use a mutex please
@@ -81,7 +82,6 @@ fn main() {
                 Error::Other(c) => c,
             };
             if is_citra {
-                //TODO: proper implementation
                 let gfx = Gfx::new().unwrap();
                 let _ = ctru::console::Console::new(gfx.bottom_screen.borrow_mut());
                 println!("Error: {}\n\nExiting in 20 seconds...", error);
@@ -134,7 +134,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut audio_player;
 
     #[allow(unused)]
-    let mut _ndsp;
+    let mut ndsp;
 
     #[allow(unused)]
     #[cfg(not(feature = "audio"))]
@@ -145,8 +145,8 @@ fn run(is_citra: bool) -> error::Result<()> {
 
     #[cfg(feature = "audio")]
     {
-        _ndsp = Ndsp::new()?;
-        _ndsp.set_output_mode(ndsp::OutputMode::Stereo);
+        ndsp = Ndsp::new()?;
+        ndsp.set_output_mode(ndsp::OutputMode::Stereo);
 
         // Music test
         audio_player = audio::AudioManager::new();
@@ -216,7 +216,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     drop(hid);
     drop(_romfs);
     #[allow(dropping_copy_types)]
-    drop(_ndsp);
+    drop(ndsp);
 
     if let Some(c) = game_to_load {
         launcher::launch(c, is_citra, &settings)
@@ -235,31 +235,13 @@ fn audio<'a>() -> &'a audio::AudioManager {
 }
 
 fn panic_hook(info: &PanicInfo) {
-    let location_info = if let Some(c) = info.location() {
-        format!(
-            " at {}:{}:{}",
-            error::no_doxx(c.file()),
-            c.line(),
-            c.column()
-        )
-    } else {
-        String::new()
-    };
-
-    let msg = if let Some(c) = info.payload().downcast_ref::<&str>() {
-        format!("panic: {:?}{}\0", c, location_info)
-    } else if let Some(c) = info.payload().downcast_ref::<String>() {
-        format!("panic: {:?}{}\0", c, location_info)
-    } else {
-        format!("panic{}\0", location_info)
-    };
-    error_applet(msg);
+    error_applet(panic_message(info));
 
     process::exit(1);
 }
 
 fn citra_panic_hook(info: &PanicInfo) {
-    let mut backtrace = backtrace::Backtrace::new();
+    /* let mut backtrace = backtrace::Backtrace::new();
     backtrace.resolve();
     println!(
         "{:?}",
@@ -268,29 +250,28 @@ fn citra_panic_hook(info: &PanicInfo) {
             .iter()
             .map(|c| c.symbol_address())
             .collect::<Vec<_>>()
-    );
-    let location_info = if let Some(c) = info.location() {
-        format!(
-            " at {}:{}:{}",
-            error::no_doxx(c.file()),
-            c.line(),
-            c.column()
-        )
-    } else {
-        String::new()
-    };
+    ); */
 
-    let msg = if let Some(c) = info.payload().downcast_ref::<&str>() {
-        format!("panic: {:?}{}\0", c, location_info)
-    } else if let Some(c) = info.payload().downcast_ref::<String>() {
-        format!("panic: {:?}{}\0", c, location_info)
-    } else {
-        format!("panic{}\0", location_info)
-    };
-    println!("{}", msg);
+    println!("{}", panic_message(info));
 
     println!("\nExiting in 20 seconds...");
     std::thread::sleep(Duration::from_secs(20));
 
     process::exit(1);
+}
+
+fn panic_message(info: &PanicInfo) -> String {
+    let location_info = if let Some(c) = info.location() {
+        format!(" at {}:{}:{}", c.file(), c.line(), c.column())
+    } else {
+        String::new()
+    };
+
+    if let Some(c) = info.payload().downcast_ref::<&str>() {
+        format!("panic: {:?}{}\0", c, location_info)
+    } else if let Some(c) = info.payload().downcast_ref::<String>() {
+        format!("panic: {:?}{}\0", c, location_info)
+    } else {
+        format!("panic{}\0", location_info)
+    }
 }
