@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::{fmt::Display, sync::Mutex};
 
 use lazy_static::lazy_static;
 
@@ -10,14 +10,13 @@ pub enum Log {
 }
 
 #[cfg(debug_assertions)]
-impl ToString for Log {
-    fn to_string(&self) -> String {
-        use Log::*;
-        match self {
-            General => "general",
-            Audio => "audio",
-        }
-        .to_string()
+impl Display for Log {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(
+            match self {
+                Log::General => "general",
+                Log::Audio => "audio",
+            })
     }
 }
 

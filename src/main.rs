@@ -8,7 +8,7 @@ use ctru::{
 };
 use error::error_applet;
 use std::{
-    panic::{self, PanicInfo},
+    panic::{self, PanicHookInfo},
     process,
     time::Duration,
 };
@@ -100,7 +100,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     let mut hid = Hid::new()?;
     let gfx = Gfx::new()?;
     let ps = Ps::new()?;
-    let _romfs = RomFS::new()?;
+    let romfs = RomFS::new()?;
     let console = Console::new(gfx.bottom_screen.borrow_mut());
 
     log!(General, "test");
@@ -214,7 +214,7 @@ fn run(is_citra: bool) -> error::Result<()> {
     drop(console);
     drop(gfx);
     drop(hid);
-    drop(_romfs);
+    drop(romfs);
     #[allow(dropping_copy_types)]
     drop(ndsp);
 
@@ -234,13 +234,13 @@ fn audio<'a>() -> &'a audio::AudioManager {
     unsafe { &*AUDIO.expect("Audio not initialized") }
 }
 
-fn panic_hook(info: &PanicInfo) {
+fn panic_hook(info: &PanicHookInfo) {
     error_applet(panic_message(info));
 
     process::exit(1);
 }
 
-fn citra_panic_hook(info: &PanicInfo) {
+fn citra_panic_hook(info: &PanicHookInfo) {
     /* let mut backtrace = backtrace::Backtrace::new();
     backtrace.resolve();
     println!(
@@ -260,7 +260,7 @@ fn citra_panic_hook(info: &PanicInfo) {
     process::exit(1);
 }
 
-fn panic_message(info: &PanicInfo) -> String {
+fn panic_message(info: &PanicHookInfo) -> String {
     let location_info = if let Some(c) = info.location() {
         format!(" at {}:{}:{}", c.file(), c.line(), c.column())
     } else {

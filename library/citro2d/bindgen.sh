@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+#TODO: https://rust-lang.github.io/rust-bindgen/library-usage.html
+
 set -euxo pipefail
 
 bindgen "$DEVKITPRO/libctru/include/citro2d.h" \

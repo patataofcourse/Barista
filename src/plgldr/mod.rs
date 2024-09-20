@@ -94,7 +94,7 @@ pub fn set_params(
         path_bytes[c] = *byte;
     }
 
-    let config = unsafe { std::mem::transmute(config) };
+    let config = unsafe { std::mem::transmute::<SaltwaterParams, [u32; 32]>(config) };
 
     let result = unsafe {
         PARAMS = bindings::PluginLoadParameters {

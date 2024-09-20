@@ -193,7 +193,10 @@ impl BCSTMFile {
         }
 
         let buffer_data = unsafe {
-            mem::transmute::<_, [Vec<u8, LinearAllocator>; Self::BUFFER_COUNT]>(buffer_data)
+            mem::transmute::<
+                [std::mem::MaybeUninit<std::vec::Vec<u8, ctru::linear::LinearAllocator>>; 20],
+                [std::vec::Vec<u8, ctru::linear::LinearAllocator>; 20],
+            >(buffer_data)
         };
 
         file.seek(SeekFrom::Start(data_offset as u64 + 0x20))?;
@@ -263,7 +266,7 @@ impl BCSTMFile {
             ndspChnSetRate(self.channel[i] as i32, self.sample_rate as f32);
 
             for j in 0..Self::BUFFER_COUNT {
-                self.wave_buf[i][j].status = NDSP_WBUF_DONE as u8;
+                self.wave_buf[i][j].status = NDSP_WBUF_DONE;
             }
         }
 
@@ -301,10 +304,10 @@ impl BCSTMFile {
     unsafe fn stream_data(&mut self) -> Result<bool> {
         if !self.is_paused {
             for i in 0..Self::BUFFER_COUNT {
-                if self.wave_buf[0][i].status != NDSP_WBUF_DONE as u8 {
+                if self.wave_buf[0][i].status != NDSP_WBUF_DONE {
                     continue;
                 }
-                if self.channel_count == 2 && self.wave_buf[1][i].status != NDSP_WBUF_DONE as u8 {
+                if self.channel_count == 2 && self.wave_buf[1][i].status != NDSP_WBUF_DONE {
                     continue;
                 }
 

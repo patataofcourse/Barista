@@ -202,7 +202,7 @@ pub fn launch(ver: GameVer, is_citra: bool, settings: &BaristaConfig) {
         ctru_sys::MEDIATYPE_SD
     } else {
         ctru_sys::MEDIATYPE_GAME_CARD
-    } as u8;
+    };
 
     unsafe {
         if is_citra {
