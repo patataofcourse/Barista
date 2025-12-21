@@ -11,6 +11,7 @@ NM 			:= $(DEVKITARM)/bin/arm-none-eabi-nm
 SMDHTOOL 	:= $(DEVKITPRO)/tools/bin/smdhtool
 3DSXTOOL	:= $(DEVKITPRO)/tools/bin/3dsxtool
 BANNERTOOL 	:= $(DEVKITPRO)/tools/bin/bannertool
+AZAHAR 		:= $(shell which azahar 2> /dev/null || true)
 CITRA		:= $(shell which citra-qt 2> /dev/null || which citra 2> /dev/null || which citra-appimage 2> /dev/null || true)
 
 CARGOFLAGS  := --color=always
@@ -31,8 +32,11 @@ CARGO		:= cargo 3ds
 
 endif
 
+ifneq ($(AZAHAR),)
+# rip citra
+CITRA		:= $(AZAHAR)
+else ifeq ($(CITRA),)
 # Assume flatpak
-ifeq ($(CITRA),)
 CITRA 		:= flatpak run org.citra_emu.citra
 endif
 
