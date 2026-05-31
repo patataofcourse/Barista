@@ -71,7 +71,7 @@ impl BCSTMFile {
 
         let mut magic_buf = [0u8; 4];
         file.read_exact(&mut magic_buf)?;
-        if magic_buf != [b'C', b'S', b'T', b'M'] {
+        if magic_buf != *b"CSTM" {
             Err(Error::Other("BCSTM - Not a BCSTM file".to_string()))?;
         }
 
@@ -174,13 +174,13 @@ impl BCSTMFile {
                 adpcm_info_pos as i64 - 8 * (i + 1) as i64 - 4,
             ))?;
 
-            for j in 0..16 {
-                adpcm_coefs[i][j] = u16::read_from(&mut file, endian)?;
+            for coef in &mut adpcm_coefs[i] {
+                *coef = u16::read_from(&mut file, endian)?;
             }
-            for j in 0..1 {
-                adpcm_data[i][j].index = u16::read_from(&mut file, endian)?;
-                adpcm_data[i][j].history0 = i16::read_from(&mut file, endian)?;
-                adpcm_data[i][j].history1 = i16::read_from(&mut file, endian)?;
+            for data in &mut adpcm_data[i] {
+                data.index = u16::read_from(&mut file, endian)?;
+                data.history0 = i16::read_from(&mut file, endian)?;
+                data.history1 = i16::read_from(&mut file, endian)?;
             }
             u16::read_from(&mut file, endian)?;
         }

@@ -25,7 +25,9 @@ pub struct BaristaConfig {
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Default)]
 pub enum SlotTitleMode {
+    #[default]
     Megamix,
     Original,
     Internal,
@@ -44,11 +46,6 @@ impl Default for BaristaConfig {
     }
 }
 
-impl Default for SlotTitleMode {
-    fn default() -> Self {
-        Self::Megamix
-    }
-}
 
 impl BaristaConfig {
     pub fn from_file(path: impl Into<PathBuf>) -> Result<Self> {

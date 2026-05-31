@@ -1,7 +1,5 @@
 use std::{fmt::Display, sync::Mutex};
 
-use lazy_static::lazy_static;
-
 #[cfg(debug_assertions)]
 #[allow(unused)]
 pub enum Log {
@@ -21,9 +19,7 @@ impl Display for Log {
 }
 
 #[cfg(debug_assertions)]
-lazy_static! {
-    pub static ref LOG: Mutex<String> = Mutex::new(String::new());
-}
+pub static LOG: Mutex<String> = Mutex::new(String::new());
 
 #[macro_export]
 #[cfg(debug_assertions)]

@@ -1,4 +1,4 @@
-#![feature(allocator_api, int_roundings, panic_backtrace_config)]
+#![cfg_attr(feature = "audio",feature(allocator_api))]
 
 extern crate barista_ui as ui_lib;
 
@@ -10,11 +10,14 @@ use error::error_applet;
 use std::{
     panic::{self, PanicHookInfo},
     process,
+    sync::{LazyLock, Mutex},
     time::Duration,
 };
 use ui_lib::{BaristaUI, Screen};
 
 mod error;
+
+use crate::format::saltwater_cfg::Config;
 
 use self::error::{Error, Result};
 
@@ -40,8 +43,10 @@ use self::{
 /// Bindings + safe abstraction for plgldr.c
 mod plgldr;
 
-//TODO: mutex or reduce all these things to one global state struct
-static mut CONFIG: Option<format::saltwater_cfg::Config> = None;
+static CONFIG: LazyLock<Mutex<Config>> = LazyLock::new(|| {
+    format::saltwater_cfg::Config::from_file("sdmc:/spicerack/bin/saltwater.cfg")
+        .unwrap_or_default().into()
+});
 
 //TODO: just use a mutex please
 #[cfg(feature = "audio")]
@@ -158,16 +163,10 @@ fn run(is_citra: bool) -> error::Result<()> {
         unsafe { AUDIO = Some(&audio_player) }
     }
 
-    // Init Saltwater config
-    unsafe {
-        CONFIG = Some(
-            format::saltwater_cfg::Config::from_file("sdmc:/spicerack/bin/saltwater.cfg")
-                .unwrap_or_default(),
-        );
-    }
     // clear mods not in the current folder, save the cfg file after clearing
-    config().clear_deleted_mods(&mods);
-    config().to_file("sdmc:/spicerack/bin/saltwater.cfg")?;
+    CONFIG.lock().unwrap().clear_deleted_mods(&mods);
+    CONFIG.lock().unwrap().to_file("sdmc:/spicerack/bin/saltwater.cfg")?;
+    
 
     let mut page = 0;
 
@@ -196,7 +195,7 @@ fn run(is_citra: bool) -> error::Result<()> {
                 }
             }
             MenuAction::SaveConfig => {
-                config().to_file("sdmc:/spicerack/bin/saltwater.cfg")?;
+                CONFIG.lock().unwrap().to_file("sdmc:/spicerack/bin/saltwater.cfg")?;
             }
             MenuAction::SaveSettings => {
                 settings.to_file("sdmc:/spicerack/cfg.toml")?;
@@ -223,10 +222,6 @@ fn run(is_citra: bool) -> error::Result<()> {
     }
 
     Ok(())
-}
-
-fn config() -> &'static mut format::saltwater_cfg::Config {
-    unsafe { CONFIG.as_mut().expect("Config not initialized") }
 }
 
 #[cfg(feature = "audio")]

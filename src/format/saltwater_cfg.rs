@@ -21,7 +21,7 @@ impl Config {
         let mut magic_buffer = [0u8; 4];
         file.read_exact(&mut magic_buffer)?;
         if &magic_buffer != MAGIC {
-            Err(io::Error::new(io::ErrorKind::Other, "invalid file"))?;
+            Err(io::Error::other("invalid file"))?;
         }
         let mut btks = HashMap::new();
         loop {

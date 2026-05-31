@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+#TODO: integrate into build process
+
 set -euxo pipefail
 
 bindgen "library/plgldr/include/plgldr.h" \

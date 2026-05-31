@@ -26,7 +26,7 @@ impl MenuState {
         self.action = MenuAction::None;
 
         let mut mod_page = if let SubMenu::SetUp(_) = self.sub_menu {
-            mod_picker::show_page(mods, crate::config(), *page)
+            mod_picker::show_page(mods, &crate::CONFIG.lock().unwrap(), *page)
         } else {
             vec![]
         };
@@ -110,7 +110,7 @@ impl MenuState {
             MenuAction::Exit | MenuAction::Run | MenuAction::None => return Ok(()),
             MenuAction::ChangeMenu(c) => {
                 if let SubMenu::SetUp(_) = *c {
-                    mod_page = mod_picker::show_page(mods, crate::config(), *page);
+                    mod_page = mod_picker::show_page(mods, &crate::CONFIG.lock().unwrap(), *page);
                 }
 
                 self.sub_menu = *c;
@@ -129,7 +129,7 @@ impl MenuState {
                     *page += 1;
                 }
                 let old_len = mod_page.len() as u32;
-                mod_page = mod_picker::show_page(mods, crate::config(), *page);
+                mod_page = mod_picker::show_page(mods, &crate::CONFIG.lock().unwrap(), *page);
 
                 // Make sure the cursor is in-bounds
                 if self.cursor < old_len {
@@ -144,7 +144,7 @@ impl MenuState {
             //TODO: properly order stuff in new gate mode (both ChangeIndex and ToggleMod)
             MenuAction::ChangeIndex(i, fast) => {
                 if let Some(m) = mod_page.get_mut(self.cursor as usize) {
-                    let config = crate::config();
+                    let mut config = crate::CONFIG.lock().unwrap();
                     if m.1 != u16::MAX {
                         config.btks.remove(&m.1);
                         let mut step: i16 = if *i { 1 } else { -1 };
@@ -174,7 +174,7 @@ impl MenuState {
             }
             MenuAction::ToggleMod => {
                 if let Some(m) = mod_page.get_mut(self.cursor as usize) {
-                    let config = crate::config();
+                    let mut config = crate::CONFIG.lock().unwrap();
                     if m.1 == u16::MAX {
                         let mut val = 0;
                         while val <= 0x113 && config.btks.contains_key(&val) {
