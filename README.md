@@ -1,6 +1,8 @@
 # Barista
 A launcher for Rhythm Heaven Megamix mods.
 
+Latest known working Rust version: `rustc 1.98.0-nightly (d1fc603d1 2026-05-26)`
+
 ## Credits
 - Coding by patataofcourse
 - Graphics by MilaDraws / MilaDoesStuff
